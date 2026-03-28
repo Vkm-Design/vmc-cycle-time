@@ -1,29 +1,48 @@
 import streamlit as st
 import math
 
-def rpm(vc, d):
-    return (1000 * vc) / (math.pi * d)
+# ---- Your Real Data ----
+cutting_data = [
+    {"min_d": 0.5, "max_d": 0.9, "rpm": 8500, "feed_min": 60},
+    {"min_d": 1, "max_d": 3, "rpm": 6500, "feed_min": 100},
+    {"min_d": 3.1, "max_d": 5, "vc": 50, "feed_min": 450},
+    {"min_d": 5.1, "max_d": 8, "vc": 80, "feed_min": 550},
+    {"min_d": 8.1, "max_d": 10, "vc": 100, "feed_min": 480},
+    {"min_d": 10.1, "max_d": 15, "vc": 120, "feed_min": 550}
+]
 
-def drilling_time(depth, feed, rpm):
-    return depth / (feed * rpm)  # time in minutes
+def get_parameters(diameter):
+    for row in cutting_data:
+        if row["min_d"] <= diameter <= row["max_d"]:
+            if "rpm" in row:
+                rpm = row["rpm"]
+            else:
+                rpm = (1000 * row["vc"]) / (math.pi * diameter)
+            return rpm, row["feed_min"]
+    return None, None
 
-st.title("Drilling Cycle Time Calculator")
+def drilling_time(depth, feed_min):
+    return depth / feed_min
 
-vc = st.number_input("Cutting Speed (Vc)", value=200.0)
-diameter = st.number_input("Drill Diameter (mm)", value=10.0)
-feed = st.number_input("Feed (mm/rev)", value=0.2)
-depth = st.number_input("Depth (mm)", value=20.0)
+st.title("Smart Drilling Calculator (Aluminum)")
+
+# ---- Inputs ----
+diameter = st.number_input("Drill Diameter (mm)", value=5.0)
+depth = st.number_input("Depth (mm)", value=10.0)
 count = st.number_input("Number of Holes", value=1)
 
+# ---- Get Parameters ----
+rpm, feed_min = get_parameters(diameter)
+
+st.write("RPM:", rpm)
+st.write("Feed (mm/min):", feed_min)
+
+# ---- Calculation ----
 if st.button("Calculate"):
-    r = rpm(vc, diameter)
-    time_per_hole_min = drilling_time(depth, feed, r)
-    total_time_min = time_per_hole_min * count
+    if rpm is None:
+        st.write("No data available for this diameter")
+    else:
+        time_per_hole = drilling_time(depth, feed_min)
+        total_time_sec = time_per_hole * count * 60
 
-    # convert to seconds
-    time_per_hole_sec = time_per_hole_min * 60
-    total_time_sec = total_time_min * 60
-
-    st.write("RPM:", round(r, 2))
-    st.write("Time per hole (sec):", round(time_per_hole_sec, 2))
-    st.write("Total time (sec):", round(total_time_sec, 2))
+        st.write("Total Time (sec):", round(total_time_sec, 2))
