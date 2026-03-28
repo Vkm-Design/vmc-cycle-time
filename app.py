@@ -31,6 +31,27 @@ diameter = st.number_input("Drill Diameter (mm)", value=5.0)
 depth = st.number_input("Depth (mm)", value=10.0)
 count = st.number_input("Number of Holes", value=1)
 
+# ---- Get parameters ----
+rpm, feed_rev, max_depth = get_parameters(diameter)
+
+# ---- Auto calculation ----
+feed_min = feed_rev * rpm
+
+st.write("Recommended RPM:", round(rpm, 2))
+st.write("Recommended Feed (mm/rev):", feed_rev)
+st.write("Feed (mm/min):", round(feed_min, 2))
+st.write("Max Allowed Depth:", max_depth)
+
+if max_depth is not None and depth > max_depth:
+    st.warning("Depth exceeds recommended limit. Please enter manual values.")
+
+    vc_manual = st.number_input("Enter Vc manually", value=50.0)
+    feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1)
+
+    # override values
+    rpm = (1000 * vc_manual) / (math.pi * diameter)
+    feed_min = feed_rev_manual * rpm
+
 rpm, feed_min, max_depth = get_parameters(diameter)
 
 st.write("Recommended RPM:", rpm)
@@ -63,5 +84,14 @@ if st.button("Calculate"):
     else:
         time_per_hole = depth / feed_min
         total_time_sec = time_per_hole * count * 60
+
+        if st.button("Calculate"):
+    if rpm is None:
+        st.write("No data available")
+    else:
+        time_per_hole = depth / feed_min
+        total_time_sec = time_per_hole * count * 60
+
+        st.write("Total Time (sec):", round(total_time_sec, 2))
 
         st.write("Total Time (sec):", round(total_time_sec, 2))
