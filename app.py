@@ -85,7 +85,7 @@ if st.button("Calculate"):
         time_per_hole = depth / feed_min
         total_time_sec = time_per_hole * count * 60
 
-        if st.button("Calculate"):
+       if st.button("Calculate"):
     if rpm is None:
         st.write("No data available")
     else:
@@ -94,4 +94,4 @@ if st.button("Calculate"):
 
         st.write("Total Time (sec):", round(total_time_sec, 2))
 
-        st.write("Total Time (sec):", round(total_time_sec, 2))
+        
