@@ -51,7 +51,7 @@ if depth > max_depth:
     feed_min = feed_manual
 
 # ---- Get Parameters ----
-rpm, feed_min = get_parameters(diameter)
+rpm, feed_min, max_depth = get_parameters(diameter)
 
 st.write("RPM:", rpm)
 st.write("Feed (mm/min):", feed_min)
