@@ -90,19 +90,22 @@ if operation == "Drilling":
 
     rpm, feed_min, max_depth = get_parameters(diameter)
 
+    # ---- Show recommended ----
     if rpm is not None:
         st.write("Recommended RPM:", round(rpm, 2))
-        st.write("Feed (mm/min):", feed_min)
+        st.write("Feed (mm/min):", round(feed_min, 2))
         st.write("Max Allowed Depth:", max_depth)
     else:
         st.error("Diameter not in defined range")
 
+    # ---- Depth check ----
     manual_mode = False
 
-    if max_depth is not None and depth > max_depth:
+    if rpm is not None and max_depth is not None and depth > max_depth:
         st.warning("Depth exceeds recommended limit. Enter manual values.")
         manual_mode = True
 
+    # ---- Manual input ----
     if manual_mode:
         vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual")
         feed_rev_manual = st.number_input("Enter Feed (mm/rev)", value=0.1, key="feed_manual")
@@ -110,10 +113,17 @@ if operation == "Drilling":
         rpm = (1000 * vc_manual) / (math.pi * diameter)
         feed_min = feed_rev_manual * rpm
 
+    # ---- Calculation ----
     if st.button("Calculate Drill Time"):
-        if rpm is not None:
+
+        if rpm is None:
+            st.error("Cannot calculate. Invalid diameter.")
+        elif feed_min == 0:
+            st.error("Feed cannot be zero.")
+        else:
             time_per_hole = depth / feed_min
             total_time_sec = time_per_hole * count * 60
+
             st.write("Total Time (sec):", round(total_time_sec, 2))
 
 elif operation == "Tapping":
