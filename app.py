@@ -143,14 +143,14 @@ if tap_type == "Blind":
     # ---- Depth validation ----
     valid_tap = True
 
-    if tap_type == "Blind":
-        if drill_depth < (tap_depth + 3 * pitch):
-            st.error("Thread milling recommended instead of tapping")
-            valid_tap = False
+if tap_type == "Blind":
+    if drill_depth < (tap_depth + 3 * pitch):
+        st.error("Thread milling recommended instead of tapping")
+        valid_tap = False
 
     # ---- Max depth check ----
     manual_mode = False
-    if tap_depth > max_depth:
+if tap_depth > max_depth:
         st.warning("Depth exceeds recommended limit. Enter Vc manually.")
         manual_mode = True
 
