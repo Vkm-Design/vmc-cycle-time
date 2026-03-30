@@ -120,13 +120,25 @@ elif operation == "Tapping":
     tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
 
     tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
+    
+    if tap_type == "Blind":
     drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
-    count = st.number_input("Number of Holes", value=1)
+else:
+    drill_depth = None
 
     st.write("Diameter:", diameter)
     st.write("Pitch:", pitch)
     st.write("Recommended Vc:", vc)
     st.write("Max Depth:", max_depth)
+    
+    # ---- Depth validation ----
+valid_tap = True
+
+if tap_type == "Blind":
+    if drill_depth < (tap_depth + 3 * pitch):
+        st.error("Thread milling recommended instead of tapping")
+        valid_tap = False
+
 
     # ---- Depth validation ----
     valid_tap = True
@@ -146,20 +158,15 @@ elif operation == "Tapping":
         vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
     # ---- Calculation ----
-    if valid_tap:
-        rpm = (1000 * vc) / (math.pi * diameter)
-        feed_min = pitch * rpm
+   if valid_tap:
 
-        cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
+    rpm = (1000 * vc) / (math.pi * diameter)
+    feed_min = pitch * rpm
 
-        st.write("RPM:", round(rpm, 2))
-        st.write("Feed (mm/min):", round(feed_min, 2))
-        st.write("Cut Length (mm):", round(cut_length, 2))
+    cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
 
-        if st.button("Calculate Tap Time"):
-            time_per_hole = cut_length / feed_min
-            total_time_sec = time_per_hole * count * 60
-
-            st.write("Total Time (sec):", round(total_time_sec, 2))
+    st.write("RPM:", round(rpm, 2))
+    st.write("Feed (mm/min):", round(feed_min, 2))
+    st.write("Cut Length (mm):", round(cut_length, 2))
 
 
