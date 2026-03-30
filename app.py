@@ -146,19 +146,7 @@ elif operation == "Tapping":
         drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
     else:
         drill_depth = None
-
-    # ---- Show data ----
-    st.write("Diameter:", diameter)
-    st.write("Pitch:", pitch)
-    st.write("Recommended Vc:", vc)
-    st.write("Max Depth:", max_depth)
-
-    # ---- Validation ----
-    valid_tap = True
-
-    use_threadmill = False
-
-# ---- Clearance Logic ----
+        # ---- Clearance Logic ----
 clearance = drill_depth - tap_depth
 
 valid_tap = True
@@ -191,6 +179,17 @@ if tap_type == "Blind":
     # ✅ Tap allowed
     else:
         st.success("Suitable for tapping")
+
+    # ---- Show data ----
+    st.write("Diameter:", diameter)
+    st.write("Pitch:", pitch)
+    st.write("Recommended Vc:", vc)
+    st.write("Max Depth:", max_depth)
+
+    # ---- Validation ----
+    valid_tap = True
+
+    use_threadmill = False
 
     # ---- Max depth check ----
     manual_mode = False
