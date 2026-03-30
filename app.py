@@ -80,14 +80,8 @@ if manual_mode:
     rpm = (1000 * vc_manual) / (math.pi * diameter)
     feed_min = feed_rev_manual * rpm
 
-    vc_manual = st.number_input("Enter Vc manually")
-    feed_manual = st.number_input("Enter Feed (mm/min) manually")
-
     rpm = (1000 * vc_manual) / (math.pi * diameter)
     feed_min = feed_manual
-
-# ---- Get Parameters ----
-rpm, feed_min, max_depth = get_parameters(diameter)
 
 st.write("RPM:", rpm)
 st.write("Feed (mm/min):", feed_min)
