@@ -29,27 +29,27 @@ depth = st.number_input("Depth (mm)", value=10.0)
 count = st.number_input("Number of Holes", value=1)
 
 # ---- Get Parameters ----
-rpm, feed_min, max_depth = get_parameters(diameter)
-
-# ---- Show recommended ----
 st.write("Recommended RPM:", round(rpm, 2))
-st.write("Recommended Feed (mm/min):", feed_min)
+st.write("Feed (mm/min):", feed_min)
 st.write("Max Allowed Depth:", max_depth)
 
 # ---- Depth check ----
 manual_mode = False
 
 if max_depth is not None and depth > max_depth:
-    st.warning("Depth exceeds recommended limit. Enter manual values below.")
+    st.warning("Depth exceeds recommended limit. Enter manual values.")
     manual_mode = True
 
-# ---- Manual override ----
+# ---- Manual override (ONLY when depth exceeds) ----
 if manual_mode:
-    vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual_new")
-    feed_manual = st.number_input("Enter Feed (mm/min) manually", value=300.0, key="feed_manual_new")
+    vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual")
+    feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1, key="feed_rev_manual")
 
     rpm = (1000 * vc_manual) / (math.pi * diameter)
-    feed_min = feed_manual
+    feed_min = feed_rev_manual * rpm
+
+    st.write("Calculated RPM:", round(rpm, 2))
+    st.write("Calculated Feed (mm/min):", round(feed_min, 2))
 
 # ---- Calculation ----
 if st.button("Calculate"):
