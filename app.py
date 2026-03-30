@@ -40,7 +40,6 @@ feed_min = feed_rev * rpm
 st.write("Recommended RPM:", round(rpm, 2))
 st.write("Recommended Feed (mm/rev):", feed_rev)
 st.write("Feed (mm/min):", round(feed_min, 2))
-st.write("Max Allowed Depth:", max_depth)
 
 if max_depth is not None and depth > max_depth:
     st.warning("Depth exceeds recommended limit. Please enter manual values.")
@@ -61,9 +60,17 @@ st.write("Max Allowed Depth:", max_depth)
 # ⚠️ Check depth condition
 manual_mode = False
 
-if depth > max_depth:
-    st.warning("Depth exceeds recommended limit. Please enter manual values.")
+if max_depth is not None and depth > max_depth:
+    st.warning("Depth exceeds recommended limit. Enter manual values below.")
+
     manual_mode = True
+
+ if manual_mode:
+    vc_manual = st.number_input("Enter Vc manually", value=50.0)
+    feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1)
+
+    rpm = (1000 * vc_manual) / (math.pi * diameter)
+    feed_min = feed_rev_manual * rpm
 
     vc_manual = st.number_input("Enter Vc manually")
     feed_manual = st.number_input("Enter Feed (mm/min) manually")
