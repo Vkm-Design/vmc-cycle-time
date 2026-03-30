@@ -21,9 +21,6 @@ def get_parameters(diameter):
             return rpm, row["feed_min"], row["max_depth"]
     return None, None, None
 
-def drilling_time(depth, feed_min):
-    return depth / feed_min
-
 st.title("Smart Drilling Calculator (Aluminum)")
 
 # ---- Inputs ----
@@ -32,25 +29,27 @@ depth = st.number_input("Depth (mm)", value=10.0)
 count = st.number_input("Number of Holes", value=1)
 
 # ---- Get Parameters ----
-rpm, feed_rev, max_depth = get_parameters(diameter)
-
-# ---- Auto calculation ----
-feed_min = feed_rev * rpm
+rpm, feed_min, max_depth = get_parameters(diameter)
 
 # ---- Show recommended ----
 st.write("Recommended RPM:", round(rpm, 2))
-st.write("Recommended Feed (mm/rev):", feed_rev)
-st.write("Feed (mm/min):", round(feed_min, 2))
+st.write("Recommended Feed (mm/min):", feed_min)
 st.write("Max Allowed Depth:", max_depth)
 
 # ---- Depth check ----
 manual_mode = False
+
+if max_depth is not None and depth > max_depth:
+    st.warning("Depth exceeds recommended limit. Enter manual values below.")
+    manual_mode = True
+
+# ---- Manual override ----
 if manual_mode:
     vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual_new")
-    feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1, key="feed_manual_new")
+    feed_manual = st.number_input("Enter Feed (mm/min) manually", value=300.0, key="feed_manual_new")
 
     rpm = (1000 * vc_manual) / (math.pi * diameter)
-    feed_min = feed_rev_manual * rpm
+    feed_min = feed_manual
 
 # ---- Calculation ----
 if st.button("Calculate"):
@@ -61,4 +60,3 @@ if st.button("Calculate"):
         total_time_sec = time_per_hole * count * 60
 
         st.write("Total Time (sec):", round(total_time_sec, 2))
-        
