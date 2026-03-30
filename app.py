@@ -50,7 +50,14 @@ if max_depth is not None and depth > max_depth:
     st.warning("Depth exceeds recommended limit. Enter manual values below.")
     manual_mode = True
 
-# ---- Manual override ----
+if manual_mode:
+    vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual")
+    feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1, key="feed_manual")
+
+    rpm = (1000 * vc_manual) / (math.pi * diameter)
+    feed_min = feed_rev_manual * rpm
+    manual_mode = True
+
 if manual_mode:
     vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual")
     feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1, key="feed_manual")
