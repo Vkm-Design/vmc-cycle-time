@@ -3,12 +3,12 @@ import math
 
 # ---- Your Real Data ----
 cutting_data = [
-    {"min_d": 0.5, "max_d": 0.9, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
+    {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
     {"min_d": 1, "max_d": 3, "rpm": 6500, "feed_min": 100, "max_depth": 5},
-    {"min_d": 3.1, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
-    {"min_d": 5.1, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
-    {"min_d": 8.1, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
-    {"min_d": 10.1, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50}
+    {"min_d": 3, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
+    {"min_d": 5, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
+    {"min_d": 8, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
+    {"min_d": 10, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50}
 ]
 
 def get_parameters(diameter):
@@ -29,9 +29,12 @@ depth = st.number_input("Depth (mm)", value=10.0)
 count = st.number_input("Number of Holes", value=1)
 
 # ---- Get Parameters ----
-st.write("Recommended RPM:", round(rpm, 2))
-st.write("Feed (mm/min):", feed_min)
-st.write("Max Allowed Depth:", max_depth)
+if rpm is not None:
+    st.write("Recommended RPM:", round(rpm, 2))
+    st.write("Feed (mm/min):", feed_min)
+    st.write("Max Allowed Depth:", max_depth)
+else:
+    st.error("Diameter not in defined range")
 
 # ---- Depth check ----
 manual_mode = False
