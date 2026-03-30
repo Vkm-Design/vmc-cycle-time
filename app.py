@@ -5,10 +5,10 @@ import math
 cutting_data = [
     {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
     {"min_d": 1, "max_d": 3, "rpm": 6500, "feed_min": 100, "max_depth": 5},
-    {"min_d": 3.1, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
-    {"min_d": 5.1, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
-    {"min_d": 8.1, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
-    {"min_d": 10.1, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50}
+    {"min_d": 3, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
+    {"min_d": 5, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
+    {"min_d": 8, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
+    {"min_d": 10, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50}
 ]
 
 def get_parameters(diameter):
