@@ -119,8 +119,12 @@ elif operation == "Tapping":
     # ---- Tap type ----
     tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
 
-    tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
+   tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
+
+if tap_type == "Blind":
     drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
+else:
+    drill_depth = None
     count = st.number_input("Number of Holes", value=1)
 
     st.write("Diameter:", diameter)
