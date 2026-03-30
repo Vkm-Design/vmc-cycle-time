@@ -69,6 +69,7 @@ if max_depth is not None and depth > max_depth:
     vc_manual = st.number_input("Enter Vc manually", value=50.0)
     feed_rev_manual = st.number_input("Enter Feed (mm/rev) manually", value=0.1)
 
+    # override values
     rpm = (1000 * vc_manual) / (math.pi * diameter)
     feed_min = feed_rev_manual * rpm
 
