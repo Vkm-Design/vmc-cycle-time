@@ -198,16 +198,19 @@ if use_threadmill:
 
     st.subheader("Thread Milling Calculation")
 
-    # find matching data
-    tm_row = next((row for row in threadmill_data if row["tap"] == selected_tap), None)
+    tm_row = next(
+        (row for row in threadmill_data 
+         if row["tap"] == selected_tap and row["pitch"] == pitch),
+        None
+    )
 
     if tm_row is None:
         st.error("No thread mill data available")
     else:
         vc_tm = tm_row["vc"]
-        feed_min = tm_row["feed_min"]
-        max_depth_tm = tm_row["max_depth"]
+        feed_rev = tm_row["feed_rev"]
         tool_dia = tm_row["tool_dia"]
+        max_depth_tm = tm_row["max_depth"]
 
         D2 = diameter   # thread size
         D1 = tool_dia   # tool diameter
@@ -217,12 +220,12 @@ if use_threadmill:
             st.warning("Special tool recommended")
         else:
             rpm = (1000 * vc_tm) / (math.pi * tool_dia)
+            feed_min = feed_rev * rpm
 
-            # ---- Cut length formula ----
             cut_length = ((D2 - D1) * 3.14 * 3) + tap_depth + 4
 
             st.write("RPM:", round(rpm, 2))
-            st.write("Feed (mm/min):", feed_min)
+            st.write("Feed (mm/min):", round(feed_min, 2))
             st.write("Cut Length (mm):", round(cut_length, 2))
 
             if st.button("Calculate Thread Mill Time"):
