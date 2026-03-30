@@ -29,6 +29,9 @@ depth = st.number_input("Depth (mm)", value=10.0)
 count = st.number_input("Number of Holes", value=1)
 
 # ---- Get Parameters ----
+rpm, feed_min, max_depth = get_parameters(diameter)
+
+# ---- Show recommended ----
 if rpm is not None:
     st.write("Recommended RPM:", round(rpm, 2))
     st.write("Feed (mm/min):", feed_min)
