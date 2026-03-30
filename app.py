@@ -116,48 +116,43 @@ elif operation == "Tapping":
     vc = selected_row["vc"]
     max_depth = selected_row["max_depth"]
 
-    # ---- Tap type ----
-    tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
+   # ---- Tap type ----
+tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
 
-    tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
-    
-    if tap_type == "Blind":
-        drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
+tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
+
+if tap_type == "Blind":
+    drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
 else:
     drill_depth = None
 
-    st.write("Diameter:", diameter)
-    st.write("Pitch:", pitch)
-    st.write("Recommended Vc:", vc)
-    st.write("Max Depth:", max_depth)
-    
-    # ---- Depth validation ----
+# ---- Show data ----
+st.write("Diameter:", diameter)
+st.write("Pitch:", pitch)
+st.write("Recommended Vc:", vc)
+st.write("Max Depth:", max_depth)
+
+# ---- Validation ----
 valid_tap = True
 
+# 🔹 Blind hole check
 if tap_type == "Blind":
     if drill_depth < (tap_depth + 3 * pitch):
         st.error("Thread milling recommended instead of tapping")
         valid_tap = False
 
+# 🔹 Max depth check
+manual_mode = False
 
-    # ---- Depth validation ----
-    valid_tap = True
-
-if tap_type == "Blind":
-    if drill_depth < (tap_depth + 3 * pitch):
-        st.error("Thread milling recommended instead of tapping")
-        valid_tap = False
-
-    # ---- Max depth check ----
-    manual_mode = False
 if tap_depth > max_depth:
-        st.warning("Depth exceeds recommended limit. Enter Vc manually.")
-        manual_mode = True
+    st.warning("Depth exceeds recommended limit. Enter Vc manually.")
+    manual_mode = True
 
-    if manual_mode:
-        vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
+# ---- Manual input ----
+if manual_mode:
+    vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
-    # ---- Calculation ----
+# ---- Calculation ----
 if valid_tap:
 
     rpm = (1000 * vc) / (math.pi * diameter)
