@@ -154,51 +154,47 @@ elif operation == "Tapping":
     st.write("Recommended Vc:", vc)
     st.write("Max Depth:", max_depth)
 
-    # ---- Validation ----
+       # ---- Validation ----
     valid_tap = True
-
     use_threadmill = False
-
-    # ---- Max depth check ----
     manual_mode = False
+    stop_all = False
 
     # ---- Clearance Logic ----
-clearance = drill_depth - tap_depth
+    if tap_type == "Blind":
 
-valid_tap = True
-use_threadmill = False
-stop_all = False   # ✅ NEW
+        clearance = drill_depth - tap_depth
 
-if tap_type == "Blind":
+        st.write("Clearance:", round(clearance, 2))
 
-    st.write("Clearance:", round(clearance, 2))
+        # ❌ Impossible case
+        if drill_depth <= tap_depth:
+            st.error("Drill depth is less than tap depth. Not possible to machine thread")
+            valid_tap = False
+            use_threadmill = False
+            stop_all = True
 
-    # ❌ CRITICAL: drill depth less than tap depth
-    if drill_depth <= tap_depth:
-        st.error("Drill depth is less than tap depth. Not possible to machine thread")
-        valid_tap = False
-        use_threadmill = False
-        stop_all = True   # ✅ STOP EVERYTHING
+        # ❌ Unsafe
+        elif clearance < (1 * pitch):
+            st.error("Insufficient clearance. Not safe for tapping")
+            valid_tap = False
+            use_threadmill = True
 
-    # ❌ Very unsafe
-    elif clearance < (1 * pitch):
-        st.error("Insufficient clearance. Not safe for tapping")
-        valid_tap = False
-        use_threadmill = True
+        # ⚠️ Thread mill zone
+        elif clearance <= (2 * pitch):
+            st.warning("Clearance not sufficient. Thread milling recommended")
+            valid_tap = False
+            use_threadmill = True
 
-    # ⚠️ Thread mill zone
-    elif clearance <= (2 * pitch):
-        st.warning("Clearance not sufficient. Thread milling recommended")
-        valid_tap = False
-        use_threadmill = True
+        # ✅ Safe for tapping
+        else:
+            st.success("Suitable for tapping")
 
-    # ✅ Tap allowed
-    else:
-        st.success("Suitable for tapping")
-
+    # ---- Tap depth check (ONLY if tapping allowed) ----
     if valid_tap and not stop_all:
-        st.warning("Depth exceeds recommended limit. Enter Vc manually.")
-        manual_mode = True
+        if tap_depth > max_depth:
+            st.warning("Depth exceeds recommended limit. Enter Vc manually.")
+            manual_mode = True
 
     # ---- Manual input ----
     if manual_mode and valid_tap:
