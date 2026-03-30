@@ -116,56 +116,56 @@ elif operation == "Tapping":
     vc = selected_row["vc"]
     max_depth = selected_row["max_depth"]
 
-   # ---- Tap type ----
-tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
+    # ---- Tap type ----
+    tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
 
-tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
+    tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
+    count = st.number_input("Number of Holes", value=1)
 
-if tap_type == "Blind":
-    drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
-else:
-    drill_depth = None
+    if tap_type == "Blind":
+        drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
+    else:
+        drill_depth = None
 
-# ---- Show data ----
-st.write("Diameter:", diameter)
-st.write("Pitch:", pitch)
-st.write("Recommended Vc:", vc)
-st.write("Max Depth:", max_depth)
+    # ---- Show data ----
+    st.write("Diameter:", diameter)
+    st.write("Pitch:", pitch)
+    st.write("Recommended Vc:", vc)
+    st.write("Max Depth:", max_depth)
 
-# ---- Validation ----
-valid_tap = True
+    # ---- Validation ----
+    valid_tap = True
 
-# 🔹 Blind hole check
-if tap_type == "Blind":
-    if drill_depth < (tap_depth + 3 * pitch):
-        st.error("Thread milling recommended instead of tapping")
-        valid_tap = False
+    if tap_type == "Blind":
+        if drill_depth < (tap_depth + 3 * pitch):
+            st.error("Thread milling recommended instead of tapping")
+            valid_tap = False
 
-# 🔹 Max depth check
-manual_mode = False
+    # ---- Max depth check ----
+    manual_mode = False
 
-if tap_depth > max_depth:
-    st.warning("Depth exceeds recommended limit. Enter Vc manually.")
-    manual_mode = True
+    if tap_depth > max_depth:
+        st.warning("Depth exceeds recommended limit. Enter Vc manually.")
+        manual_mode = True
 
-# ---- Manual input ----
-if manual_mode:
-    vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
+    # ---- Manual input ----
+    if manual_mode:
+        vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
-# ---- Calculation ----
-if valid_tap:
+    # ---- Calculation ----
+    if valid_tap:
 
-    rpm = (1000 * vc) / (math.pi * diameter)
-    feed_min = pitch * rpm
+        rpm = (1000 * vc) / (math.pi * diameter)
+        feed_min = pitch * rpm
 
-    cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
+        cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
 
-    st.write("RPM:", round(rpm, 2))
-    st.write("Feed (mm/min):", round(feed_min, 2))
-    st.write("Cut Length (mm):", round(cut_length, 2))
+        st.write("RPM:", round(rpm, 2))
+        st.write("Feed (mm/min):", round(feed_min, 2))
+        st.write("Cut Length (mm):", round(cut_length, 2))
 
-    if st.button("Calculate Tap Time"):
-        time_per_hole = cut_length / feed_min
-        total_time_sec = time_per_hole * count * 60
+        if st.button("Calculate Tap Time"):
+            time_per_hole = cut_length / feed_min
+            total_time_sec = time_per_hole * count * 60
 
-        st.write("Total Time (sec):", round(total_time_sec, 2))
+            st.write("Total Time (sec):", round(total_time_sec, 2))
