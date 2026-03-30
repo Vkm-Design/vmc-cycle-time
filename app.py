@@ -158,21 +158,41 @@ elif operation == "Tapping":
 
     use_threadmill = False
 
+# ---- Clearance Logic ----
+clearance = drill_depth - tap_depth
+
+valid_tap = True
+use_threadmill = False
+
 if tap_type == "Blind":
-    if drill_depth < (tap_depth + 3 * pitch):
-        st.error("Thread milling recommended instead of tapping")
+
+    st.write("Clearance:", round(clearance, 2))
+
+    # ❌ Very unsafe
+    if clearance < (1 * pitch):
+        st.error("Insufficient clearance. Not safe for tapping")
         valid_tap = False
         use_threadmill = True
+
+    # ⚠️ Not acceptable for tapping → thread mill
+    elif clearance <= (2 * pitch):
+        st.warning("Clearance not sufficient. Thread milling recommended")
+        valid_tap = False
+        use_threadmill = True
+
+    # ✅ Only this allows tapping
+    else:
+        st.success("Suitable for tapping")
 
     # ---- Max depth check ----
     manual_mode = False
 
-    if tap_depth > max_depth:
+    if valid_tap and tap_depth > max_depth:
         st.warning("Depth exceeds recommended limit. Enter Vc manually.")
         manual_mode = True
 
     # ---- Manual input ----
-    if manual_mode:
+    if manual_mode and valid_tap:
         vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
     # ---- Calculation ----
