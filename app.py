@@ -80,9 +80,6 @@ if manual_mode:
     rpm = (1000 * vc_manual) / (math.pi * diameter)
     feed_min = feed_rev_manual * rpm
 
-    rpm = (1000 * vc_manual) / (math.pi * diameter)
-    feed_min = feed_manual
-
 st.write("RPM:", rpm)
 st.write("Feed (mm/min):", feed_min)
 
