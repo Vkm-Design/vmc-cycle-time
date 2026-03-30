@@ -13,7 +13,7 @@ cutting_data = [
 
 def get_parameters(diameter):
     for row in cutting_data:
-        if row["min_d"] <= diameter <= row["max_d"]:
+        if row["min_d"] <= diameter < row["max_d"]:
             if "rpm" in row:
                 rpm = row["rpm"]
             else:
