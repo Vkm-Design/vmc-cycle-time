@@ -158,7 +158,7 @@ if tap_type == "Blind":
         vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
     # ---- Calculation ----
-      if valid_tap:
+    if valid_tap:
         rpm = (1000 * vc) / (math.pi * diameter)
         feed_min = pitch * rpm
 
