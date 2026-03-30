@@ -43,6 +43,26 @@ tap_data = [
     {"tap": "M18", "pitch": 2.5, "vc": 20, "max_depth": 54},
     {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
 ]
+
+threadmill_data = [
+    {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 30, "feed_rev": 0.06, "max_depth": 7.5},
+    {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 30, "feed_rev": 0.09, "max_depth": 10},
+    {"tap": "M5", "tool_dia": 4, "pitch": 0.8, "vc": 50, "feed_rev": 0.12, "max_depth": 12.5},
+    {"tap": "M6", "tool_dia": 4.8, "pitch": 1, "vc": 50, "feed_rev": 0.14, "max_depth": 15},
+    {"tap": "M8", "tool_dia": 6.4, "pitch": 1.25, "vc": 60, "feed_rev": 0.15, "max_depth": 20},
+    {"tap": "M8", "tool_dia": 6.4, "pitch": 1, "vc": 60, "feed_rev": 0.14, "max_depth": 20},
+    {"tap": "M10", "tool_dia": 7.95, "pitch": 1.5, "vc": 70, "feed_rev": 0.14, "max_depth": 25},
+    {"tap": "M10", "tool_dia": 7.95, "pitch": 1, "vc": 70, "feed_rev": 0.14, "max_depth": 25},
+    {"tap": "M10", "tool_dia": 7.95, "pitch": 1.25, "vc": 80, "feed_rev": 0.14, "max_depth": 25},
+    {"tap": "M12", "tool_dia": 9.95, "pitch": 1.75, "vc": 80, "feed_rev": 0.20, "max_depth": 30},
+    {"tap": "M12", "tool_dia": 9.95, "pitch": 1.5, "vc": 80, "feed_rev": 0.20, "max_depth": 30},
+    {"tap": "M14", "tool_dia": 11.2, "pitch": 2, "vc": 90, "feed_rev": 0.20, "max_depth": 35},
+    {"tap": "M14", "tool_dia": 11.2, "pitch": 1.5, "vc": 90, "feed_rev": 0.20, "max_depth": 35},
+    {"tap": "M16", "tool_dia": 12.8, "pitch": 2, "vc": 120, "feed_rev": 0.20, "max_depth": 40},
+    {"tap": "M16", "tool_dia": 12.8, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 40},
+    {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
+    {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
+]
 def get_parameters(diameter):
     for row in cutting_data:
         if row["min_d"] <= diameter <= row["max_d"]:
@@ -136,10 +156,13 @@ elif operation == "Tapping":
     # ---- Validation ----
     valid_tap = True
 
-    if tap_type == "Blind":
-        if drill_depth < (tap_depth + 3 * pitch):
-            st.error("Thread milling recommended instead of tapping")
-            valid_tap = False
+    use_threadmill = False
+
+if tap_type == "Blind":
+    if drill_depth < (tap_depth + 3 * pitch):
+        st.error("Thread milling recommended instead of tapping")
+        valid_tap = False
+        use_threadmill = True
 
     # ---- Max depth check ----
     manual_mode = False
@@ -169,3 +192,41 @@ elif operation == "Tapping":
             total_time_sec = time_per_hole * count * 60
 
             st.write("Total Time (sec):", round(total_time_sec, 2))
+
+# ---- THREAD MILL LOGIC ----
+if use_threadmill:
+
+    st.subheader("Thread Milling Calculation")
+
+    # find matching data
+    tm_row = next((row for row in threadmill_data if row["tap"] == selected_tap), None)
+
+    if tm_row is None:
+        st.error("No thread mill data available")
+    else:
+        vc_tm = tm_row["vc"]
+        feed_min = tm_row["feed_min"]
+        max_depth_tm = tm_row["max_depth"]
+        tool_dia = tm_row["tool_dia"]
+
+        D2 = diameter   # thread size
+        D1 = tool_dia   # tool diameter
+
+        # ---- Depth check ----
+        if tap_depth > max_depth_tm:
+            st.warning("Special tool recommended")
+        else:
+            rpm = (1000 * vc_tm) / (math.pi * tool_dia)
+
+            # ---- Cut length formula ----
+            cut_length = ((D2 - D1) * 3.14 * 3) + tap_depth + 4
+
+            st.write("RPM:", round(rpm, 2))
+            st.write("Feed (mm/min):", feed_min)
+            st.write("Cut Length (mm):", round(cut_length, 2))
+
+            if st.button("Calculate Thread Mill Time"):
+                time_per_hole = cut_length / feed_min
+                total_time_sec = time_per_hole * count * 60
+
+                st.write("Total Time (sec):", round(total_time_sec, 2))
