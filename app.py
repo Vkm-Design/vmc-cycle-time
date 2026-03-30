@@ -158,15 +158,19 @@ if tap_type == "Blind":
         vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
     # ---- Calculation ----
-   if valid_tap:
+      if valid_tap:
+        rpm = (1000 * vc) / (math.pi * diameter)
+        feed_min = pitch * rpm
 
-    rpm = (1000 * vc) / (math.pi * diameter)
-    feed_min = pitch * rpm
+        cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
 
-    cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
+        st.write("RPM:", round(rpm, 2))
+        st.write("Feed (mm/min):", round(feed_min, 2))
+        st.write("Cut Length (mm):", round(cut_length, 2))
 
-    st.write("RPM:", round(rpm, 2))
-    st.write("Feed (mm/min):", round(feed_min, 2))
-    st.write("Cut Length (mm):", round(cut_length, 2))
+        if st.button("Calculate Tap Time"):
+            time_per_hole = cut_length / feed_min
+            total_time_sec = time_per_hole * count * 60
 
+            st.write("Total Time (sec):", round(total_time_sec, 2))
 
