@@ -219,20 +219,20 @@ elif operation == "Tapping":
 
             st.write("Total Time (sec):", round(total_time_sec, 2))
 
-# ---- THREAD MILL LOGIC ----
-if use_threadmill and not stop_all:
+    # ---- THREAD MILL LOGIC ----
+    if use_threadmill and not stop_all:
 
-    st.subheader("Thread Milling Calculation")
+       st.subheader("Thread Milling Calculation")
 
-    tm_row = next(
+       tm_row = next(
         (row for row in threadmill_data 
          if row["tap"] == selected_tap and row["pitch"] == pitch),
         None
-    )
+        )
 
-    if tm_row is None:
+       if tm_row is None:
         st.error("No thread mill data available")
-    else:
+      else:
         vc_tm = tm_row["vc"]
         feed_rev = tm_row["feed_rev"]
         tool_dia = tm_row["tool_dia"]
