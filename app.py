@@ -222,40 +222,42 @@ elif operation == "Tapping":
     # ---- THREAD MILL LOGIC ----
     if use_threadmill and not stop_all:
 
-       st.subheader("Thread Milling Calculation")
+        st.subheader("Thread Milling Calculation")
 
-       tm_row = next(
-        (row for row in threadmill_data 
-         if row["tap"] == selected_tap and row["pitch"] == pitch),
-        None
+        tm_row = next(
+            (row for row in threadmill_data
+             if row["tap"] == selected_tap and row["pitch"] == pitch),
+            None
         )
 
-       if tm_row is None:
-        st.error("No thread mill data available")
-      else:
-        vc_tm = tm_row["vc"]
-        feed_rev = tm_row["feed_rev"]
-        tool_dia = tm_row["tool_dia"]
-        max_depth_tm = tm_row["max_depth"]
+        if tm_row is None:
+            st.error("No thread mill data available")
 
-        D2 = diameter   # thread size
-        D1 = tool_dia   # tool diameter
-
-        # ---- Depth check ----
-        if tap_depth > max_depth_tm:
-            st.warning("Special tool recommended")
         else:
-            rpm = (1000 * vc_tm) / (math.pi * tool_dia)
-            feed_min = feed_rev * rpm
+            vc_tm = tm_row["vc"]
+            feed_rev = tm_row["feed_rev"]
+            tool_dia = tm_row["tool_dia"]
+            max_depth_tm = tm_row["max_depth"]
 
-            cut_length = ((D2 - D1) * 3.14 * 3) + tap_depth + 4
+            D2 = diameter   # thread size
+            D1 = tool_dia   # tool diameter
 
-            st.write("RPM:", round(rpm, 2))
-            st.write("Feed (mm/min):", round(feed_min, 2))
-            st.write("Cut Length (mm):", round(cut_length, 2))
+            # ---- Depth check ----
+            if tap_depth > max_depth_tm:
+                st.warning("Special thread mill recommended")
 
-            if st.button("Calculate Thread Mill Time"):
-                time_per_hole = cut_length / feed_min
-                total_time_sec = time_per_hole * count * 60
+            else:
+                rpm = (1000 * vc_tm) / (math.pi * tool_dia)
+                feed_min = feed_rev * rpm
 
-                st.write("Total Time (sec):", round(total_time_sec, 2))
+                cut_length = ((D2 - D1) * 3.14 * 3) + tap_depth + 4
+
+                st.write("RPM:", round(rpm, 2))
+                st.write("Feed (mm/min):", round(feed_min, 2))
+                st.write("Cut Length (mm):", round(cut_length, 2))
+
+                if st.button("Calculate Thread Mill Time"):
+                    time_per_hole = cut_length / feed_min
+                    total_time_sec = time_per_hole * count * 60
+
+                    st.write("Total Time (sec):", round(total_time_sec, 2))
