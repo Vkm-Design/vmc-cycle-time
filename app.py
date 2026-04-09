@@ -326,29 +326,29 @@ elif operation == "Face Milling":
         dia = st.selectbox("Select Tool Diameter", dia_list)
         selected_tool = next(t for t in tools if t["dia"] == dia)
 
-    if selected_tool:
-        tool_dia = selected_tool["dia"]
-        max_width = selected_tool["max_width"]
+    # ---- Radial Pass Calculation ----
+    if comp_dia <= max_width:
+        radial_passes = 1
+    else:
+        radial_passes = math.ceil(comp_dia / max_width)
 
-        # ---- Width Pass Calculation ----
-        if W <= max_width:
-            width_passes = 1
-        else:
-            width_passes = math.ceil(W / max_width)
+# ---- Single Pass Length ----
+    if comp_dia <= max_width:
+        single_pass_length = comp_dia + tool_dia
+    else:
+        eff_dia = comp_dia + 5
+        single_pass_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
 
-        # ---- Single Pass Length ----
-        single_pass_length = long_dim + tool_dia + 4
+# ---- Total Cut Length ----
+cut_length = single_pass_length * radial_passes
 
-        # ---- Total Cut Length ----
-        cut_length = single_pass_length * width_passes
+# ---- Display ----
+st.write("Radial Passes:", radial_passes)
+st.write("Single Pass Length:", round(single_pass_length, 2))
+st.write("Total Cut Length:", round(cut_length, 2))
 
-        # ---- Display ----
-        st.write("Width Passes:", width_passes)
-        st.write("Single Pass Length:", round(single_pass_length, 2))
-        st.write("Total Cut Length:", round(cut_length, 2))
-
-        if width_passes > 1:
-            st.warning("Multiple width passes required ⚠️")
+if radial_passes > 1:
+    st.warning("Multiple radial passes required ⚠️")
 
     else:
         comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
