@@ -63,6 +63,25 @@ threadmill_data = [
     {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
     {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
 ]
+
+face_mill_data = [
+    {"dia": 3, "stock": 1, "vc": 50, "rpm": 5304, "feed": 477.4, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 6, "stock": 1.5, "vc": 70, "rpm": 3713, "feed": 445.6, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 8, "stock": 1.5, "vc": 100, "rpm": 3978, "feed": 477.4, "max_width": 6.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 10, "stock": 2, "vc": 120, "rpm": 3819, "feed": 572.9, "max_width": 8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 12, "stock": 2, "vc": 140, "rpm": 3713, "feed": 557.0, "max_width": 9.6, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 14, "stock": 2, "vc": 160, "rpm": 3637, "feed": 654.7, "max_width": 11.2, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 16, "stock": 2, "vc": 180, "rpm": 3581, "feed": 644.5, "max_width": 12.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 20, "stock": 2, "vc": 200, "rpm": 3183, "feed": 668.4, "max_width": 16, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 25, "stock": 2, "vc": 300, "rpm": 3819, "feed": 802.0, "max_width": 17.5, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 32, "stock": 2, "vc": 350, "rpm": 3481, "feed": 1044.3, "max_width": 22.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 40, "stock": 2, "vc": 350, "rpm": 2785, "feed": 1113.9, "max_width": 28, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 50, "stock": 2, "vc": 400, "rpm": 2546, "feed": 1273.1, "max_width": 35, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 63, "stock": 2, "vc": 450, "rpm": 2273, "feed": 1227.6, "max_width": 44.1, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 80, "stock": 2, "vc": 450, "rpm": 1790, "feed": 1289.0, "max_width": 56, "spindles": ["HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
+]
+
 def get_parameters(diameter):
     for row in cutting_data:
         if row["min_d"] <= diameter <= row["max_d"]:
@@ -76,9 +95,24 @@ def get_parameters(diameter):
 def get_diameter(tap):
     return float(tap.replace("M", ""))
 
-st.title("Smart Drilling/Tapping Calculator (Aluminum)")
+def filter_tools_by_spindle(spindle):
+    return [t for t in face_mill_data if spindle in t["spindles"]]
 
-operation = st.selectbox("Select Operation", ["Drilling", "Tapping"])
+def select_tool_rect(min_dim, tools):
+    for t in tools:
+        if t["max_width"] >= min_dim:
+            return t
+    return None
+
+def select_tool_circular(dia, tools):
+    for t in tools:
+        if t["max_width"] >= dia:
+            return t
+    return None
+
+st.title("Smart Machining Calculator (Aluminum)")
+
+operation = st.selectbox("Select Operation", ["Drilling", "Tapping", "Face Milling"])
 
 if operation == "Drilling":
 
@@ -261,3 +295,104 @@ elif operation == "Tapping":
                     total_time_sec = time_per_hole * count * 60
 
                     st.write("Total Time (sec):", round(total_time_sec, 2))
+
+elif operation == "Face Milling":
+
+    st.title("Face Milling Calculator")
+
+    spindle = st.selectbox("Select Spindle", ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"])
+
+    shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
+
+    stock = st.number_input("Total Stock (mm)", value=3.0)
+
+    tools = filter_tools_by_spindle(spindle)
+
+    tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
+
+    selected_tool = None
+
+    if shape == "Rectangular":
+        L = st.number_input("Length (mm)", value=60.0)
+        W = st.number_input("Width (mm)", value=10.0)
+
+        min_dim = min(L, W)
+        long_dim = max(L, W)
+
+        if tool_mode == "Auto":
+            selected_tool = select_tool_rect(min_dim, tools)
+
+        else:
+            dia_list = [t["dia"] for t in tools]
+            dia = st.selectbox("Select Tool Diameter", dia_list)
+            selected_tool = next(t for t in tools if t["dia"] == dia)
+
+        if selected_tool:
+            tool_dia = selected_tool["dia"]
+            cut_length = long_dim + tool_dia + 4
+
+    else:
+        comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
+
+        if tool_mode == "Auto":
+            selected_tool = select_tool_circular(comp_dia, tools)
+
+        else:
+            dia_list = [t["dia"] for t in tools]
+            dia = st.selectbox("Select Tool Diameter", dia_list)
+            selected_tool = next(t for t in tools if t["dia"] == dia)
+
+        if selected_tool:
+            tool_dia = selected_tool["dia"]
+
+            if selected_tool["max_width"] >= comp_dia:
+                cut_length = comp_dia + tool_dia
+            else:
+                eff_dia = comp_dia + 5
+                cut_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
+
+    # ---- Surface Finish ----
+    ra = st.number_input("Surface Finish Ra", value=3.2)
+
+    if selected_tool:
+
+        feed = selected_tool["feed"]
+        rpm = selected_tool["rpm"]
+        stock_limit = selected_tool["stock"]
+
+        finish_required = ra < 1.6
+
+        if finish_required:
+            rough_stock = stock - 0.5
+        else:
+            rough_stock = stock
+
+        passes = math.ceil(rough_stock / stock_limit)
+
+        rough_depth = rough_stock / passes
+
+        st.write("Selected Tool Dia:", selected_tool["dia"])
+        st.write("RPM:", rpm)
+        st.write("Feed:", feed)
+        st.write("No. of Rough Passes:", passes)
+        st.write("Depth per Pass:", round(rough_depth, 2))
+        st.write("Cut Length:", round(cut_length, 2))
+
+        if finish_required:
+            finish_feed = feed * 0.8
+            st.write("Finish Pass: 0.5 mm")
+            st.write("Finish Feed:", round(finish_feed, 2))
+
+        if st.button("Calculate Milling Time"):
+
+            total_time = 0
+
+            for i in range(passes):
+                total_time += (cut_length / feed)
+
+            if finish_required:
+                total_time += (cut_length / finish_feed)
+
+            total_time_sec = total_time * 60
+
+            st.write("Total Time (sec):", round(total_time_sec, 2))
