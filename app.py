@@ -317,7 +317,14 @@ elif operation == "Face Milling":
 
         min_dim = min(L, W)
         long_dim = max(L, W)
-
+# Auto tool selection for circular
+    if tool_mode == "Auto":
+        tools_sorted = sorted(tools, key=lambda x: x["max_width"], reverse=True)
+        selected_tool = tools_sorted[0] if tools_sorted else None
+    else:
+        dia_list = [t["dia"] for t in tools]
+        dia = st.selectbox("Select Tool Diameter", dia_list)
+        selected_tool = next(t for t in tools if t["dia"] == dia)
     if tool_mode == "Auto":
         selected_tool = select_tool_rect(min_dim, tools)
     else:
