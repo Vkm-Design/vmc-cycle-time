@@ -99,10 +99,9 @@ def filter_tools_by_spindle(spindle):
     return [t for t in face_mill_data if spindle in t["spindles"]]
 
 def select_tool_rect(min_dim, tools):
-    for t in tools:
-        if t["max_width"] >= min_dim:
-            return t
-    return None
+    # Select biggest allowed tool for selected spindle
+    tools_sorted = sorted(tools, key=lambda x: x["max_width"], reverse=True)
+    return tools_sorted[0] if tools_sorted else None
 
 def select_tool_circular(dia, tools):
     for t in tools:
@@ -312,24 +311,44 @@ elif operation == "Face Milling":
 
     selected_tool = None
 
-    if shape == "Rectangular":
-        L = st.number_input("Length (mm)", value=60.0)
-        W = st.number_input("Width (mm)", value=10.0)
+   if shape == "Rectangular":
+    L = st.number_input("Length (mm)", value=60.0)
+    W = st.number_input("Width (mm)", value=10.0)
 
-        min_dim = min(L, W)
-        long_dim = max(L, W)
+    min_dim = min(L, W)
+    long_dim = max(L, W)
 
-        if tool_mode == "Auto":
-            selected_tool = select_tool_rect(min_dim, tools)
+    if tool_mode == "Auto":
+        selected_tool = select_tool_rect(min_dim, tools)
+    else:
+        dia_list = [t["dia"] for t in tools]
+        dia = st.selectbox("Select Tool Diameter", dia_list)
+        selected_tool = next(t for t in tools if t["dia"] == dia)
 
+    if selected_tool:
+        tool_dia = selected_tool["dia"]
+        max_width = selected_tool["max_width"]
+
+        # ---- Width Pass Calculation ----
+        if W <= max_width:
+            width_passes = 1
         else:
-            dia_list = [t["dia"] for t in tools]
-            dia = st.selectbox("Select Tool Diameter", dia_list)
-            selected_tool = next(t for t in tools if t["dia"] == dia)
+            width_passes = math.ceil(W / max_width)
 
-        if selected_tool:
-            tool_dia = selected_tool["dia"]
-            cut_length = long_dim + tool_dia + 4
+        # ---- Single Pass Length ----
+        single_pass_length = long_dim + tool_dia + 4
+
+        # ---- Total Cut Length ----
+        cut_length = single_pass_length * width_passes
+
+        # ---- Display ----
+        st.write("Width Passes:", width_passes)
+        st.write("Single Pass Length:", round(single_pass_length, 2))
+        st.write("Total Cut Length:", round(cut_length, 2))
+
+        # ---- Warning ----
+        if width_passes > 1:
+            st.warning("Multiple width passes required ⚠️")
 
     else:
         comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
