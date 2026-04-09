@@ -312,20 +312,20 @@ elif operation == "Face Milling":
     selected_tool = None
 
     if shape == "Rectangular":
-    L = st.number_input("Length (mm)", value=60.0)
-    W = st.number_input("Width (mm)", value=10.0)
+       L = st.number_input("Length (mm)", value=60.0)
+       W = st.number_input("Width (mm)", value=10.0)
 
-    min_dim = min(L, W)
-    long_dim = max(L, W)
+       min_dim = min(L, W)
+       long_dim = max(L, W)
 
-    if tool_mode == "Auto":
+     if tool_mode == "Auto":
         selected_tool = select_tool_rect(min_dim, tools)
-    else:
+     else:
         dia_list = [t["dia"] for t in tools]
         dia = st.selectbox("Select Tool Diameter", dia_list)
         selected_tool = next(t for t in tools if t["dia"] == dia)
 
-    if selected_tool:
+     if selected_tool:
         tool_dia = selected_tool["dia"]
         max_width = selected_tool["max_width"]
 
