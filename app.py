@@ -325,12 +325,6 @@ elif operation == "Face Milling":
         dia_list = [t["dia"] for t in tools]
         dia = st.selectbox("Select Tool Diameter", dia_list)
         selected_tool = next(t for t in tools if t["dia"] == dia)
-    if tool_mode == "Auto":
-        selected_tool = select_tool_rect(min_dim, tools)
-    else:
-        dia_list = [t["dia"] for t in tools]
-        dia = st.selectbox("Select Tool Diameter", dia_list)
-        selected_tool = next(t for t in tools if t["dia"] == dia)
 
     if selected_tool:
         tool_dia = selected_tool["dia"]
