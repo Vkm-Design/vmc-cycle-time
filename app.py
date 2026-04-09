@@ -311,7 +311,7 @@ elif operation == "Face Milling":
 
     selected_tool = None
 
-   if shape == "Rectangular":
+    if shape == "Rectangular":
     L = st.number_input("Length (mm)", value=60.0)
     W = st.number_input("Width (mm)", value=10.0)
 
