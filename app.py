@@ -389,56 +389,61 @@ if selected_tool:
     rpm = selected_tool["rpm"]
     stock_limit = selected_tool["stock"]
 
-    finish_required = ra < 1.6
-
     stock = st.number_input("Stock to Remove (mm)", value=2.0)
+
+    finish_required = ra < 1.6
 
     if finish_required:
         rough_stock = stock - 0.5
     else:
         rough_stock = stock
-# ---- Rough Pass Calculation ----
-passes = math.ceil(rough_stock / stock_limit)
 
-if passes < 1:
-    passes = 1
+    # ---- Rough Pass Calculation ----
+    passes = math.ceil(rough_stock / stock_limit)
 
-rough_passes = []
-remaining = rough_stock
+    if passes < 1:
+        passes = 1
 
-for i in range(passes):
-    if remaining >= stock_limit:
-        depth = stock_limit
-    else:
-        depth = remaining
+    rough_passes = []
+    remaining = rough_stock
 
-    rough_passes.append(round(depth, 2))
-    remaining -= depth
+    for i in range(passes):
+        if remaining >= stock_limit:
+            depth = stock_limit
+        else:
+            depth = remaining
 
-# ---- OUTPUT ----
-st.write("Rough Passes:", rough_passes)
+        rough_passes.append(round(depth, 2))
+        remaining -= depth
 
-if finish_required:
-    st.write("Finish Pass: 0.5 mm")
-   
+    # ---- OUTPUT ----
+    st.write("Rough Passes:", rough_passes)
+
+    if finish_required:
+        st.write("Finish Pass: 0.5 mm")
+
+    # ✅ ALWAYS SHOW (not inside finish_required)
     st.write("Selected Tool Dia:", selected_tool["dia"])
     st.write("RPM:", rpm)
     st.write("Feed:", feed)
-    st.write("No. of Rough Passes:", passes)
+    st.write("No. of Rough Passes:", len(rough_passes))
     st.write("Cut Length:", round(cut_length, 2))
 
+    # ---- Finish Feed ----
     if finish_required:
         finish_feed = feed * 0.8
-        st.write("Finish Pass: 0.5 mm")
         st.write("Finish Feed:", round(finish_feed, 2))
 
+    # ---- Time Calculation ----
     if st.button("Calculate Milling Time"):
 
         total_time = 0
 
-        for i in range(passes):
+        # Rough passes
+        for depth in rough_passes:
             total_time += (cut_length / feed)
 
+        # Finish pass
         if finish_required:
             total_time += (cut_length / finish_feed)
 
