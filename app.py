@@ -312,76 +312,76 @@ elif operation == "Face Milling":
     selected_tool = None
 
     # ================= RECTANGULAR =================
-if shape == "Rectangular":
+ if shape == "Rectangular":
 
-    L = st.number_input("Length (mm)", value=60.0)
-    W = st.number_input("Width (mm)", value=10.0)
+     L = st.number_input("Length (mm)", value=60.0)
+     W = st.number_input("Width (mm)", value=10.0)
 
-    min_dim = min(L, W)
-    long_dim = max(L, W)
+     min_dim = min(L, W)
+     long_dim = max(L, W)
 
-    # Tool selection
-    if tool_mode == "Auto":
-        selected_tool = select_tool_rect(min_dim, tools)
-    else:
-        dia_list = [t["dia"] for t in tools]
-        dia = st.selectbox("Select Tool Diameter", dia_list)
-        selected_tool = next(t for t in tools if t["dia"] == dia)
+     # Tool selection
+     if tool_mode == "Auto":
+         selected_tool = select_tool_rect(min_dim, tools)
+     else:
+         dia_list = [t["dia"] for t in tools]
+         dia = st.selectbox("Select Tool Diameter", dia_list)
+         selected_tool = next(t for t in tools if t["dia"] == dia)
 
-    if selected_tool:
-        tool_dia = selected_tool["dia"]
-        max_width = selected_tool["max_width"]
+      if selected_tool:
+          tool_dia = selected_tool["dia"]
+          max_width = selected_tool["max_width"]
 
-        if W <= max_width:
-            width_passes = 1
-        else:
-            width_passes = math.ceil(W / max_width)
+          if W <= max_width:
+             width_passes = 1
+         else:
+             width_passes = math.ceil(W / max_width)
 
-        single_pass_length = long_dim + tool_dia + 4
-        cut_length = single_pass_length * width_passes
-
-
-# ================= CIRCULAR =================
-elif shape == "Circular":
-
-    comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
-
-    # Tool selection
-    if tool_mode == "Auto":
-        tools_sorted = sorted(tools, key=lambda x: x["max_width"], reverse=True)
-        selected_tool = tools_sorted[0] if tools_sorted else None
-    else:
-        dia_list = [t["dia"] for t in tools]
-        dia = st.selectbox("Select Tool Diameter", dia_list)
-        selected_tool = next(t for t in tools if t["dia"] == dia)
-
-    if selected_tool:
-        tool_dia = selected_tool["dia"]
-        max_width = selected_tool["max_width"]
-
-        # Radial passes
-        if comp_dia <= max_width:
-            radial_passes = 1
-        else:
-            radial_passes = math.ceil(comp_dia / max_width)
-
-        # Single pass length
-        if comp_dia <= max_width:
-            single_pass_length = comp_dia + tool_dia
-        else:
-            eff_dia = comp_dia + 5
-            single_pass_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
-
-        cut_length = single_pass_length * radial_passes
-
-        st.write("Radial Passes:", radial_passes)
-
-        if radial_passes > 1:
-            st.warning("Multiple radial passes required ⚠️")
+         single_pass_length = long_dim + tool_dia + 4
+         cut_length = single_pass_length * width_passes
 
 
-# ================= COMMON (RUNS FOR BOTH) =================
-if selected_tool:
+ # ================= CIRCULAR =================
+ elif shape == "Circular":
+
+     comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
+
+     # Tool selection
+     if tool_mode == "Auto":
+         tools_sorted = sorted(tools, key=lambda x: x["max_width"], reverse=True)
+         selected_tool = tools_sorted[0] if tools_sorted else None
+     else:
+         dia_list = [t["dia"] for t in tools]
+         dia = st.selectbox("Select Tool Diameter", dia_list)
+         selected_tool = next(t for t in tools if t["dia"] == dia)
+
+     if selected_tool:
+         tool_dia = selected_tool["dia"]
+         max_width = selected_tool["max_width"]
+
+         # Radial passes
+         if comp_dia <= max_width:
+             radial_passes = 1
+         else:
+             radial_passes = math.ceil(comp_dia / max_width)
+
+         # Single pass length
+         if comp_dia <= max_width:
+             single_pass_length = comp_dia + tool_dia
+         else:
+             eff_dia = comp_dia + 5
+             single_pass_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
+
+         cut_length = single_pass_length * radial_passes
+
+         st.write("Radial Passes:", radial_passes)
+
+         if radial_passes > 1:
+             st.warning("Multiple radial passes required ⚠️")
+
+
+ # ================= COMMON (RUNS FOR BOTH) =================
+ if selected_tool:
 
     ra = st.number_input("Surface Finish Ra", value=3.2)
 
@@ -417,7 +417,7 @@ if selected_tool:
         remaining -= depth
 
     # ---- OUTPUT ----
-    st.write("Rough Passes:", rough_passes)
+    st.write("Rough Passes:", ", ".join(map(str, rough_passes)))
 
     if finish_required:
         st.write("Finish Pass: 0.5 mm")
