@@ -311,13 +311,42 @@ elif operation == "Face Milling":
 
     selected_tool = None
 
-    if shape == "Rectangular":
-        L = st.number_input("Length (mm)", value=60.0)
-        W = st.number_input("Width (mm)", value=10.0)
+    # ================= RECTANGULAR =================
+if shape == "Rectangular":
 
-        min_dim = min(L, W)
-        long_dim = max(L, W)
-# Auto tool selection for circular
+    L = st.number_input("Length (mm)", value=60.0)
+    W = st.number_input("Width (mm)", value=10.0)
+
+    min_dim = min(L, W)
+    long_dim = max(L, W)
+
+    # Tool selection
+    if tool_mode == "Auto":
+        selected_tool = select_tool_rect(min_dim, tools)
+    else:
+        dia_list = [t["dia"] for t in tools]
+        dia = st.selectbox("Select Tool Diameter", dia_list)
+        selected_tool = next(t for t in tools if t["dia"] == dia)
+
+    if selected_tool:
+        tool_dia = selected_tool["dia"]
+        max_width = selected_tool["max_width"]
+
+        if W <= max_width:
+            width_passes = 1
+        else:
+            width_passes = math.ceil(W / max_width)
+
+        single_pass_length = long_dim + tool_dia + 4
+        cut_length = single_pass_length * width_passes
+
+
+# ================= CIRCULAR =================
+elif shape == "Circular":
+
+    comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
+
+    # Tool selection
     if tool_mode == "Auto":
         tools_sorted = sorted(tools, key=lambda x: x["max_width"], reverse=True)
         selected_tool = tools_sorted[0] if tools_sorted else None
@@ -326,92 +355,74 @@ elif operation == "Face Milling":
         dia = st.selectbox("Select Tool Diameter", dia_list)
         selected_tool = next(t for t in tools if t["dia"] == dia)
 
-    # ---- Radial Pass Calculation ----
-    if comp_dia <= max_width:
-        radial_passes = 1
-    else:
-        radial_passes = math.ceil(comp_dia / max_width)
+    if selected_tool:
+        tool_dia = selected_tool["dia"]
+        max_width = selected_tool["max_width"]
 
-# ---- Single Pass Length ----
-    if comp_dia <= max_width:
-        single_pass_length = comp_dia + tool_dia
-    else:
-        eff_dia = comp_dia + 5
-        single_pass_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
-
-# ---- Total Cut Length ----
-cut_length = single_pass_length * radial_passes
-
-# ---- Display ----
-st.write("Radial Passes:", radial_passes)
-st.write("Single Pass Length:", round(single_pass_length, 2))
-st.write("Total Cut Length:", round(cut_length, 2))
-
-if radial_passes > 1:
-    st.warning("Multiple radial passes required ⚠️")
-
-       else:
-           comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
-
-        if tool_mode == "Auto":
-            selected_tool = select_tool_circular(comp_dia, tools)
-
+        # Radial passes
+        if comp_dia <= max_width:
+            radial_passes = 1
         else:
-            dia_list = [t["dia"] for t in tools]
-            dia = st.selectbox("Select Tool Diameter", dia_list)
-            selected_tool = next(t for t in tools if t["dia"] == dia)
+            radial_passes = math.ceil(comp_dia / max_width)
 
-        if selected_tool:
-            tool_dia = selected_tool["dia"]
+        # Single pass length
+        if comp_dia <= max_width:
+            single_pass_length = comp_dia + tool_dia
+        else:
+            eff_dia = comp_dia + 5
+            single_pass_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
 
-            if selected_tool["max_width"] >= comp_dia:
-                cut_length = comp_dia + tool_dia
-            else:
-                eff_dia = comp_dia + 5
-                cut_length = math.pi * (eff_dia - tool_dia) + comp_dia + tool_dia
+        cut_length = single_pass_length * radial_passes
 
-    # ---- Surface Finish ----
+        st.write("Radial Passes:", radial_passes)
+
+        if radial_passes > 1:
+            st.warning("Multiple radial passes required ⚠️")
+
+
+# ================= COMMON (RUNS FOR BOTH) =================
+if selected_tool:
+
     ra = st.number_input("Surface Finish Ra", value=3.2)
 
-    if selected_tool:
+    feed = selected_tool["feed"]
+    rpm = selected_tool["rpm"]
+    stock_limit = selected_tool["stock"]
 
-        feed = selected_tool["feed"]
-        rpm = selected_tool["rpm"]
-        stock_limit = selected_tool["stock"]
+    finish_required = ra < 1.6
 
-        finish_required = ra < 1.6
+    stock = 2  # (define this properly if dynamic)
+
+    if finish_required:
+        rough_stock = stock - 0.5
+    else:
+        rough_stock = stock
+
+    passes = math.ceil(rough_stock / stock_limit)
+    rough_depth = rough_stock / passes
+
+    st.write("Selected Tool Dia:", selected_tool["dia"])
+    st.write("RPM:", rpm)
+    st.write("Feed:", feed)
+    st.write("No. of Rough Passes:", passes)
+    st.write("Depth per Pass:", round(rough_depth, 2))
+    st.write("Cut Length:", round(cut_length, 2))
+
+    if finish_required:
+        finish_feed = feed * 0.8
+        st.write("Finish Pass: 0.5 mm")
+        st.write("Finish Feed:", round(finish_feed, 2))
+
+    if st.button("Calculate Milling Time"):
+
+        total_time = 0
+
+        for i in range(passes):
+            total_time += (cut_length / feed)
 
         if finish_required:
-            rough_stock = stock - 0.5
-        else:
-            rough_stock = stock
+            total_time += (cut_length / finish_feed)
 
-        passes = math.ceil(rough_stock / stock_limit)
+        total_time_sec = total_time * 60
 
-        rough_depth = rough_stock / passes
-
-        st.write("Selected Tool Dia:", selected_tool["dia"])
-        st.write("RPM:", rpm)
-        st.write("Feed:", feed)
-        st.write("No. of Rough Passes:", passes)
-        st.write("Depth per Pass:", round(rough_depth, 2))
-        st.write("Cut Length:", round(cut_length, 2))
-
-        if finish_required:
-            finish_feed = feed * 0.8
-            st.write("Finish Pass: 0.5 mm")
-            st.write("Finish Feed:", round(finish_feed, 2))
-
-        if st.button("Calculate Milling Time"):
-
-            total_time = 0
-
-            for i in range(passes):
-                total_time += (cut_length / feed)
-
-            if finish_required:
-                total_time += (cut_length / finish_feed)
-
-            total_time_sec = total_time * 60
-
-            st.write("Total Time (sec):", round(total_time_sec, 2))
+        st.write("Total Time (sec):", round(total_time_sec, 2))
