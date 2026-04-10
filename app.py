@@ -391,21 +391,40 @@ if selected_tool:
 
     finish_required = ra < 1.6
 
-    stock = 2  # (define this properly if dynamic)
+    stock = st.number_input("Stock to Remove (mm)", value=2.0)
 
     if finish_required:
         rough_stock = stock - 0.5
     else:
         rough_stock = stock
+# ---- Rough Pass Calculation ----
+passes = math.ceil(rough_stock / stock_limit)
 
-    passes = math.ceil(rough_stock / stock_limit)
-    rough_depth = rough_stock / passes
+if passes < 1:
+    passes = 1
 
+rough_passes = []
+remaining = rough_stock
+
+for i in range(passes):
+    if remaining >= stock_limit:
+        depth = stock_limit
+    else:
+        depth = remaining
+
+    rough_passes.append(round(depth, 2))
+    remaining -= depth
+
+# ---- OUTPUT ----
+st.write("Rough Passes:", rough_passes)
+
+if finish_required:
+    st.write("Finish Pass: 0.5 mm")
+   
     st.write("Selected Tool Dia:", selected_tool["dia"])
     st.write("RPM:", rpm)
     st.write("Feed:", feed)
     st.write("No. of Rough Passes:", passes)
-    st.write("Depth per Pass:", round(rough_depth, 2))
     st.write("Cut Length:", round(cut_length, 2))
 
     if finish_required:
