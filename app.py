@@ -350,8 +350,8 @@ st.write("Total Cut Length:", round(cut_length, 2))
 if radial_passes > 1:
     st.warning("Multiple radial passes required ⚠️")
 
-    else:
-        comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
+       else:
+           comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
 
         if tool_mode == "Auto":
             selected_tool = select_tool_circular(comp_dia, tools)
