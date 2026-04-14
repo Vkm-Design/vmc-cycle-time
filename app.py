@@ -157,8 +157,9 @@ def get_parameters(diameter, material):
 def get_diameter(tap):
     return float(tap.replace("M", ""))
 
-def filter_tools_by_spindle(spindle):
-    return [t for t in face_mill_data if spindle in t["spindles"]]
+def filter_tools_by_spindle(spindle, material):
+    table = material_tables[material]["face_mill"]
+    return [t for t in table if spindle in t["spindles"]]
 
 def select_tool_rect(min_dim, tools):
     # Select biggest allowed tool for selected spindle
@@ -416,12 +417,14 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
 
     st.title("Face Milling Calculator")
+    
+    material = st.selectbox("Select Material", list(material_tables.keys()))
 
     spindle = st.selectbox("Select Spindle", ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"])
 
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
 
-    tools = filter_tools_by_spindle(spindle)
+    tools = filter_tools_by_spindle(spindle, material)
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
 
     selected_tool = None
