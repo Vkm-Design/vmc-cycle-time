@@ -26,36 +26,41 @@ machine_data = {
     "Makino PS65 HSK63": {"power": 18.5, "torque": 95}
 }
 
-# ---- Your Real Data ----
-cutting_data = [
+material_tables = {
 
-    {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
-    {"min_d": 1, "max_d": 3, "rpm": 6500, "feed_min": 100, "max_depth": 5},
+    "Aluminium": {
 
-    {"min_d": 3, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
-    {"min_d": 5, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
-    {"min_d": 8, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
-    {"min_d": 10, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50},
+        "drill": [
+            {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
+            {"min_d": 1, "max_d": 3, "rpm": 6500, "feed_min": 100, "max_depth": 5},
 
-    {"min_d": 15, "max_d": 16, "rpm": 2464, "feed_min": 444, "max_depth": 48},
-    {"min_d": 16, "max_d": 17, "rpm": 2508, "feed_min": 451, "max_depth": 51},
-    {"min_d": 17, "max_d": 18, "rpm": 2364, "feed_min": 426, "max_depth": 54},
-    {"min_d": 18, "max_d": 19, "rpm": 2409, "feed_min": 482, "max_depth": 57},
-    {"min_d": 19, "max_d": 20, "rpm": 2448, "feed_min": 490, "max_depth": 60},
+            {"min_d": 3, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
+            {"min_d": 5, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
+            {"min_d": 8, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
+            {"min_d": 10, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50},
 
-    {"min_d": 20, "max_d": 21, "rpm": 2484, "feed_min": 248, "max_depth": 63},
-    {"min_d": 21, "max_d": 22, "rpm": 2369, "feed_min": 237, "max_depth": 66},
-    {"min_d": 22, "max_d": 23, "rpm": 2263, "feed_min": 226, "max_depth": 69},
-    {"min_d": 23, "max_d": 24, "rpm": 2167, "feed_min": 238, "max_depth": 72},
+            {"min_d": 15, "max_d": 16, "rpm": 2464, "feed_min": 444, "max_depth": 48},
+            {"min_d": 16, "max_d": 17, "rpm": 2508, "feed_min": 451, "max_depth": 51},
+            {"min_d": 17, "max_d": 18, "rpm": 2364, "feed_min": 426, "max_depth": 54},
+            {"min_d": 18, "max_d": 19, "rpm": 2409, "feed_min": 482, "max_depth": 57},
+            {"min_d": 19, "max_d": 20, "rpm": 2448, "feed_min": 490, "max_depth": 60},
 
-    {"min_d": 24, "max_d": 25, "rpm": 2338, "feed_min": 234, "max_depth": 75},
-    {"min_d": 25, "max_d": 26, "rpm": 2371, "feed_min": 249, "max_depth": 78},
-    {"min_d": 26, "max_d": 27, "rpm": 2402, "feed_min": 240, "max_depth": 81},
-    {"min_d": 27, "max_d": 28, "rpm": 2315, "feed_min": 232, "max_depth": 84},
-    {"min_d": 28, "max_d": 29, "rpm": 2233, "feed_min": 223, "max_depth": 87},
-    {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
+            {"min_d": 20, "max_d": 21, "rpm": 2484, "feed_min": 248, "max_depth": 63},
+            {"min_d": 21, "max_d": 22, "rpm": 2369, "feed_min": 237, "max_depth": 66},
+            {"min_d": 22, "max_d": 23, "rpm": 2263, "feed_min": 226, "max_depth": 69},
+            {"min_d": 23, "max_d": 24, "rpm": 2167, "feed_min": 238, "max_depth": 72},
 
-]
+            {"min_d": 24, "max_d": 25, "rpm": 2338, "feed_min": 234, "max_depth": 75},
+            {"min_d": 25, "max_d": 26, "rpm": 2371, "feed_min": 249, "max_depth": 78},
+            {"min_d": 26, "max_d": 27, "rpm": 2402, "feed_min": 240, "max_depth": 81},
+            {"min_d": 27, "max_d": 28, "rpm": 2315, "feed_min": 232, "max_depth": 84},
+            {"min_d": 28, "max_d": 29, "rpm": 2233, "feed_min": 223, "max_depth": 87},
+            {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
+        ]
+
+    }
+
+}
 
 tap_data = [
     {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
@@ -176,7 +181,7 @@ if operation == "Drilling":
     depth = st.number_input("Depth (mm)", value=10.0)
     count = st.number_input("Number of Holes", value=1)
 
-    rpm, feed_min, max_depth = get_parameters(diameter)
+    rpm, feed_min, max_depth = get_parameters(diameter, material)
 
     if rpm is not None:
         st.write("Recommended RPM:", round(rpm, 2))
