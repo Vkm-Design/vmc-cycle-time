@@ -270,7 +270,7 @@ elif operation == "Tapping":
     selected_pitch = st.selectbox("Select Pitch", pitch_list)
 
     filtered = [row for row in tap_table if row["pitch"] == selected_pitch]
-    tap_options = list(set(row["tap"] for row in filtered))))
+    tap_options = list(set(row["tap"] for row in filtered))
 
     selected_tap = st.selectbox("Select Tap Size", tap_options)
 
