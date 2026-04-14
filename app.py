@@ -432,7 +432,7 @@ elif operation == "Face Milling":
 
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
 
-    tools = filter_tools_by_spindle(spindle, face_material))
+    tools = filter_tools_by_spindle(spindle, face_material)
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
 
     selected_tool = None
