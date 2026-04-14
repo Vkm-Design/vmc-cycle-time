@@ -271,10 +271,9 @@ elif operation == "Tapping":
         "Select Material",
         list(material_tables.keys()),
         key="tap_material"
-)
+    )
 
     tap_table = material_tables[tap_material]["tap"]
-
     # ---- Pitch selection ----
     tap_table = material_tables[material]["tap"]
 
