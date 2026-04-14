@@ -26,11 +26,7 @@ machine_data = {
     "Makino PS65 HSK63": {"power": 18.5, "torque": 95}
 }
 
-material_tables = {
-
-    "Aluminium": {
-
-        "drill": [
+drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
             {"min_d": 1, "max_d": 3, "rpm": 6500, "feed_min": 100, "max_depth": 5},
 
@@ -56,15 +52,9 @@ material_tables = {
             {"min_d": 27, "max_d": 28, "rpm": 2315, "feed_min": 232, "max_depth": 84},
             {"min_d": 28, "max_d": 29, "rpm": 2233, "feed_min": 223, "max_depth": 87},
             {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
-        ],
-        
-        "tap": tap_data
+]
 
-    }
-
-}
-
-tap_data = [
+tap_data_aluminium  = [
     {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
     {"tap": "M3.5", "pitch": 0.6, "vc": 5, "max_depth": 10.5},
     {"tap": "M4", "pitch": 0.7, "vc": 6, "max_depth": 12},
@@ -97,7 +87,7 @@ tap_data = [
     {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
 ]
 
-threadmill_data = [
+threadmill_data_aluminium = [
     {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 30, "feed_rev": 0.06, "max_depth": 7.5},
     {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 30, "feed_rev": 0.09, "max_depth": 10},
     {"tap": "M5", "tool_dia": 4, "pitch": 0.8, "vc": 50, "feed_rev": 0.12, "max_depth": 12.5},
@@ -117,7 +107,7 @@ threadmill_data = [
     {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
 ]
 
-face_mill_data = [
+face_mill_data_aluminium = [
     {"dia": 3, "stock": 1, "vc": 50, "rpm": 5304, "feed": 477.4, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 6, "stock": 1.5, "vc": 70, "rpm": 3713, "feed": 445.6, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 8, "stock": 1.5, "vc": 100, "rpm": 3978, "feed": 477.4, "max_width": 6.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
@@ -134,6 +124,19 @@ face_mill_data = [
     {"dia": 80, "stock": 2, "vc": 450, "rpm": 1790, "feed": 1289.0, "max_width": 56, "spindles": ["HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
 ]
+
+material_tables = {
+
+    "Aluminium": {
+
+        "drill": drill_data_aluminium,
+        "tap": tap_data_aluminium, 
+        "threadmill": threadmill_data_aluminium,
+        "face_mill": face_mill_data_aluminium
+
+    }
+
+}
 
 def get_parameters(diameter, material):
 
