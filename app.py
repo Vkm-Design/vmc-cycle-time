@@ -273,7 +273,7 @@ elif operation == "Tapping":
     key="tap_material"
 )
 
-    tap_table = material_tables[material]["tap"]
+    tap_table = material_tables[tap_material]["tap"]
 
     # ---- Pitch selection ----
     tap_table = material_tables[material]["tap"]
@@ -422,13 +422,17 @@ elif operation == "Face Milling":
 
     st.title("Face Milling Calculator")
     
-    material = st.selectbox("Select Material", list(material_tables.keys()))
+    face_material = st.selectbox(
+    "Select Material",
+    list(material_tables.keys()),
+    key="face_material"
+)
 
     spindle = st.selectbox("Select Spindle", ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"])
 
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
 
-    tools = filter_tools_by_spindle(spindle, material)
+    tools = filter_tools_by_spindle(spindle, face_material))
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
 
     selected_tool = None
