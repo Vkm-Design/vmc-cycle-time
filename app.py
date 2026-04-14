@@ -1,6 +1,31 @@
 import streamlit as st
 import math
 
+# ================= MATERIAL TABLE =================
+kc_data = {
+    "Aluminium": 800,
+    "Steel_C22": 1700,
+    "Steel_C45": 1950,
+    "Steel_C60": 2250,
+    "Stainless_Steel": 2400
+}
+
+# ================= MACHINE TABLE (CONTINUOUS VALUES ONLY) =================
+machine_data = {
+    "Ace BT40": {"power": 5.5, "torque": 35},
+    "Ace HSK63": {"power": 5.5, "torque": 35},
+
+    "Brother Std BT30": {"power": 7, "torque": 26.8},
+    "Brother High Torque BT30": {"power": 9.2, "torque": 61.1},
+
+    "Fanuc Std BT30": {"power": 3.7, "torque": 11.8},
+    "Fanuc High Torque BT30": {"power": 3.7, "torque": 27.6},
+
+    "Makino Slim HSK50": {"power": 11, "torque": 33},
+    "Makino PS65 BT40": {"power": 18.5, "torque": 95},
+    "Makino PS65 HSK63": {"power": 18.5, "torque": 95}
+}
+
 # ---- Your Real Data ----
 cutting_data = [
 
