@@ -225,6 +225,26 @@ if operation == "Drilling":
             total_time_sec = time_per_hole * count * 60
             st.write("Total Time (sec):", round(total_time_sec, 2))
 
+    # ================= MACHINE VALIDATION =================
+
+    st.write("Machine Power (kW):", machine_power)
+    st.write("Machine Torque (Nm):", machine_torque)
+
+    power_ok = power <= machine_power
+    torque_ok = torque <= machine_torque
+
+    if power_ok and torque_ok:
+        st.success("✅ Machine is suitable for this operation")
+
+    else:
+        if not power_ok:
+            st.error("❌ Power requirement exceeds machine capacity")
+
+        if not torque_ok:
+            st.error("❌ Torque requirement exceeds machine capacity")
+
+        st.warning("⚠️ Suggestion: Select a higher capacity machine")
+
 
 elif operation == "Tapping":
 
