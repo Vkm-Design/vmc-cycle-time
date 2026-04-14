@@ -56,7 +56,9 @@ material_tables = {
             {"min_d": 27, "max_d": 28, "rpm": 2315, "feed_min": 232, "max_depth": 84},
             {"min_d": 28, "max_d": 29, "rpm": 2233, "feed_min": 223, "max_depth": 87},
             {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
-        ]
+        ],
+        
+        "tap": tap_data
 
     }
 
@@ -262,11 +264,13 @@ elif operation == "Tapping":
     st.title("Tapping Calculator")
 
     # ---- Pitch selection ----
-    pitch_list = sorted(list(set(row["pitch"] for row in tap_data)))
+    tap_table = material_tables[material]["tap"]
+
+    pitch_list = sorted(list(set(row["pitch"] for row in tap_table)))
     selected_pitch = st.selectbox("Select Pitch", pitch_list)
 
-    filtered = [row for row in tap_data if row["pitch"] == selected_pitch]
-    tap_options = list(set(row["tap"] for row in filtered))
+    filtered = [row for row in tap_table if row["pitch"] == selected_pitch]
+    tap_options = list(set(row["tap"] for row in filtered))))
 
     selected_tap = st.selectbox("Select Tap Size", tap_options)
 
