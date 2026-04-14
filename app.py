@@ -275,7 +275,7 @@ elif operation == "Tapping":
 
     tap_table = material_tables[tap_material]["tap"]
     # ---- Pitch selection ----
-    tap_table = material_tables[material]["tap"]
+    tap_table = material_tables[tap_material]["tap"]
 
     pitch_list = sorted(list(set(row["pitch"] for row in tap_table)))
     selected_pitch = st.selectbox("Select Pitch", pitch_list)
