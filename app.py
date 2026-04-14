@@ -163,6 +163,15 @@ if operation == "Drilling":
 
     st.title("Drilling Calculator")
 
+    # ---- Material Selection ----
+    material = st.selectbox("Select Material", list(kc_data.keys()))
+    kc = kc_data[material]
+
+    # ---- Machine Selection ----
+    machine = st.selectbox("Select Machine", list(machine_data.keys()))
+    machine_power = machine_data[machine]["power"]
+    machine_torque = machine_data[machine]["torque"]
+
     diameter = st.number_input("Drill Diameter (mm)", value=5.0)
     depth = st.number_input("Depth (mm)", value=10.0)
     count = st.number_input("Number of Holes", value=1)
