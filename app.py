@@ -198,6 +198,27 @@ if operation == "Drilling":
         rpm = (1000 * vc_manual) / (math.pi * diameter)
         feed_min = feed_rev_manual * rpm
 
+    # ================= POWER & TORQUE CALCULATION =================
+
+    # Convert feed (mm/min) → feed per rev (mm/rev)
+    if rpm > 0:
+        frev = feed_min / rpm
+    else:
+        frev = 0
+
+    # ---- Power Calculation (Drilling) ----
+    power = (frev * (rpm * math.pi * diameter / 1000) * diameter * kc) / (240000 * 0.8)
+
+    # ---- Torque Calculation ----
+    if rpm > 0:
+        torque = (power * 9550) / rpm
+    else:
+        torque = 0
+
+    # ---- Display ----
+    st.write("Required Power (kW):", round(power, 2))
+    st.write("Required Torque (Nm):", round(torque, 2))
+
     if st.button("Calculate Drill Time"):
         if rpm is not None:
             time_per_hole = depth / feed_min
