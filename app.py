@@ -267,7 +267,11 @@ elif operation == "Tapping":
 
     st.title("Tapping Calculator")
 
-    material = st.selectbox("Select Material", list(material_tables.keys()))
+    material = st.selectbox(
+    "Select Material",
+    list(material_tables.keys()),
+    key="tap_material"
+)
 
     tap_table = material_tables[material]["tap"]
 
