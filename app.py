@@ -265,7 +265,10 @@ if operation == "Drilling":
 elif operation == "Tapping":
 
     st.title("Tapping Calculator")
+
     material = st.selectbox("Select Material", list(material_tables.keys()))
+
+    tap_table = material_tables[material]["tap"]
 
     # ---- Pitch selection ----
     tap_table = material_tables[material]["tap"]
