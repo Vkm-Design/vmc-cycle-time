@@ -133,14 +133,20 @@ face_mill_data = [
     {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
 ]
 
-def get_parameters(diameter):
-    for row in cutting_data:
-        if row["min_d"] <= diameter <= row["max_d"]:
+def get_parameters(diameter, material):
+
+    table = material_tables[material]["drill"]
+
+    for row in table:
+        if row["min_d"] <= diameter < row["max_d"]:
+
             if "rpm" in row:
                 rpm = row["rpm"]
             else:
                 rpm = (1000 * row["vc"]) / (math.pi * diameter)
+
             return rpm, row["feed_min"], row["max_depth"]
+
     return None, None, None
 
 def get_diameter(tap):
