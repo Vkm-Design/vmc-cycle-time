@@ -206,7 +206,7 @@ if operation == "Drilling":
         st.write("Feed (mm/min):", feed_min)
         st.write("Max Allowed Depth:", max_depth)
     else:
-        st.error("Diameter not in defined range"))
+        st.error("Diameter not in defined range")
 
     manual_mode = False
 
