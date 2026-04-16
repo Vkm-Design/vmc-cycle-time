@@ -219,12 +219,6 @@ def select_tool_circular(dia, tools):
 
 st.title("Smart Machining Calculator (Aluminum)")
 
-operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
-
-if operation == "Drilling":
-
-    st.title("Drilling Calculator")
-
     # 1. ---- Material Selection (Always from kc_data keys) ----
     material = st.selectbox("Select Material", list(kc_data.keys()), key="drill_mat")
     kc = kc_data[material]
@@ -234,18 +228,23 @@ if operation == "Drilling":
     machine_power = machine_data[machine]["power"]
     machine_torque = machine_data[machine]["torque"]
 
+operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
+
+if operation == "Drilling":
+
+    st.title("Drilling Calculator")
     diameter = st.number_input("Drill Diameter (mm)", value=5.0)
     depth = st.number_input("Depth (mm)", value=10.0)
     count = st.number_input("Number of Holes", value=1)
 
-    # 3. ---- Safety Check for Parameters Table ----
+    # 1. ---- Safety Check for Parameters Table ----
     if material in material_tables:
         rpm, feed_min, max_depth = get_parameters(diameter, material)
     else:
         st.error(f"Cutting parameters for {material} are not yet defined in 'material_tables'.")
         st.stop() # Prevents the program from crashing at get_parameters
 
-    # 4. ---- Display Parameters ----
+    # 2. ---- Display Parameters ----
     if rpm is not None:
         st.write("Recommended RPM:", round(rpm, 2))
         st.write("Feed (mm/min):", feed_min)
