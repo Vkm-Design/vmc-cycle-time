@@ -387,7 +387,7 @@ elif operation == "Tapping":
         st.subheader("Thread Milling Calculation")
 
         tm_row = next(
-            (row for row in threadmill_data
+            (row for row in threadmill_table
              if row["tap"] == selected_tap and row["pitch"] == pitch),
             None
         )
