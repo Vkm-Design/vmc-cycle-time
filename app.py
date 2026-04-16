@@ -430,14 +430,19 @@ elif operation == "Tapping":
                     st.write("Total Time (sec):", round(total_time_sec, 2))
 
 elif operation == "Face Milling":
-
     st.title("Face Milling Calculator")
     
     face_material = st.selectbox(
-    "Select Material",
-    list(material_tables.keys()),
-    key="face_material"
-)
+        "Select Material",
+        list(kc_data.keys()), # Change this to show all materials
+        key="face_material"
+    )
+
+    if face_material in material_tables:
+        tools = filter_tools_by_spindle(spindle, face_material)
+    else:
+        st.error(f"Face Mill parameters for {face_material} are not yet defined.")
+        st.stop()
 
     spindle = st.selectbox("Select Spindle", ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"])
 
