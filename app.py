@@ -264,18 +264,21 @@ if operation == "Drilling":
 
 
 elif operation == "Tapping":
-
     st.title("Tapping Calculator")
 
+    # Change list(material_tables.keys()) to list(kc_data.keys())
     tap_material = st.selectbox(
         "Select Material",
-        list(material_tables.keys()),
+        list(kc_data.keys()), 
         key="tap_material"
     )
 
-    tap_table = material_tables[tap_material]["tap"]
-    # ---- Pitch selection ----
-    tap_table = material_tables[tap_material]["tap"]
+    # This logic allows you to select "Steel" even before the table is ready
+    if tap_material in material_tables:
+        tap_table = material_tables[tap_material]["tap"]
+    else:
+        st.error(f"Cutting parameters for {tap_material} are not yet defined.")
+        st.stop() # Prevents the code from crashing further down
 
     pitch_list = sorted(list(set(row["pitch"] for row in tap_table)))
     selected_pitch = st.selectbox("Select Pitch", pitch_list)
