@@ -180,11 +180,11 @@ if operation == "Drilling":
 
     st.title("Drilling Calculator")
 
-    # ---- Material Selection ----
-    material = st.selectbox("Select Material", list(kc_data.keys()))
+    # 1. ---- Material Selection (Always from kc_data keys) ----
+    material = st.selectbox("Select Material", list(kc_data.keys()), key="drill_mat")
     kc = kc_data[material]
 
-    # ---- Machine Selection ----
+    # 2. ---- Machine Selection ----
     machine = st.selectbox("Select Machine", list(machine_data.keys()))
     machine_power = machine_data[machine]["power"]
     machine_torque = machine_data[machine]["torque"]
@@ -193,14 +193,20 @@ if operation == "Drilling":
     depth = st.number_input("Depth (mm)", value=10.0)
     count = st.number_input("Number of Holes", value=1)
 
-    rpm, feed_min, max_depth = get_parameters(diameter, material)
+    # 3. ---- Safety Check for Parameters Table ----
+    if material in material_tables:
+        rpm, feed_min, max_depth = get_parameters(diameter, material)
+    else:
+        st.error(f"Cutting parameters for {material} are not yet defined in 'material_tables'.")
+        st.stop() # Prevents the program from crashing at get_parameters
 
+    # 4. ---- Display Parameters ----
     if rpm is not None:
         st.write("Recommended RPM:", round(rpm, 2))
         st.write("Feed (mm/min):", feed_min)
         st.write("Max Allowed Depth:", max_depth)
     else:
-        st.error("Diameter not in defined range")
+        st.error("Diameter not in defined range"))
 
     manual_mode = False
 
