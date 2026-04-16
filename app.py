@@ -374,14 +374,16 @@ elif operation == "Tapping":
 
             st.write("Total Time (sec):", round(total_time_sec, 2))
 
-        thread_material = st.selectbox(
+
+    # ---- THREAD MILL LOGIC ----
+
+    thread_material = st.selectbox(
         "Select Material",
         list(material_tables.keys()),
         key="thread_material"
     )
 
     threadmill_table = material_tables[thread_material]["threadmill"]
-    # ---- THREAD MILL LOGIC ----
     if use_threadmill and not stop_all:
 
         st.subheader("Thread Milling Calculation")
