@@ -125,17 +125,49 @@ face_mill_data_aluminium = [
     {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
 ]
 
+boring_data_aluminium = [
+    {"min": 0, "max": 1, "rpm": 7957, "feed_min": 159.1, "ap": 0.1},
+    {"min": 1, "max": 2, "rpm": 7161, "feed_min": 143.2, "ap": 0.2},
+    {"min": 2, "max": 3, "rpm": 5304, "feed_min": 265.2, "ap": 0.3},
+    {"min": 3, "max": 4, "rpm": 4774, "feed_min": 477.4, "ap": 0.5},
+    {"min": 4, "max": 5, "rpm": 4456, "feed_min": 445.6, "ap": 1.0},
+    {"min": 5, "max": 6, "rpm": 4244, "feed_min": 424.4, "ap": 1.5},
+    {"min": 6, "max": 7, "rpm": 3637, "feed_min": 363.7, "ap": 1.8},
+    {"min": 7, "max": 8, "rpm": 3581, "feed_min": 429.7, "ap": 2.1},
+    {"min": 8, "max": 9, "rpm": 3929, "feed_min": 471.5, "ap": 2.4},
+    {"min": 9, "max": 10, "rpm": 3183, "feed_min": 381.9, "ap": 2.7},
+    {"min": 10, "max": 11, "rpm": 3472, "feed_min": 486.1, "ap": 3.0},
+    {"min": 11, "max": 12, "rpm": 3183, "feed_min": 477.4, "ap": 3.3},
+    {"min": 12, "max": 13, "rpm": 3183, "feed_min": 477.4, "ap": 3.6},
+    {"min": 13, "max": 14, "rpm": 3183, "feed_min": 477.4, "ap": 3.9},
+    {"min": 14, "max": 15, "rpm": 3183, "feed_min": 477.4, "ap": 4.2},
+    {"min": 15, "max": 16, "rpm": 2984, "feed_min": 447.6, "ap": 4.5},
+    {"min": 16, "max": 17, "rpm": 2808, "feed_min": 421.2, "ap": 4.8},
+    {"min": 17, "max": 18, "rpm": 2829, "feed_min": 424.4, "ap": 5.1},
+    {"min": 18, "max": 19, "rpm": 3015, "feed_min": 452.3, "ap": 5.4},
+    {"min": 19, "max": 20, "rpm": 2864, "feed_min": 429.7, "ap": 5.7},
+    {"min": 20, "max": 25, "rpm": 2864, "feed_min": 515.6, "ap": 5.0},
+    {"min": 25, "max": 30, "rpm": 2801, "feed_min": 560.1, "ap": 6.0},
+    {"min": 30, "max": 35, "rpm": 2546, "feed_min": 509.2, "ap": 6.0},
+    {"min": 35, "max": 40, "rpm": 2273, "feed_min": 454.7, "ap": 8.0},
+    {"min": 40, "max": 45, "rpm": 1989, "feed_min": 477.4, "ap": 10.0},
+    {"min": 45, "max": 50, "rpm": 1980, "feed_min": 435.7, "ap": 10.0},
+    {"min": 50, "max": 55, "rpm": 1910, "feed_min": 420.1, "ap": 10.0},
+    {"min": 55, "max": 60, "rpm": 1736, "feed_min": 381.9, "ap": 10.0},
+    {"min": 60, "max": 65, "rpm": 1591, "feed_min": 350.1, "ap": 10.0},
+    {"min": 65, "max": 70, "rpm": 1714, "feed_min": 377.0, "ap": 10.0},
+]
+
 material_tables = {
-
     "Aluminium": {
-
-        "drill": drill_data_aluminium,
-        "tap": tap_data_aluminium, 
-        "threadmill": threadmill_data_aluminium,
-        "face_mill": face_mill_data_aluminium
-
-    }
-
+        "drill": drill_data_aluminium, 
+        "boring": boring_data_aluminium,     
+        "tap": tap_data_aluminium      
+    },
+    "Steel_C22": {"drill": [], "boring": [], "tap": []},
+    "Steel_C45": {"drill": [], "boring": [], "tap": []},
+    "Steel_C60": {"drill": [], "boring": [], "tap": []},
+    "Stainless_Steel": {"drill": [], "boring": [], "tap": []}
 }
 
 def get_parameters(diameter, material):
@@ -153,6 +185,19 @@ def get_parameters(diameter, material):
             return rpm, row["feed_min"], row["max_depth"]
 
     return None, None, None
+
+def get_boring_params(dia, material):
+    # Check if boring data exists for this material
+    if "boring" in material_tables[material] and len(material_tables[material]["boring"]) > 0:
+        table = material_tables[material]["boring"]
+    else:
+        # Fallback to Aluminium if table is empty (your safety rule)
+        table = material_tables["Aluminium"]["boring"]
+        
+    for row in table:
+        if row["min"] <= dia < row["max"]:
+            return row
+    return None
 
 def get_diameter(tap):
     return float(tap.replace("M", ""))
@@ -174,7 +219,7 @@ def select_tool_circular(dia, tools):
 
 st.title("Smart Machining Calculator (Aluminum)")
 
-operation = st.selectbox("Select Operation", ["Drilling", "Tapping", "Face Milling"])
+operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
 
 if operation == "Drilling":
 
@@ -267,6 +312,99 @@ if operation == "Drilling":
             st.error("❌ Torque requirement exceeds machine capacity")
 
         st.warning("⚠️ Suggestion: Select a higher capacity machine")
+
+elif operation == "Boring / Hole Milling":
+    # --- MATERIAL DATA CHECK ---
+    if material != "Aluminium":
+        st.error(f"⚠️ Boring data for {material} is currently under preparation.")
+        st.info("Please select 'Aluminium' to test the logic, or contact the admin to upload Steel data tables.")
+        st.stop() # This stops the rest of the boring code from running
+    
+    st.header("Boring & Hole Mill Planner")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        finish_dia = st.number_input("Finish Bore Diameter (mm)", value=33.0)
+        bore_depth = st.number_input("Bore Depth (mm)", value=50.0)
+    
+    # --- Step 1: Solid vs Core Logic ---
+    if finish_dia <= 3.0:
+        st.info("Diameter ≤ 3mm. Solid drilling only (Boring/Core not possible).")
+        entry_mode = "Solid"
+    else:
+        entry_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True)
+
+    if entry_mode == "Core Hole":
+        start_dia = st.number_input("Existing Core Diameter (mm)", value=28.0)
+    else:
+        # If solid, drill first. Max drill Ø30 per your rule.
+        start_dia = min(finish_dia - 1.0, 30.0)
+        st.info(f"Process: Will start with a Ø{start_dia} Drill.")
+
+    # --- Step 2: Process Analysis (Tolerance & Ra Gates) ---
+    needs_boring = False
+    if finish_dia > 20:
+        term = "Boring Bar"
+        # Rule: Tol >= 0.2 and Ra >= 3.2 is just a drill
+        if ra_input < 3.2 or tol_input < 0.2: 
+            needs_boring = True
+    else:
+        term = "Hole Mill"
+        # Rule: Tol >= 0.1 and Ra >= 3.2 is just a drill
+        if ra_input < 3.2 or tol_input < 0.1: 
+            needs_boring = True
+
+    if not needs_boring:
+        st.success(f"✅ Analysis: Drilling is sufficient for Ø{finish_dia} with current Tolerance/Ra.")
+    else:
+        # --- Step 3: Boring Chain Calculation ---
+        total_stock_dia = finish_dia - start_dia
+        params = get_boring_params(finish_dia, material)
+        
+        if params:
+            # ap is radial, so max diametrical stock is 2 * ap
+            max_dia_stock = params["ap"] * 2
+            num_tools = math.ceil(total_stock_dia / max_dia_stock)
+            
+            tool_steps = []
+            for i in range(1, num_tools + 1):
+                # Distribute stock equally across tools
+                step_dia = start_dia + (total_stock_dia / num_tools) * i
+                tool_steps.append(round(step_dia, 2))
+            
+            st.subheader(f"Calculated {term} Sequence")
+            total_boring_time = 0
+            current_d1 = start_dia
+            
+            for i, step_dia in enumerate(tool_steps):
+                p = get_boring_params(step_dia, material)
+                rpm = p["rpm"]
+                feed_min = p["feed_min"]
+                
+                # Check 3xD Rule for Manual Overrides
+                if bore_depth > (3 * step_dia):
+                    st.warning(f"⚠️ Depth > 3xD for tool Ø{step_dia}. Adjusting parameters.")
+                    vc_man = st.number_input(f"Manual Vc (m/min) for Ø{step_dia}", value=50.0, key=f"vc_{i}")
+                    f_rev_man = st.number_input(f"Manual Feed (mm/rev) for Ø{step_dia}", value=0.1, key=f"f_{i}")
+                    rpm = (1000 * vc_man) / (math.pi * step_dia)
+                    feed_min = rpm * f_rev_man
+
+                # Power Calculation (Based on your formula image)
+                # Power = (Vc * Frev * (D2-D1)/2 * Kc) / (60 * 1000 * 0.8)
+                vc_calc = (math.pi * step_dia * rpm) / 1000
+                f_rev_calc = feed_min / rpm
+                p_req = (vc_calc * f_rev_calc * ((step_dia - current_d1)/2) * kc) / (60 * 1000 * 0.8)
+                
+                st.write(f"**Tool {i+1}:** {term} Ø{step_dia} | RPM: {int(rpm)} | Feed: {feed_min} mm/min | Power: {round(p_req, 2)} kW")
+                
+                total_boring_time += (bore_depth / feed_min)
+                current_d1 = step_dia
+            
+            st.divider()
+            st.metric("Total Boring Cycle Time", f"{round(total_boring_time * 60, 2)} Seconds")
+            
+            if ra_input < 1.6:
+                st.error("💡 High Surface Finish Requirement: A Finish Reamer is suggested after this cycle.")
 
 
 elif operation == "Tapping":
