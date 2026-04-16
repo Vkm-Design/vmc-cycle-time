@@ -432,26 +432,31 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
     
+    # 1. Select Material from the full kc_data list
     face_material = st.selectbox(
         "Select Material",
-        list(kc_data.keys()), # Change this to show all materials
+        list(kc_data.keys()), 
         key="face_material"
     )
 
+    # 2. Select Spindle (Must be defined BEFORE filtering tools)
+    spindle = st.selectbox(
+        "Select Spindle", 
+        ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"]
+    )
+
+    # 3. Check if material exists in your tool tables and filter
     if face_material in material_tables:
         tools = filter_tools_by_spindle(spindle, face_material)
     else:
-        st.error(f"Face Mill parameters for {face_material} are not yet defined.")
-        st.stop()
+        st.error(f"Face Mill parameters for {face_material} are not yet defined in 'material_tables'.")
+        st.stop() # Stops the code here so it doesn't crash below
 
-    spindle = st.selectbox("Select Spindle", ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"])
-
+    # 4. Continue with Shape and Mode
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
-
-    tools = filter_tools_by_spindle(spindle, face_material)
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
 
-    selected_tool = None
+    # ... rest of your Face Milling logic follows ...
 
     # ================= RECTANGULAR =================
     if shape == "Rectangular":
