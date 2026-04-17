@@ -224,6 +224,9 @@ def select_tool_circular(dia, tools):
 # ==========================================
 st.title("Smart Machining Calculator")
 
+# Main Operation Menu
+operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
+
 # --- 1. GLOBAL SELECTIONS (Always visible) ---
 st.sidebar.header("Global Settings")
 material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
@@ -245,9 +248,6 @@ if operation != "Face Milling":
 else:
     # We set a default value so the code doesn't crash, but the user doesn't see the box
     tol_input = 0.1
-
-# Main Operation Menu
-operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
 
 # ==========================================
 # 4. OPERATION: DRILLING
