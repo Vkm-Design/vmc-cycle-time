@@ -165,12 +165,14 @@ material_tables = {
     "Aluminium": {
         "drill": drill_data_aluminium, 
         "boring": boring_data_aluminium,     
-        "tap": tap_data_aluminium      
+        "tap": tap_data_aluminium,
+        "threadmill": threadmill_data_aluminium, # ADD THIS LINE
+        "face_mill": face_mill_data_aluminium    # ADD THIS TOO if you have it
     },
-    "Steel_C22": {"drill": [], "boring": [], "tap": []},
-    "Steel_C45": {"drill": [], "boring": [], "tap": []},
-    "Steel_C60": {"drill": [], "boring": [], "tap": []},
-    "Stainless_Steel": {"drill": [], "boring": [], "tap": []}
+    "Steel_C22": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_C45": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_C60": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
 }
 
 # ==========================================
