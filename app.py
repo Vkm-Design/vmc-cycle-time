@@ -224,7 +224,7 @@ def select_tool_circular(dia, tools):
 # ==========================================
 st.title("Smart Machining Calculator")
 
-# Sidebar for Quality and Machine (keeps main screen clean)
+# --- 1. GLOBAL SELECTIONS (Always visible) ---
 st.sidebar.header("Global Settings")
 material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
 kc = kc_data[material]
@@ -235,8 +235,16 @@ m_torque = machine_data[machine]["torque"]
 
 st.sidebar.markdown("---")
 st.sidebar.header("Quality Requirements")
+
+# ALWAYS show Ra for everything
 ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=3.2, step=0.1)
-tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.1, format="%.3f")
+
+# ONLY show Diameter Tolerance if it is NOT Face Milling
+if operation != "Face Milling":
+    tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.1, format="%.3f")
+else:
+    # We set a default value so the code doesn't crash, but the user doesn't see the box
+    tol_input = 0.1
 
 # Main Operation Menu
 operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
