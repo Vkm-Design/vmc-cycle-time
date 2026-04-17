@@ -158,6 +158,9 @@ boring_data_aluminium = [
     {"min": 65, "max": 70, "rpm": 1714, "feed_min": 377.0, "ap": 10.0},
 ]
 
+# ==========================================
+# 1. MATERIAL MASTER TABLE
+# ==========================================
 material_tables = {
     "Aluminium": {
         "drill": drill_data_aluminium, 
@@ -170,30 +173,25 @@ material_tables = {
     "Stainless_Steel": {"drill": [], "boring": [], "tap": []}
 }
 
+# ==========================================
+# 2. LOOKUP FUNCTIONS
+# ==========================================
 def get_parameters(diameter, material):
-
     table = material_tables[material]["drill"]
-
     for row in table:
         if row["min_d"] <= diameter < row["max_d"]:
-
             if "rpm" in row:
                 rpm = row["rpm"]
             else:
                 rpm = (1000 * row["vc"]) / (math.pi * diameter)
-
             return rpm, row["feed_min"], row["max_depth"]
-
     return None, None, None
 
 def get_boring_params(dia, material):
-    # Check if boring data exists for this material
     if "boring" in material_tables[material] and len(material_tables[material]["boring"]) > 0:
         table = material_tables[material]["boring"]
     else:
-        # Fallback to Aluminium if table is empty (your safety rule)
         table = material_tables["Aluminium"]["boring"]
-        
     for row in table:
         if row["min"] <= dia < row["max"]:
             return row
@@ -203,11 +201,13 @@ def get_diameter(tap):
     return float(tap.replace("M", ""))
 
 def filter_tools_by_spindle(spindle, material):
-    table = material_tables[material]["face_mill"]
-    return [t for t in table if spindle in t["spindles"]]
+    # Ensure face_mill exists in your table for this material
+    if "face_mill" in material_tables[material]:
+        table = material_tables[material]["face_mill"]
+        return [t for t in table if spindle in t["spindles"]]
+    return []
 
 def select_tool_rect(min_dim, tools):
-    # Select biggest allowed tool for selected spindle
     tools_sorted = sorted(tools, key=lambda x: x["max_width"], reverse=True)
     return tools_sorted[0] if tools_sorted else None
 
@@ -217,194 +217,111 @@ def select_tool_circular(dia, tools):
             return t
     return None
 
-st.title("Smart Machining Calculator (Aluminum)")
+# ==========================================
+# 3. GLOBAL SELECTIONS & APP UI
+# ==========================================
+st.title("Smart Machining Calculator")
 
-    # 1. ---- Material Selection (Always from kc_data keys) ----
-    material = st.selectbox("Select Material", list(kc_data.keys()), key="drill_mat")
-    kc = kc_data[material]
+# Sidebar for Quality and Machine (keeps main screen clean)
+st.sidebar.header("Global Settings")
+material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
+kc = kc_data[material]
 
-    # 2. ---- Machine Selection ----
-    machine = st.selectbox("Select Machine", list(machine_data.keys()))
-    machine_power = machine_data[machine]["power"]
-    machine_torque = machine_data[machine]["torque"]
+machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
+m_power = machine_data[machine]["power"]
+m_torque = machine_data[machine]["torque"]
 
+st.sidebar.markdown("---")
+st.sidebar.header("Quality Requirements")
+ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=3.2, step=0.1)
+tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.1, format="%.3f")
+
+# Main Operation Menu
 operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
 
+# ==========================================
+# 4. OPERATION: DRILLING
+# ==========================================
 if operation == "Drilling":
+    st.subheader("Drilling Calculator")
+    dia = st.number_input("Drill Diameter (mm)", value=10.0)
+    dep = st.number_input("Depth (mm)", value=20.0)
+    cnt = st.number_input("Number of Holes", value=1)
 
-    st.title("Drilling Calculator")
-    diameter = st.number_input("Drill Diameter (mm)", value=5.0)
-    depth = st.number_input("Depth (mm)", value=10.0)
-    count = st.number_input("Number of Holes", value=1)
-
-    # 1. ---- Safety Check for Parameters Table ----
-    if material in material_tables:
-        rpm, feed_min, max_depth = get_parameters(diameter, material)
+    rpm, f_min, mx_dep = get_parameters(dia, material)
+    
+    if rpm:
+        st.write(f"**RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
+        f_rev = f_min / rpm
+        # Drilling Power Formula
+        p_req = (f_rev * (rpm * math.pi * dia / 1000) * dia * kc) / (240000 * 0.8)
+        t_req = (p_req * 9550) / rpm
+        
+        st.write(f"**Power:** {round(p_req, 2)} kW | **Torque:** {round(t_req, 2)} Nm")
+        
+        if p_req <= m_power and t_req <= m_torque:
+            st.success("✅ Machine Capacity OK")
+        else:
+            st.error("❌ Machine Capacity Exceeded")
+            
+        if st.button("Calculate Time"):
+            st.info(f"Total Time: {round((dep/f_min)*cnt*60, 2)} seconds")
     else:
-        st.error(f"Cutting parameters for {material} are not yet defined in 'material_tables'.")
-        st.stop() # Prevents the program from crashing at get_parameters
+        st.error("Diameter not in database")
 
-    # 2. ---- Display Parameters ----
-    if rpm is not None:
-        st.write("Recommended RPM:", round(rpm, 2))
-        st.write("Feed (mm/min):", feed_min)
-        st.write("Max Allowed Depth:", max_depth)
-    else:
-        st.error("Diameter not in defined range")
-
-    manual_mode = False
-
-    if max_depth is not None and depth > max_depth:
-        st.warning("Depth exceeds recommended limit. Enter manual values.")
-        manual_mode = True
-
-    if manual_mode:
-        vc_manual = st.number_input("Enter Vc manually", value=50.0, key="vc_manual")
-        feed_rev_manual = st.number_input("Enter Feed (mm/rev)", value=0.1, key="feed_manual")
-
-        rpm = (1000 * vc_manual) / (math.pi * diameter)
-        feed_min = feed_rev_manual * rpm
-
-    # ================= POWER & TORQUE CALCULATION =================
-
-    # Convert feed (mm/min) → feed per rev (mm/rev)
-    if rpm > 0:
-        frev = feed_min / rpm
-    else:
-        frev = 0
-
-    # ---- Power Calculation (Drilling) ----
-    power = (frev * (rpm * math.pi * diameter / 1000) * diameter * kc) / (240000 * 0.8)
-
-    # ---- Torque Calculation ----
-    if rpm > 0:
-        torque = (power * 9550) / rpm
-    else:
-        torque = 0
-
-    # ---- Display ----
-    st.write("Required Power (kW):", round(power, 2))
-    st.write("Required Torque (Nm):", round(torque, 2))
-
-    if st.button("Calculate Drill Time"):
-        if rpm is not None:
-            time_per_hole = depth / feed_min
-            total_time_sec = time_per_hole * count * 60
-            st.write("Total Time (sec):", round(total_time_sec, 2))
-
-    # ================= MACHINE VALIDATION =================
-
-    st.write("Machine Power (kW):", machine_power)
-    st.write("Machine Torque (Nm):", machine_torque)
-
-    power_ok = power <= machine_power
-    torque_ok = torque <= machine_torque
-
-    if power_ok and torque_ok:
-        st.success("✅ Machine is suitable for this operation")
-
-    else:
-        if not power_ok:
-            st.error("❌ Power requirement exceeds machine capacity")
-
-        if not torque_ok:
-            st.error("❌ Torque requirement exceeds machine capacity")
-
-        st.warning("⚠️ Suggestion: Select a higher capacity machine")
-
+# ==========================================
+# 5. OPERATION: BORING / HOLE MILLING
+# ==========================================
 elif operation == "Boring / Hole Milling":
-    # --- MATERIAL DATA CHECK ---
     if material != "Aluminium":
-        st.error(f"⚠️ Boring data for {material} is currently under preparation.")
-        st.info("Please select 'Aluminium' to test the logic, or contact the admin to upload Steel data tables.")
-        st.stop() # This stops the rest of the boring code from running
-    
-    st.header("Boring & Hole Mill Planner")
-    
+        st.error(f"⚠️ Boring data for {material} is under preparation.")
+        st.stop()
+
+    st.subheader("Boring & Hole Mill Planner")
     col1, col2 = st.columns(2)
     with col1:
-        finish_dia = st.number_input("Finish Bore Diameter (mm)", value=33.0)
-        bore_depth = st.number_input("Bore Depth (mm)", value=50.0)
+        f_dia = st.number_input("Finish Bore Diameter (mm)", value=33.0)
+        b_dep = st.number_input("Bore Depth (mm)", value=50.0)
     
-    # --- Step 1: Solid vs Core Logic ---
-    if finish_dia <= 3.0:
-        st.info("Diameter ≤ 3mm. Solid drilling only (Boring/Core not possible).")
-        entry_mode = "Solid"
-    else:
-        entry_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True)
+    e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True)
+    s_dia = st.number_input("Core Dia", value=28.0) if e_mode == "Core Hole" else min(f_dia - 1.0, 30.0)
+    
+    # Process Logic
+    needs_b = False
+    limit = 0.2 if f_dia > 20 else 0.1
+    if ra_input < 3.2 or tol_input < limit: needs_b = True
 
-    if entry_mode == "Core Hole":
-        start_dia = st.number_input("Existing Core Diameter (mm)", value=28.0)
+    if not needs_b:
+        st.success("✅ Drilling is sufficient for this tolerance.")
     else:
-        # If solid, drill first. Max drill Ø30 per your rule.
-        start_dia = min(finish_dia - 1.0, 30.0)
-        st.info(f"Process: Will start with a Ø{start_dia} Drill.")
-
-    # --- Step 2: Process Analysis (Tolerance & Ra Gates) ---
-    needs_boring = False
-    if finish_dia > 20:
-        term = "Boring Bar"
-        # Rule: Tol >= 0.2 and Ra >= 3.2 is just a drill
-        if ra_input < 3.2 or tol_input < 0.2: 
-            needs_boring = True
-    else:
-        term = "Hole Mill"
-        # Rule: Tol >= 0.1 and Ra >= 3.2 is just a drill
-        if ra_input < 3.2 or tol_input < 0.1: 
-            needs_boring = True
-
-    if not needs_boring:
-        st.success(f"✅ Analysis: Drilling is sufficient for Ø{finish_dia} with current Tolerance/Ra.")
-    else:
-        # --- Step 3: Boring Chain Calculation ---
-        total_stock_dia = finish_dia - start_dia
-        params = get_boring_params(finish_dia, material)
-        
+        params = get_boring_params(f_dia, material)
         if params:
-            # ap is radial, so max diametrical stock is 2 * ap
-            max_dia_stock = params["ap"] * 2
-            num_tools = math.ceil(total_stock_dia / max_dia_stock)
+            max_stk = params["ap"] * 2
+            tools_n = math.ceil((f_dia - s_dia) / max_stk)
+            curr_d1 = s_dia
+            total_t = 0
             
-            tool_steps = []
-            for i in range(1, num_tools + 1):
-                # Distribute stock equally across tools
-                step_dia = start_dia + (total_stock_dia / num_tools) * i
-                tool_steps.append(round(step_dia, 2))
-            
-            st.subheader(f"Calculated {term} Sequence")
-            total_boring_time = 0
-            current_d1 = start_dia
-            
-            for i, step_dia in enumerate(tool_steps):
-                p = get_boring_params(step_dia, material)
-                rpm = p["rpm"]
-                feed_min = p["feed_min"]
+            for i in range(tools_n):
+                step_d = s_dia + ((f_dia - s_dia) / tools_n) * (i + 1)
+                p = get_boring_params(step_d, material)
+                rpm_b, f_b = p["rpm"], p["feed_min"]
                 
-                # Check 3xD Rule for Manual Overrides
-                if bore_depth > (3 * step_dia):
-                    st.warning(f"⚠️ Depth > 3xD for tool Ø{step_dia}. Adjusting parameters.")
-                    vc_man = st.number_input(f"Manual Vc (m/min) for Ø{step_dia}", value=50.0, key=f"vc_{i}")
-                    f_rev_man = st.number_input(f"Manual Feed (mm/rev) for Ø{step_dia}", value=0.1, key=f"f_{i}")
-                    rpm = (1000 * vc_man) / (math.pi * step_dia)
-                    feed_min = rpm * f_rev_man
+                if b_dep > (3 * step_d):
+                    st.warning(f"Long Tool Safety: Enter Manual Vc/Feed for Ø{step_d}")
+                    v_man = st.number_input(f"Vc Ø{step_d}", value=60, key=f"v{i}")
+                    fr_man = st.number_input(f"f/rev Ø{step_d}", value=0.1, key=f"fr{i}")
+                    rpm_b = (1000 * v_man) / (math.pi * step_d)
+                    f_b = rpm_b * fr_man
 
-                # Power Calculation (Based on your formula image)
-                # Power = (Vc * Frev * (D2-D1)/2 * Kc) / (60 * 1000 * 0.8)
-                vc_calc = (math.pi * step_dia * rpm) / 1000
-                f_rev_calc = feed_min / rpm
-                p_req = (vc_calc * f_rev_calc * ((step_dia - current_d1)/2) * kc) / (60 * 1000 * 0.8)
+                # Boring Power
+                p_b = ((math.pi*step_d*rpm_b/1000)*(f_b/rpm_b)*((step_d-curr_d1)/2)*kc)/(48000)
+                t_b = (p_b * 9550) / rpm_b if rpm_b > 0 else 0
                 
-                st.write(f"**Tool {i+1}:** {term} Ø{step_dia} | RPM: {int(rpm)} | Feed: {feed_min} mm/min | Power: {round(p_req, 2)} kW")
-                
-                total_boring_time += (bore_depth / feed_min)
-                current_d1 = step_dia
+                st.write(f"**Step {i+1}:** Ø{round(step_d,2)} | {int(rpm_b)} RPM | {f_b} mm/min | {round(p_b,2)} kW")
+                total_t += (b_dep / f_b)
+                curr_d1 = step_d
             
-            st.divider()
-            st.metric("Total Boring Cycle Time", f"{round(total_boring_time * 60, 2)} Seconds")
-            
-            if ra_input < 1.6:
-                st.error("💡 High Surface Finish Requirement: A Finish Reamer is suggested after this cycle.")
-
+            st.metric("Total Boring Time", f"{round(total_t * 60, 2)} sec")
 
 elif operation == "Tapping":
     st.title("Tapping Calculator")
