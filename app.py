@@ -340,19 +340,20 @@ elif operation == "Boring / Hole Milling":
 elif operation == "Tapping":
     st.title("Tapping Calculator")
 
-    # Change list(material_tables.keys()) to list(kc_data.keys())
-    tap_material = st.selectbox(
-        "Select Material",
-        list(kc_data.keys()), 
-        key="tap_material"
-    )
+    # 1. System Detection & Material Guardrail (Synced with your main material variable)
+    if material != "Aluminium":
+        st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
+        st.stop()
 
-    # This logic allows you to select "Steel" even before the table is ready
-    if tap_material in material_tables:
-        tap_table = material_tables[tap_material]["tap"]
+    st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
+
+    # 2. Tap Data Filtering
+    # Assuming 'material' is defined globally at the top of your app
+    if material in material_tables:
+        tap_table = material_tables[material]["tap"]
     else:
-        st.error(f"Cutting parameters for {tap_material} are not yet defined.")
-        st.stop() # Prevents the code from crashing further down
+        st.error(f"Cutting parameters for {material} are not yet defined.")
+        st.stop() 
 
     pitch_list = sorted(list(set(row["pitch"] for row in tap_table)))
     selected_pitch = st.selectbox("Select Pitch", pitch_list)
@@ -371,7 +372,6 @@ elif operation == "Tapping":
 
     # ---- Tap type ----
     tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
-
     tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
     count = st.number_input("Number of Holes", value=1)
 
@@ -379,7 +379,6 @@ elif operation == "Tapping":
         drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
     else:
         drill_depth = None
-        
 
     # ---- Show data ----
     st.write("Diameter:", diameter)
@@ -387,58 +386,44 @@ elif operation == "Tapping":
     st.write("Recommended Vc:", vc)
     st.write("Max Depth:", max_depth)
 
-       # ---- Validation ----
+    # ---- Validation & Clearance Logic ----
     valid_tap = True
     use_threadmill = False
     manual_mode = False
     stop_all = False
 
-    # ---- Clearance Logic ----
     if tap_type == "Blind":
-
         clearance = drill_depth - tap_depth
-
         st.write("Clearance:", round(clearance, 2))
 
-        # ❌ Impossible case
         if drill_depth <= tap_depth:
             st.error("Drill depth is less than tap depth. Not possible to machine thread")
             valid_tap = False
-            use_threadmill = False
             stop_all = True
-
-        # ❌ Unsafe
         elif clearance < (1 * pitch):
             st.error("Insufficient clearance. Not safe for tapping")
             valid_tap = False
             use_threadmill = True
-
-        # ⚠️ Thread mill zone
         elif clearance <= (2 * pitch):
             st.warning("Clearance not sufficient. Thread milling recommended")
             valid_tap = False
             use_threadmill = True
-
-        # ✅ Safe for tapping
         else:
             st.success("Suitable for tapping")
 
-    # ---- Tap depth check (ONLY if tapping allowed) ----
     if valid_tap and not stop_all:
         if tap_depth > max_depth:
             st.warning("Depth exceeds recommended limit. Enter Vc manually.")
             manual_mode = True
 
-    # ---- Manual input ----
     if manual_mode and valid_tap:
         vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
 
-    # ---- Calculation ----
+    # ---- Tapping Calculation ----
     if valid_tap:
-
         rpm = (1000 * vc) / (math.pi * diameter)
         feed_min = pitch * rpm
-
+        # Standard approach/retract length logic
         cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
 
         st.write("RPM:", round(rpm, 2))
@@ -448,23 +433,14 @@ elif operation == "Tapping":
         if st.button("Calculate Tap Time"):
             time_per_hole = cut_length / feed_min
             total_time_sec = time_per_hole * count * 60
-
             st.write("Total Time (sec):", round(total_time_sec, 2))
 
-
     # ---- THREAD MILL LOGIC ----
+    # Uses the same 'material' guardrail from Step 1
+    threadmill_table = material_tables[material]["threadmill"]
 
-    thread_material = st.selectbox(
-        "Select Material",
-        list(material_tables.keys()),
-        key="thread_material"
-    )
-
-    threadmill_table = material_tables[thread_material]["threadmill"]
     if use_threadmill and not stop_all:
-
         st.subheader("Thread Milling Calculation")
-
         tm_row = next(
             (row for row in threadmill_table
              if row["tap"] == selected_tap and row["pitch"] == pitch),
@@ -472,8 +448,7 @@ elif operation == "Tapping":
         )
 
         if tm_row is None:
-            st.error("No thread mill data available")
-
+            st.error("No thread mill data available for this size.")
         else:
             vc_tm = tm_row["vc"]
             feed_rev = tm_row["feed_rev"]
@@ -483,15 +458,13 @@ elif operation == "Tapping":
             D2 = diameter   # thread size
             D1 = tool_dia   # tool diameter
 
-            # ---- Depth check ----
             if tap_depth > max_depth_tm:
-                st.warning("Special thread mill recommended")
-
+                st.warning("Special thread mill recommended for this depth.")
             else:
                 rpm = (1000 * vc_tm) / (math.pi * tool_dia)
                 feed_min = feed_rev * rpm
-
-                cut_length = ((D2 - D1) * 3.14 * 3) + tap_depth + 4
+                # Helix travel calculation
+                cut_length = ((D2 - D1) * math.pi * 3) + tap_depth + 4
 
                 st.write("RPM:", round(rpm, 2))
                 st.write("Feed (mm/min):", round(feed_min, 2))
@@ -500,7 +473,6 @@ elif operation == "Tapping":
                 if st.button("Calculate Thread Mill Time"):
                     time_per_hole = cut_length / feed_min
                     total_time_sec = time_per_hole * count * 60
-
                     st.write("Total Time (sec):", round(total_time_sec, 2))
 
 elif operation == "Face Milling":
