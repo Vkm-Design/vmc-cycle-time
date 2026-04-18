@@ -527,12 +527,16 @@ elif operation == "Face Milling":
 
     # ... rest of your tool selection (Auto/Manual) and power calculation logic ...
 
-    # 1. Component Inputs
-    col1, col2 = st.columns(2)
-    with col1:
-        length = st.number_input("Length (mm)", value=60.0)
-    with col2:
-        width = st.number_input("Width (mm)", value=10.0)
+    # ================= 1. COMPONENT INPUTS (Fixed with unique keys) =================
+    if shape == "Rectangular":
+        L = st.number_input("Length (mm)", value=60.0, key="fm_rect_length") # Added unique key
+        W = st.number_input("Width (mm)", value=10.0, key="fm_rect_width")  # Added unique key
+        min_dim = min(L, W)
+        long_dim = max(L, W)
+    else: # Circular
+        comp_dia = st.number_input("Component Diameter (mm)", value=50.0, key="fm_circ_dia") # Added unique key
+        W = comp_dia  
+        long_dim = comp_dia
 
     # 2. Tool Selection Logic
     tool = None
