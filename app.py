@@ -572,27 +572,43 @@ elif operation == "Face Milling":
             st.info(f"Calculation based on Max Tool Width ({ae}mm) and Kc ({kc})")
 
         # 7. Passes & Cycle Time
+        import math  # Safety import inside the block
+
         total_stock = st.number_input("Total Stock to Remove (mm)", value=2.0, key="fm_total_stock")
         finish_required = ra_input < 1.6 
 
+        # Define stock for passes
         rough_stock = total_stock - 0.5 if finish_required else total_stock
-        passes = math.ceil(rough_stock / stock_limit)
         
-        # Calculate Cut Length based on tool diameter and shape
+        # Calculate passes using the tool's stock capacity from your table
+        if stock_limit > 0:
+            passes = math.ceil(rough_stock / stock_limit)
+        else:
+            passes = 1
+        
+        # Calculate Cut Length
         if shape == "Rectangular":
             width_passes = math.ceil(W / max_width)
             cut_length = (long_dim + tool_dia + 4) * width_passes
         else: # Circular
             radial_passes = math.ceil(W / max_width)
-            if radial_passes == 1:
+            if radial_passes <= 1:
                 cut_length = W + tool_dia
             else:
                 cut_length = (math.pi * (W + 5 - tool_dia) + W + tool_dia) * radial_passes
 
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
+            # Time calculation: (Length * Number of passes) / Feed
             time_min = (cut_length * passes) / feed
             if finish_required:
-                time_min += (cut_length / (feed * 0.8)) # 20% slower for finish
+                # Add time for 0.5mm finish pass at 80% feed
+                time_min += (cut_length / (feed * 0.8))
             
-            st.write(f"**Total Estimated Time:** {time_min * 60:.2f} seconds")
-            st.write(f"**Passes:** {passes} roughing passes of max {stock_limit}mm")
+            st.divider()
+            st.subheader("Final Estimates")
+            col_a, col_b = st.columns(2)
+            col_a.metric("Roughing Passes", f"{passes}")
+            col_b.metric("Total Time", f"{time_min * 60:.1f} sec")
+            
+            if finish_required:
+                st.info("Note: Includes one 0.5mm finish pass for Ra requirement.")
