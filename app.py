@@ -551,20 +551,25 @@ elif operation == "Face Milling":
     # 6. Calculations & Machine Power Check
     if selected_tool:
         tool_dia = selected_tool["dia"]
-        max_width = selected_tool["max_width"]
+        ae = selected_tool["max_width"] # We use the Tool's Max Cutting Width as per your instruction
         rpm = selected_tool["rpm"]
-        feed = selected_tool["feed"]
-        stock_limit = selected_tool["stock"]
-
-        # Power calculation using W (width/dia) and stock_limit (ap)
-        req_power = (W * stock_limit * feed) / 30000 
+        vf = selected_tool["feed"]      # Feed rate in mm/min
+        ap = selected_tool["stock"]     # Depth of cut from your table
+        
+        # --- NEW POWER FORMULA ---
+        # P = (ae * ap * vf * Kc) / (60 * 10^6 * efficiency)
+        # efficiency = 0.8 (80%)
+        efficiency = 0.8
+        req_power = (ae * ap * vf * kc) / (60e6 * efficiency)
         
         st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
 
         if req_power > m_power:
-            st.error(f"⚠️ Machine Overload! Required {req_power:.2f}kW exceeds {m_power}kW limit.")
+            st.error(f"⚠️ Machine Overload! Required {req_power:.2f}kW exceeds machine continuous limit ({m_power}kW).")
+            st.warning("Consider reducing the feed rate or depth of cut.")
         else:
-            st.success(f"✅ Selected: Ø{tool_dia}mm | RPM: {rpm} | Feed: {feed}")
+            st.success(f"✅ Selected: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
+            st.info(f"Calculation based on Max Tool Width ({ae}mm) and Kc ({kc})")
 
         # 7. Passes & Cycle Time
         total_stock = st.number_input("Total Stock to Remove (mm)", value=2.0, key="fm_total_stock")
