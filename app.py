@@ -502,32 +502,40 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
     
-    # 1. Select Material from the full kc_data list
-    face_material = st.selectbox(
-        "Select Material",
-        list(kc_data.keys()), 
-        key="face_material"
-    )
+    # 1. DELETE the 'face_material' selectbox. 
+    # Instead, we use the GLOBAL 'material' variable from the sidebar.
+    st.info(f"Selected Material: {material}")
 
-    # 2. Select Spindle (Must be defined BEFORE filtering tools)
-    spindle = st.selectbox(
-        "Select Spindle", 
-        ["BT30","BBT30","BT40","BT50","HSK A50","HSK A63","HSK A100"]
-    )
-
-    # 3. Check if material exists in your tool tables and filter
-    if face_material in material_tables:
-        tools = filter_tools_by_spindle(spindle, face_material)
+    # 2. DELETE the 'spindle' selectbox.
+    # We automatically detect it from the 'machine' you picked in the sidebar.
+    if "BT30" in machine:
+        selected_spindle = "BT30"
+    elif "BT40" in machine:
+        selected_spindle = "BT40"
+    elif "HSK A63" in machine:
+        selected_spindle = "HSK A63"
     else:
-        st.error(f"Face Mill parameters for {face_material} are not yet defined in 'material_tables'.")
-        st.stop() # Stops the code here so it doesn't crash below
+        selected_spindle = "BT40" # Fallback default
+    
+    st.info(f"Detected Spindle: {selected_spindle}")
 
-    # 4. Continue with Shape and Mode
+    # 3. Use the GLOBAL 'material' to filter tools
+    if material in material_tables:
+        # We use 'selected_spindle' (auto-detected) and 'material' (from sidebar)
+        tools = filter_tools_by_spindle(selected_spindle, material)
+        
+        # ADD THIS: Filter tools by the Surface Finish (Ra) from the sidebar!
+        # This ensures the tool selected can actually achieve the Ra you want.
+        suitable_tools = [t for t in tools if t.get("ra", 3.2) <= ra_input]
+    else:
+        st.error(f"Data for {material} not found.")
+        st.stop()
+
+    # 4. Shape and Mode stay, but they now use the filtered 'suitable_tools'
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
-
-    # ... rest of your Face Milling logic follows ...
-
+    
+    # ... Continue with your tool selection and power logic ...
     # ================= RECTANGULAR =================
     if shape == "Rectangular":
 
