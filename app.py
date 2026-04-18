@@ -506,10 +506,18 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
 
-    # 1. System Detection Info
+    # 1. System Detection & Material Guardrail
+    if material != "Aluminium":
+        st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
+        st.stop()
+        
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
-    # 2. Filtering Logic
+    # 2. Surface Finish Warning
+    if ra_input < 0.8:
+        st.warning("⚠️ High Precision Finish: Special PCD (Polycrystalline Diamond) tooling required for Ra < 0.8.")
+
+    # 3. Filtering Logic
     suitable_tools = [
         tool for tool in face_mill_data_aluminium 
         if m_taper in tool["spindles"] and tool.get("ra", 3.2) <= ra_input
@@ -519,11 +527,11 @@ elif operation == "Face Milling":
         st.error(f"No suitable Face Mills found for {m_taper} with Ra {ra_input}.")
         st.stop()
 
-    # 3. Shape & Selection Mode
+    # 4. Shape & Selection Mode
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
 
-    # 4. Tool Selection Logic
+    # 5. Tool Selection Logic
     temp_W = 100.0 
     selected_tool = None
     if tool_mode == "Auto":
@@ -538,7 +546,7 @@ elif operation == "Face Milling":
         selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
         selected_tool = next(t for t in suitable_tools if f"Dia {t['dia']}mm" == selected_tool_name)
 
-    # 5. Final Calculations
+    # 6. Final Calculations
     if selected_tool:
         tool_dia = selected_tool["dia"]
         ae = selected_tool["max_width"] 
@@ -551,19 +559,14 @@ elif operation == "Face Milling":
         if shape == "Rectangular":
             raw_L = st.number_input("Length (mm)", value=100.0, key="fm_L")
             raw_W = st.number_input("Width (mm)", value=100.0, key="fm_W")
-            
-            # SMART SWAP LOGIC: 
-            # We always want to step over the smaller dimension to save time.
-            L = max(raw_L, raw_W) # L is now the longest side (travel length)
-            W = min(raw_L, raw_W) # W is now the shortest side (step-over width)
-            long_dim = L
-            
+            L = max(raw_L, raw_W) 
+            W = min(raw_L, raw_W) 
             if raw_W > raw_L:
-                st.caption(f"Note: Automatically swapped L/W to optimize tool path (Travel: {L}mm, Step-over: {W}mm)")
+                st.caption(f"Note: Path optimized for width step-over (Travel: {L}mm).")
         else:
             comp_dia = st.number_input("Component Diameter (mm)", value=150.0, key="fm_circ_dia")
             W = comp_dia  
-            long_dim = comp_dia
+            L = comp_dia
 
         # --- POWER VALIDATION ---
         efficiency = 0.8
@@ -575,51 +578,55 @@ elif operation == "Face Milling":
         else:
             st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
 
-        # --- PROCESS PARAMETERS ---
-        total_stock = st.number_input("Total Stock to Remove (mm)", value=2.0, key="fm_total_stock")
-        finish_required = ra_input < 1.6 
-        rough_stock = total_stock - 0.5 if finish_required else total_stock
-        passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
+        # --- PROCESS PARAMETERS (5.5mm Example Logic) ---
+        total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
+        
+        # Finish pass required for Ra between 0.8 and 3.2
+        finish_required = 0.8 <= ra_input < 3.2 
+        
+        if finish_required and total_stock > 0.5:
+            finish_pass_stock = 0.5
+            rough_stock = total_stock - finish_pass_stock
+            rough_passes = math.ceil(rough_stock / ap_limit)
+            st.info(f"Strategy: {rough_passes} Roughing passes + 1 Finishing pass (0.5mm).")
+        else:
+            finish_pass_stock = 0
+            rough_stock = total_stock
+            rough_passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
+            st.info(f"Strategy: {rough_passes} Standard passes.")
 
         # --- CALCULATE CUT LENGTH ---
         if shape == "Rectangular":
-            # Number of passes is based on the MINIMUM dimension (W)
             width_passes = math.ceil(W / ae)
-            # Total travel is based on the MAXIMUM dimension (L)
             cut_length = (L + tool_dia + 4) * width_passes
         else:
             # Machinist Realistic Circular Logic (Gap-Aware)
             if comp_dia <= ae:
                 cut_length = comp_dia + tool_dia + 10
-                st.info(f"Using Ø{tool_dia}mm Tool: Single traverse.")
             else:
                 overhang = tool_dia - ae
                 first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
                 current_path_dia = max(first_path_dia, 0)
                 total_circ_dist = 0
                 pass_count = 0
-                
                 while True:
                     total_circ_dist += math.pi * current_path_dia
                     pass_count += 1
                     inner_edge_pos = (current_path_dia / 2) - (tool_dia / 2)
-                    if inner_edge_pos <= -2: 
-                        break
+                    if inner_edge_pos <= -2: break
                     current_path_dia -= (ae * 2)
-                    if current_path_dia < 0:
-                        current_path_dia = 0
+                    if current_path_dia < 0: current_path_dia = 0
                     if pass_count > 15: break
-
                 cut_length = total_circ_dist + tool_dia
-                st.success(f"Using Ø{tool_dia}mm Tool: {pass_count} Interpolation Rings calculated.")
 
-        # --- FINAL BUTTON ---
+        # --- FINAL CALCULATION AND BUTTON ---
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
-            time_min = (cut_length * passes) / vf
-            if finish_required:
-                time_min += (cut_length / (vf * 0.8))
+            time_rough = (cut_length * rough_passes) / vf
+            time_finish = (cut_length / (vf * 0.8)) if finish_pass_stock > 0 else 0
+            
+            total_time_min = time_rough + time_finish
             
             st.subheader("Final Estimates")
             col_a, col_b = st.columns(2)
-            col_a.metric("Depth Passes", f"{passes}")
-            col_b.metric("Total Time", f"{time_min * 60:.1f} sec")
+            col_a.metric("Total Passes", f"{rough_passes + (1 if finish_pass_stock > 0 else 0)}")
+            col_b.metric("Total Time", f"{total_time_min * 60:.1f} sec")
