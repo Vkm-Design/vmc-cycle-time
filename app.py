@@ -575,28 +575,53 @@ elif operation == "Face Milling":
         rough_stock = total_stock - 0.5 if finish_required else total_stock
         passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
         
+        # --- PASSES & TRAVEL ---
+        total_stock = st.number_input("Total Stock to Remove (mm)", value=2.0, key="fm_total_stock")
+        finish_required = ra_input < 1.6 
+        rough_stock = total_stock - 0.5 if finish_required else total_stock
+        passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
+        
         # Calculate Cut Length
         if shape == "Rectangular":
             width_passes = math.ceil(W / ae)
+            # Your standard longitudinal travel
             cut_length = (long_dim + tool_dia + 4) * width_passes
         else:
+            # Machinist Realistic Circular Logic (Fix for Ø150 / Ø50 tool)
             if comp_dia <= ae:
                 cut_length = comp_dia + tool_dia + 10
-                st.info(f"Single traverse logic applied.")
+                st.info(f"Using Ø{tool_dia}mm Tool: Single traverse.")
             else:
+                # 1. First Path Dia based on your 70% engagement (ae) rule
                 overhang = tool_dia - ae
                 first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
-                current_path_dia = max(first_path_dia, 0)
                 
+                # 2. Calculate concentric rings
+                current_path_dia = max(first_path_dia, 0)
                 total_circ_dist = 0
                 pass_count = 0
-                while current_path_dia > 0:
-                    total_circ_dist += math.pi * current_path_dia
-                    current_path_dia -= (ae * 2)
-                    pass_count += 1
                 
+                while True:
+                    # Add current ring circumference
+                    total_circ_dist += math.pi * current_path_dia
+                    pass_count += 1
+                    
+                    # Move inward by double the engagement (ae * 2)
+                    current_path_dia -= (ae * 2)
+                    
+                    # BREAK CONDITION: If the next diameter is 0 or less, we've cleared the center
+                    if current_path_dia <= 0:
+                        # If there was still a substantial "island" left, 
+                        # we add the final center point move
+                        if current_path_dia < 0:
+                            # Note: we don't add circumference for a 0-dia point, 
+                            # the +tool_dia below covers the final exit move.
+                            pass
+                        break
+                
+                # 3. Add Entry/Exit (1 full Tool Diameter) for safety
                 cut_length = total_circ_dist + tool_dia
-                st.success(f"Using Ø{tool_dia}mm Tool: {pass_count} Interpolation Rings.")
+                st.success(f"Using Ø{tool_dia}mm Tool: {pass_count} Interpolation Rings calculated.")
 
         # --- FINAL BUTTON ---
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
