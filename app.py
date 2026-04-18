@@ -233,7 +233,14 @@ st.sidebar.header("Global Settings")
 # 1. Material Selection
 material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
 kc = kc_data[material]
-
+    # Hide Quality Requirements if Tapping is selected
+        if operation != "Tapping":
+            st.header("Quality Requirements")
+            ra_input = st.number_input("Surface Finish (Ra)", value=1.2, step=0.1)
+            tolerance = st.number_input("Diameter Tolerance (±)", value=0.100, format="%.3f")
+        else:
+            # We still need a default ra_input value so the rest of the code doesn't crash
+            ra_input = 3.2
 # 2. Machine Selection (This must come FIRST)
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
