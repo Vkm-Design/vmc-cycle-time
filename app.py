@@ -509,7 +509,7 @@ elif operation == "Face Milling":
     # 1. System Detection Info
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
-    # 2. Filtering Logic (Taper + Ra)
+    # 2. Filtering Logic (Finds tools based on machine taper and finish requirements)
     suitable_tools = [
         tool for tool in face_mill_data_aluminium 
         if m_taper in tool["spindles"] and tool.get("ra", 3.2) <= ra_input
@@ -519,12 +519,12 @@ elif operation == "Face Milling":
         st.error(f"No suitable Face Mills found for {m_taper} with Ra {ra_input}.")
         st.stop()
 
-    # 3. Shape & Mode Selection
+    # 3. Shape & Selection Mode
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
 
     # 4. Tool Selection Logic
-    # Temporary width for Auto-selection logic
+    # We use a default width for the Auto-filter until the user enters their actual size
     temp_W = 100.0 
 
     selected_tool = None
@@ -540,7 +540,7 @@ elif operation == "Face Milling":
         selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
         selected_tool = next(t for t in suitable_tools if f"Dia {t['dia']}mm" == selected_tool_name)
 
-    # 5. Final Calculations (Triggered only when a tool is selected)
+    # 5. Final Calculations (Runs once a tool is picked)
     if selected_tool:
         tool_dia = selected_tool["dia"]
         ae = selected_tool["max_width"] 
@@ -555,6 +555,7 @@ elif operation == "Face Milling":
             W = st.number_input("Width (mm)", value=100.0, key="fm_W")
             long_dim = max(L, W)
         else:
+            # Setting default to 150 to match your test case
             comp_dia = st.number_input("Component Diameter (mm)", value=150.0, key="fm_circ_dia")
             W = comp_dia  
             long_dim = comp_dia
@@ -575,34 +576,49 @@ elif operation == "Face Milling":
         rough_stock = total_stock - 0.5 if finish_required else total_stock
         passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
 
-        # --- CALCULATE CUT LENGTH ---
+        # --- CALCULATE CUT LENGTH (TRAVEL DISTANCE) ---
         if shape == "Rectangular":
             width_passes = math.ceil(W / ae)
             cut_length = (long_dim + tool_dia + 4) * width_passes
         else:
-            # Machinist Realistic Circular Logic
+            # MACHINIST REALISTIC CIRCULAR LOGIC (BASED ON YOUR AUTOCAD)
             if comp_dia <= ae:
+                # If tool covers the whole part in one move
                 cut_length = comp_dia + tool_dia + 10
-                st.info(f"Using Ø{tool_dia}mm Tool: Single traverse across center.")
+                st.info(f"Using Ø{tool_dia}mm Tool: Single traverse.")
             else:
-                # 1. First Path Dia (AutoCAD Spindle Path Logic)
+                # 1. Start with the outer spindle center diameter
                 overhang = tool_dia - ae
                 first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
                 
-                # 2. Concentric Loop
                 current_path_dia = max(first_path_dia, 0)
                 total_circ_dist = 0
                 pass_count = 0
                 
+                # 2. Gap-Aware Loop: Checks if the tool edge crosses the center
                 while True:
                     total_circ_dist += math.pi * current_path_dia
                     pass_count += 1
-                    current_path_dia -= (ae * 2) # Move inward
                     
-                    if current_path_dia <= 0:
+                    # Inner Edge = (Current Path Center) - (Tool Radius)
+                    # If this is > 0, there is still a "hole" or "island" in the middle
+                    inner_edge_pos = (current_path_dia / 2) - (tool_dia / 2)
+                    
+                    # Break only if the tool overlaps the center point by 2mm
+                    if inner_edge_pos <= -2: 
                         break
-                
-                # 3. Final Lead-in/Lead-out
+                    
+                    # Step inward by double the engagement width (ae * 2)
+                    current_path_dia -= (ae * 2)
+                    
+                    # Clamp to 0 if the math tries to go negative
+                    if current_path_dia < 0:
+                        current_path_dia = 0
+                    
+                    # Safety break to prevent infinite loops
+                    if pass_count > 15: break
+
+                # 3. Add Entry/Exit travel (Lead)
                 cut_length = total_circ_dist + tool_dia
                 st.success(f"Using Ø{tool_dia}mm Tool: {pass_count} Interpolation Rings calculated.")
 
@@ -610,7 +626,7 @@ elif operation == "Face Milling":
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
             time_min = (cut_length * passes) / vf
             if finish_required:
-                # Add extra pass at 80% feed for finish
+                # Add extra finish pass at slower feed
                 time_min += (cut_length / (vf * 0.8))
             
             st.subheader("Final Estimates")
