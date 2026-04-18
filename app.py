@@ -523,15 +523,44 @@ elif operation == "Face Milling":
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
 
-    # 4. Component Inputs
-    if shape == "Rectangular":
-        L = st.number_input("Length (mm)", value=60.0, key="fm_L")
-        W = st.number_input("Width (mm)", value=10.0, key="fm_W")
-        long_dim = max(L, W)
-    else: # Circular
-        comp_dia = st.number_input("Component Diameter (mm)", value=50.0, key="fm_dia")
-        W = comp_dia  
-        long_dim = comp_dia
+# 1. Component Inputs (Moved outside to prevent double selection)
+        if shape == "Rectangular":
+            L = st.number_input("Length (mm)", value=100.0, key="fm_L")
+            W = st.number_input("Width (mm)", value=100.0, key="fm_W")
+            long_dim = max(L, W)
+        else:
+            # We only show this once here
+            comp_dia = st.number_input("Component Diameter (mm)", value=100.0, key="fm_circ_dia")
+            W = comp_dia  
+            long_dim = comp_dia
+
+        # ... (Your Tool Selection and Power calculations happen here) ...
+
+        # 2. Calculate Cut Length (Using the single input from above)
+        if shape == "Rectangular":
+            width_passes = math.ceil(W / ae)
+            cut_length = (long_dim + tool_dia + 4) * width_passes
+        else: 
+            # CIRCULAR LOGIC (Using the comp_dia from above)
+            if comp_dia <= ae:
+                cut_length = comp_dia + tool_dia + 10
+                st.info(f"Using Ø{tool_dia}mm Tool: Single traverse (Comp Ø{comp_dia} ≤ ae {ae})")
+            else:
+                overhang = tool_dia - ae
+                first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
+                if first_path_dia < 0: first_path_dia = 0
+                
+                current_path_dia = first_path_dia
+                total_circ_dist = 0
+                pass_count = 0
+                while current_path_dia > 0:
+                    total_circ_dist += math.pi * current_path_dia
+                    current_path_dia -= (ae * 2)
+                    pass_count += 1
+                    if current_path_dia <= 0: break
+                
+                cut_length = total_circ_dist + tool_dia
+                st.success(f"Using Ø{tool_dia}mm Tool: {pass_count} Interpolation Rings.")
 
     # 5. Tool Selection Logic
     selected_tool = None
