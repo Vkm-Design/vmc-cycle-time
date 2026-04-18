@@ -604,7 +604,7 @@ elif operation == "Face Milling":
         dia = st.selectbox("Select Tool Diameter", dia_list)
         selected_tool = next(t for t in suitable_tools if t["dia"] == dia)
 
-    # ================= 3. CALCULATIONS & MACHINE POWER CHECK =================
+   # ================= 3. CALCULATIONS & MACHINE POWER CHECK =================
     if selected_tool:
         tool_dia = selected_tool["dia"]
         max_width = selected_tool["max_width"]
@@ -613,12 +613,10 @@ elif operation == "Face Milling":
         stock_limit = selected_tool["stock"]
 
         # --- POWER VALIDATION ---
-        # Formula: Power (kW) = (Width * ap * Feed) / 30,000
+        # Make sure this uses 'W' from your input section above
         req_power = (W * stock_limit * feed) / 30000 
         
         st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
-        if req_power > m_power:
-            st.error(f"⚠️ Machine Overload! Limit is {m_power} kW.")
 
         # --- PASSES & CYCLE TIME ---
         # Ra logic: Use ra_input from sidebar (DELETE the local ra input!)
