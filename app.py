@@ -266,10 +266,11 @@ else:
 # ==========================================
 if operation == "Drilling":
     st.subheader("Drilling Calculator")
-    dia = st.number_input("Drill Diameter (mm)", value=10.0)
-    dep = st.number_input("Depth (mm)", value=20.0)
-    cnt = st.number_input("Number of Holes", value=1)
+    dia = st.number_input("Drill Diameter (mm)", value=10.0, step=0.1)
+    dep = st.number_input("Depth (mm)", value=20.0, step=1.0)
+    cnt = st.number_input("Number of Holes", value=1, step=1)
 
+    # Use the helper to get RPM and Feed
     rpm, f_min, mx_dep = get_parameters(dia, material)
     
     if rpm:
@@ -286,7 +287,7 @@ if operation == "Drilling":
         else:
             st.error("❌ Machine Capacity Exceeded")
             
-        if st.button("Calculate Time"):
+        if st.button("Calculate Time", key="drill_time_btn"):
             st.info(f"Total Time: {round((dep/f_min)*cnt*60, 2)} seconds")
     else:
         st.error("Diameter not in database")
@@ -304,7 +305,6 @@ elif operation == "Boring / Hole Milling":
     # --- INPUTS ---
     col1, col2 = st.columns(2)
     with col1:
-        # We ensure f_dia is treated as a float immediately
         f_dia = float(st.number_input("Finish Bore Diameter (mm)", value=33.0, step=0.1, key="bor_f_dia"))
         b_dep = float(st.number_input("Bore Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
     
@@ -315,42 +315,35 @@ elif operation == "Boring / Hole Milling":
     if e_mode == "Core Hole":
         s_dia = float(st.number_input("Existing Core Diameter (mm)", value=28.0, key="bor_s_dia"))
     else:
-        # Robust check for drill_data_aluminium
-        if 'drill_data_aluminium' in locals() or 'drill_data_aluminium' in globals():
-            try:
-                # 1. Extract diameters, ensuring they are valid numbers
-                # 2. Filter for those smaller than finish diameter
-                # 3. Handle cases where "dia" might be a string or missing
-                valid_drill_dias = []
-                for d in drill_data_aluminium:
-                    try:
-                        d_val = float(d["dia"])
-                        if d_val < f_dia:
-                            valid_drill_dias.append(d_val)
-                    except (ValueError, KeyError, TypeError):
-                        continue
-                
-                if valid_drill_dias:
-                    s_dia = max(valid_drill_dias)
-                else:
-                    s_dia = 0.0
-            except TypeError:
-                st.error("Drill data format is incorrect. Check your tool table.")
-                st.stop()
+        # Check for drill_data_aluminium in both scopes
+        drill_list = globals().get('drill_data_aluminium') or locals().get('drill_data_aluminium')
+        
+        if drill_list:
+            # Safely find the largest drill smaller than our finish diameter
+            valid_drill_dias = []
+            for d in drill_list:
+                try:
+                    d_val = float(d["dia"])
+                    if d_val < f_dia:
+                        valid_drill_dias.append(d_val)
+                except:
+                    continue
+            
+            s_dia = max(valid_drill_dias) if valid_drill_dias else 0.0
         else:
-            st.error("Drill database (drill_data_aluminium) is missing.")
+            st.error("Drill database missing.")
             st.stop()
 
     # --- PROCESS LOGIC ---
-    # Determine the maximum drill size available in your data
-    max_drill_in_table = max([float(d["dia"]) for d in drill_data_aluminium]) if drill_data_aluminium else 0
+    # Find max drill diameter to see if we MUST bore
+    max_drill_available = max([float(d["dia"]) for d in drill_list]) if drill_list else 0.0
     
     limit = 0.2 if f_dia > 20 else 0.1
     needs_boring = False
     
     if e_mode == "Core Hole":
         needs_boring = True 
-    elif f_dia > max_drill_in_table: # Force boring if hole is bigger than your largest drill
+    elif f_dia > max_drill_available: # Trigger boring if larger than Ø30 (or current max)
         needs_boring = True
     elif ra_input < 3.2 or tol_input < limit:
         needs_boring = True 
@@ -358,21 +351,21 @@ elif operation == "Boring / Hole Milling":
     # --- EXECUTION ---
     total_time_sec = 0.0
 
-    # PART A: DRILLING (Solid Only)
+    # PART A: DRILLING (Calculated if Solid)
     if e_mode == "Solid" and s_dia > 0:
-        drill_row = next((d for d in drill_data_aluminium if float(d["dia"]) == s_dia), None)
+        drill_row = next((d for d in drill_list if float(d["dia"]) == s_dia), None)
         if drill_row:
             d_vc = float(drill_row["vc"])
             d_fr = float(drill_row["feed_rev"])
-            d_rpm = (1000 * d_vc) / (3.14159 * s_dia)
+            d_rpm = (1000 * d_vc) / (math.pi * s_dia)
             d_feed = d_rpm * d_fr
             d_time = (b_dep / d_feed) * 60
             
-            st.success(f"Step 1: Drilling Ø{s_dia} (Auto-selected from Drill Table)")
-            st.write(f"Parameters: {int(d_rpm)} RPM | {int(d_feed)} mm/min | Time: {round(d_time, 2)} sec")
+            st.success(f"Step 1: Drilling Ø{s_dia} (Auto-selected)")
+            st.write(f"Params: {int(d_rpm)} RPM | {int(d_feed)} mm/min | Time: {round(d_time, 2)}s")
             total_time_sec += d_time
 
-    # PART B: BORING
+    # PART B: BORING (Calculated if needed)
     if needs_boring:
         st.divider()
         st.info("Step 2: Boring Cycle")
@@ -389,22 +382,24 @@ elif operation == "Boring / Hole Milling":
                 for i in range(tools_n):
                     step_d = s_dia + (dist_to_cut / tools_n) * (i + 1)
                     p = get_boring_params(step_d, material)
-                    rpm_b = float(p["rpm"])
-                    f_b = float(p["feed_min"])
                     
-                    # Long Tool Safety
-                    if b_dep > (3 * step_d):
-                        st.warning(f"⚠️ L/D > 3 Safety for Ø{round(step_d,2)}")
-                        rpm_b *= 0.7
-                        f_b *= 0.8
-                    
-                    pass_time = (b_dep / f_b) * 60
-                    total_time_sec += pass_time
-                    st.write(f"**Boring Pass {i+1}:** Ø{round(step_d,2)} | {int(rpm_b)} RPM | {int(f_b)} mm/min")
+                    if p:
+                        rpm_b = float(p["rpm"])
+                        f_b = float(p["feed_min"])
+                        
+                        # Long Tool Safety Override
+                        if b_dep > (3 * step_d):
+                            st.warning(f"⚠️ Safety adjust for L/D > 3 on Ø{round(step_d,2)}")
+                            rpm_b *= 0.7
+                            f_b *= 0.8
+                        
+                        pass_time = (b_dep / f_b) * 60
+                        total_time_sec += pass_time
+                        st.write(f"**Bore Pass {i+1}:** Ø{round(step_d,2)} | {int(rpm_b)} RPM | {int(f_b)} mm/min")
         else:
-            st.error(f"No boring data found for diameter range Ø{f_dia}")
+            st.error(f"No boring parameters found for Ø{f_dia}")
     else:
-        st.success("✅ Standard Drilling is sufficient for this size/tolerance.")
+        st.success("✅ Tolerance/Size allows finishing with standard drilling.")
 
     st.divider()
     st.metric("Total Combined Cycle Time", f"{round(total_time_sec, 2)} sec")
