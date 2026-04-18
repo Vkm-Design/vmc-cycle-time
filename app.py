@@ -588,29 +588,40 @@ elif operation == "Face Milling":
             width_passes = math.ceil(W / ae)
             # Your standard longitudinal travel
             cut_length = (long_dim + tool_dia + 4) * width_passes
-        else: # This is the Circular case
-            # Note: Ensure these inputs are inside this block so they only show for Circular
-            comp_dia = st.number_input("Component Diameter (mm)", value=100.0, key="fm_circ_dia")
-            W = comp_dia  
-            long_dim = comp_dia
-
-            # NEW INTERPOLATION LOGIC:
-            # Calculate passes based on RADIUS because interpolation covers both sides.
-            radial_passes = math.ceil((comp_dia / 2) / ae)
-        
-            # Calculate Cut Length for Interpolation
-            if radial_passes == 1:
-                # Single circular pass around the perimeter
-                cut_length = math.pi * comp_dia
+        else: # Circular Case (Machinist Realistic)
+            comp_dia = st.number_input("Component Diameter (mm)", value=200.0, key="fm_circ_dia")
+            
+            # Use the actual diameter and max width from your Manual/Auto selection
+            # These variables (tool_dia, ae) come from the Section 6 'if selected_tool' block
+            
+            # CHECK: If part diameter is within the tool's max engagement (ae)
+            if comp_dia <= ae:
+                # TRAVERSE LOGIC: Single linear move across center
+                cut_length = comp_dia + tool_dia + 10
+                st.info(f"Using Ø{tool_dia}mm Tool: Single traverse (Comp Ø{comp_dia} <= ae {ae})")
             else:
-                # Multiple concentric circles
-                cut_length = 0
-                for i in range(radial_passes):
-                    # Each inner pass diameter is reduced by twice the tool engagement (ae)
-                    effective_path_dia = comp_dia - (i * ae * 2)
-                    if effective_path_dia < 0: 
-                        effective_path_dia = 0
-                    cut_length += math.pi * effective_path_dia
+                # INTERPOLATION LOGIC: Spindle Center Path
+                # 1. First Path Dia (First ring) based on your AutoCAD logic
+                overhang = tool_dia - ae
+                first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
+                
+                if first_path_dia < 0: first_path_dia = 0
+                
+                # 2. Calculate concentric rings
+                current_path_dia = first_path_dia
+                total_circ_dist = 0
+                pass_count = 0
+                
+                while current_path_dia > 0:
+                    total_circ_dist += math.pi * current_path_dia
+                    current_path_dia -= (ae * 2) # Step inward by max width
+                    pass_count += 1
+                    if current_path_dia <= 0:
+                        break
+                
+                # 3. Add Entry/Exit (1 full Tool Diameter)
+                cut_length = total_circ_dist + tool_dia
+                st.success(f"Using Ø{tool_dia}mm Tool: {pass_count} Interpolation Rings calculated.")
 
         # FINAL CALCULATION AND BUTTON
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
