@@ -586,14 +586,16 @@ elif operation == "Face Milling":
         # Calculate Cut Length
         if shape == "Rectangular":
             width_passes = math.ceil(W / ae)
+            # Your standard longitudinal travel
             cut_length = (long_dim + tool_dia + 4) * width_passes
-       else: # This is the Circular case
+        else: # This is the Circular case
+            # Note: Ensure these inputs are inside this block so they only show for Circular
             comp_dia = st.number_input("Component Diameter (mm)", value=100.0, key="fm_circ_dia")
             W = comp_dia  
             long_dim = comp_dia
 
             # NEW INTERPOLATION LOGIC:
-            # radial_passes = (Part Radius) / (Tool Max Engagement)
+            # Calculate passes based on RADIUS because interpolation covers both sides.
             radial_passes = math.ceil((comp_dia / 2) / ae)
         
             # Calculate Cut Length for Interpolation
@@ -604,17 +606,22 @@ elif operation == "Face Milling":
                 # Multiple concentric circles
                 cut_length = 0
                 for i in range(radial_passes):
-                    # Each inner pass is smaller by the tool's effective width
+                    # Each inner pass diameter is reduced by twice the tool engagement (ae)
                     effective_path_dia = comp_dia - (i * ae * 2)
                     if effective_path_dia < 0: 
                         effective_path_dia = 0
                     cut_length += math.pi * effective_path_dia
+
+        # FINAL CALCULATION AND BUTTON
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
+            # time_min = (Distance * Depth Passes) / Feed Rate
             time_min = (cut_length * passes) / vf
+            
             if finish_required:
+                # Adding 0.5mm finish pass at 80% feed rate
                 time_min += (cut_length / (vf * 0.8))
             
             st.subheader("Final Estimates")
             col_a, col_b = st.columns(2)
-            col_a.metric("Roughing Passes", f"{passes}")
+            col_a.metric("Depth Passes", f"{passes}")
             col_b.metric("Total Time", f"{time_min * 60:.1f} sec")
