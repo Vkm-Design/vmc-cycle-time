@@ -233,33 +233,34 @@ st.sidebar.header("Global Settings")
 # 1. Material Selection
 material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
 kc = kc_data[material]
-    # Hide Quality Requirements if Tapping is selected
-        if operation != "Tapping":
-            st.header("Quality Requirements")
-            ra_input = st.number_input("Surface Finish (Ra)", value=1.2, step=0.1)
-            tolerance = st.number_input("Diameter Tolerance (±)", value=0.100, format="%.3f")
-        else:
-            # We still need a default ra_input value so the rest of the code doesn't crash
-            ra_input = 3.2
-# 2. Machine Selection (This must come FIRST)
+
+# 2. Machine Selection
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
-# 3. Data Lookup (This uses the 'machine' variable from above)
+# 3. Machine Data Lookup
 m_power = machine_data[machine]["power"]
 m_torque = machine_data[machine]["torque"]
 m_taper = machine_data[machine].get("taper", "BT40") 
 
 st.sidebar.markdown("---")
-st.sidebar.header("Quality Requirements")
-ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=3.2, step=0.1)
 
-# ONLY show Diameter Tolerance if it is NOT Face Milling
-if operation != "Face Milling":
-    tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.1, format="%.3f")
+# 4. SMART QUALITY REQUIREMENTS (Conditional Visibility)
+# This block handles the visibility for Tapping and Face Milling automatically
+if operation != "Tapping":
+    st.sidebar.header("Quality Requirements")
+    
+    # Surface Finish (Ra) - Visible for everything EXCEPT Tapping
+    ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=1.2, step=0.1, key="sidebar_ra")
+    
+    # Diameter Tolerance - Visible for Drilling/Boring, HIDDEN for Face Milling & Tapping
+    if operation != "Face Milling":
+        tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.100, format="%.3f", key="sidebar_tol")
+    else:
+        tol_input = 0.1 # Default for Face Milling logic
 else:
-    # We set a default value so the code doesn't crash, but the user doesn't see the box
+    # Default values when Tapping is selected so the rest of the app doesn't crash
+    ra_input = 3.2
     tol_input = 0.1
-
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
