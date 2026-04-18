@@ -548,67 +548,58 @@ elif operation == "Face Milling":
         selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
         selected_tool = next(t for t in suitable_tools if f"Dia {t['dia']}mm" == selected_tool_name)
 
-    # 6. Calculations & Machine Power Check
+   # 6. Calculations, Machine Power Check & Cycle Time
     if selected_tool:
+        # --- PREPARE VARIABLES ---
         tool_dia = selected_tool["dia"]
-        ae = selected_tool["max_width"] # We use the Tool's Max Cutting Width as per your instruction
+        ae = selected_tool["max_width"] 
         rpm = selected_tool["rpm"]
-        vf = selected_tool["feed"]      # Feed rate in mm/min
-        ap = selected_tool["stock"]     # Depth of cut from your table
-        
-        # --- NEW POWER FORMULA ---
-        # P = (ae * ap * vf * Kc) / (60 * 10^6 * efficiency)
-        # efficiency = 0.8 (80%)
+        vf = selected_tool["feed"]      
+        ap_limit = selected_tool["stock"] # This is your stock_limit
+
+        # --- POWER VALIDATION ---
         efficiency = 0.8
-        req_power = (ae * ap * vf * kc) / (60e6 * efficiency)
+        req_power = (ae * ap_limit * vf * kc) / (60e6 * efficiency)
         
         st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
 
         if req_power > m_power:
-            st.error(f"⚠️ Machine Overload! Required {req_power:.2f}kW exceeds machine continuous limit ({m_power}kW).")
-            st.warning("Consider reducing the feed rate or depth of cut.")
+            st.error(f"⚠️ Machine Overload! Required {req_power:.2f}kW exceeds limit ({m_power}kW).")
         else:
-            st.success(f"✅ Selected: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
-            st.info(f"Calculation based on Max Tool Width ({ae}mm) and Kc ({kc})")
+            st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
 
-        # 7. Passes & Cycle Time
-        import math  # Safety import inside the block
-
+        # --- PASSES & CYCLE TIME (Inside the same 'if' block) ---
+        import math
+        
+        st.divider()
         total_stock = st.number_input("Total Stock to Remove (mm)", value=2.0, key="fm_total_stock")
         finish_required = ra_input < 1.6 
 
-        # Define stock for passes
         rough_stock = total_stock - 0.5 if finish_required else total_stock
         
-        # Calculate passes using the tool's stock capacity from your table
-        if stock_limit > 0:
-            passes = math.ceil(rough_stock / stock_limit)
+        # We use ap_limit here to match the variable we pulled from your tool table
+        if ap_limit > 0:
+            passes = math.ceil(rough_stock / ap_limit)
         else:
             passes = 1
         
         # Calculate Cut Length
         if shape == "Rectangular":
-            width_passes = math.ceil(W / max_width)
+            width_passes = math.ceil(W / ae)
             cut_length = (long_dim + tool_dia + 4) * width_passes
         else: # Circular
-            radial_passes = math.ceil(W / max_width)
+            radial_passes = math.ceil(W / ae)
             if radial_passes <= 1:
                 cut_length = W + tool_dia
             else:
                 cut_length = (math.pi * (W + 5 - tool_dia) + W + tool_dia) * radial_passes
 
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
-            # Time calculation: (Length * Number of passes) / Feed
-            time_min = (cut_length * passes) / feed
+            time_min = (cut_length * passes) / vf
             if finish_required:
-                # Add time for 0.5mm finish pass at 80% feed
-                time_min += (cut_length / (feed * 0.8))
+                time_min += (cut_length / (vf * 0.8))
             
-            st.divider()
             st.subheader("Final Estimates")
             col_a, col_b = st.columns(2)
             col_a.metric("Roughing Passes", f"{passes}")
             col_b.metric("Total Time", f"{time_min * 60:.1f} sec")
-            
-            if finish_required:
-                st.info("Note: Includes one 0.5mm finish pass for Ra requirement.")
