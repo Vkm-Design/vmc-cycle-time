@@ -340,15 +340,14 @@ elif operation == "Boring / Hole Milling":
 elif operation == "Tapping":
     st.title("Tapping Calculator")
 
-    # 1. System Detection & Material Guardrail (Synced with your main material variable)
+    # 1. Material Guardrail
     if material != "Aluminium":
         st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
         st.stop()
 
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
-    # 2. Tap Data Filtering
-    # Assuming 'material' is defined globally at the top of your app
+    # 2. Tap Data Selection
     if material in material_tables:
         tap_table = material_tables[material]["tap"]
     else:
@@ -356,37 +355,35 @@ elif operation == "Tapping":
         st.stop() 
 
     pitch_list = sorted(list(set(row["pitch"] for row in tap_table)))
-    selected_pitch = st.selectbox("Select Pitch", pitch_list)
+    selected_pitch = st.selectbox("Select Pitch", pitch_list, key="tap_pitch_sel")
 
     filtered = [row for row in tap_table if row["pitch"] == selected_pitch]
     tap_options = list(set(row["tap"] for row in filtered))
 
-    selected_tap = st.selectbox("Select Tap Size", tap_options)
-
+    selected_tap = st.selectbox("Select Tap Size", tap_options, key="tap_size_sel")
     selected_row = next(row for row in filtered if row["tap"] == selected_tap)
 
+    # Tool Parameters
     diameter = get_diameter(selected_tap)
     pitch = selected_row["pitch"]
     vc = selected_row["vc"]
     max_depth = selected_row["max_depth"]
 
-    # ---- Tap type ----
-    tap_type = st.selectbox("Tap Type", ["Through", "Blind"])
-    tap_depth = st.number_input("Tap Depth (mm)", value=8.0)
-    count = st.number_input("Number of Holes", value=1)
+    # 3. Input Parameters
+    tap_type = st.selectbox("Tap Type", ["Through", "Blind"], key="tap_type_sel")
+    tap_depth = st.number_input("Tap Depth (mm)", value=8.0, key="tap_depth_input")
+    count = st.number_input("Number of Holes", value=1, key="tap_count_input")
 
     if tap_type == "Blind":
-        drill_depth = st.number_input("Drill Depth (mm)", value=10.0)
+        drill_depth = st.number_input("Drill Depth (mm)", value=10.0, key="drill_depth_input")
     else:
         drill_depth = None
 
-    # ---- Show data ----
-    st.write("Diameter:", diameter)
-    st.write("Pitch:", pitch)
-    st.write("Recommended Vc:", vc)
-    st.write("Max Depth:", max_depth)
+    # Display Tool Data
+    st.write(f"**Tap Diameter:** {diameter} mm | **Pitch:** {pitch} mm")
+    st.write(f"**Recommended Vc:** {vc} m/min | **Max Tool Depth:** {max_depth} mm")
 
-    # ---- Validation & Clearance Logic ----
+    # 4. Mechanical Validation & Clearance
     valid_tap = True
     use_threadmill = False
     manual_mode = False
@@ -394,86 +391,79 @@ elif operation == "Tapping":
 
     if tap_type == "Blind":
         clearance = drill_depth - tap_depth
-        st.write("Clearance:", round(clearance, 2))
+        st.write(f"**Clearance:** {round(clearance, 2)} mm")
 
         if drill_depth <= tap_depth:
-            st.error("Drill depth is less than tap depth. Not possible to machine thread")
+            st.error("Error: Drill depth must be greater than tap depth.")
             valid_tap = False
             stop_all = True
         elif clearance < (1 * pitch):
-            st.error("Insufficient clearance. Not safe for tapping")
+            st.error("Insufficient clearance. Not safe for tapping.")
             valid_tap = False
             use_threadmill = True
         elif clearance <= (2 * pitch):
-            st.warning("Clearance not sufficient. Thread milling recommended")
+            st.warning("Low clearance. Thread milling recommended.")
             valid_tap = False
             use_threadmill = True
         else:
-            st.success("Suitable for tapping")
+            st.success("Clearance is safe for tapping.")
 
+    # 5. Depth Check
     if valid_tap and not stop_all:
         if tap_depth > max_depth:
-            st.warning("Depth exceeds recommended limit. Enter Vc manually.")
+            st.warning("Depth exceeds tool limit. Adjust Vc manually.")
             manual_mode = True
 
     if manual_mode and valid_tap:
-        vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc")
+        vc = st.number_input("Enter Vc manually", value=vc, key="tap_vc_manual")
 
-    # ---- Tapping Calculation ----
+    # 6. Tapping Calculation
     if valid_tap:
         rpm = (1000 * vc) / (math.pi * diameter)
         feed_min = pitch * rpm
-        # Standard approach/retract length logic
-        cut_length = (tap_depth + (pitch * 3 * 2)) * 2 + 4
+        # Cut length calculation: (Depth + 3 pitches for entry/exit) * 2 for in/out + safety
+        cut_length = (tap_depth + (pitch * 6)) * 2 + 4
 
-        st.write("RPM:", round(rpm, 2))
-        st.write("Feed (mm/min):", round(feed_min, 2))
-        st.write("Cut Length (mm):", round(cut_length, 2))
+        st.divider()
+        col1, col2, col3 = st.columns(3)
+        col1.metric("RPM", f"{round(rpm, 0)}")
+        col2.metric("Feed", f"{round(feed_min, 0)} mm/min")
+        col3.metric("Travel", f"{round(cut_length, 1)} mm")
 
-        if st.button("Calculate Tap Time"):
+        if st.button("Calculate Tapping Time", key="tap_calc_btn"):
             time_per_hole = cut_length / feed_min
             total_time_sec = time_per_hole * count * 60
-            st.write("Total Time (sec):", round(total_time_sec, 2))
+            st.subheader(f"Total Time: {round(total_time_sec, 1)} seconds")
 
-    # ---- THREAD MILL LOGIC ----
-    # Uses the same 'material' guardrail from Step 1
-    threadmill_table = material_tables[material]["threadmill"]
-
+    # 7. Thread Milling Logic
     if use_threadmill and not stop_all:
+        st.divider()
         st.subheader("Thread Milling Calculation")
-        tm_row = next(
-            (row for row in threadmill_table
-             if row["tap"] == selected_tap and row["pitch"] == pitch),
-            None
-        )
+        
+        threadmill_table = material_tables[material]["threadmill"]
+        tm_row = next((row for row in threadmill_table if row["tap"] == selected_tap and row["pitch"] == pitch), None)
 
         if tm_row is None:
-            st.error("No thread mill data available for this size.")
+            st.error("No thread mill data available for this specific size.")
         else:
             vc_tm = tm_row["vc"]
             feed_rev = tm_row["feed_rev"]
             tool_dia = tm_row["tool_dia"]
             max_depth_tm = tm_row["max_depth"]
 
-            D2 = diameter   # thread size
-            D1 = tool_dia   # tool diameter
-
             if tap_depth > max_depth_tm:
-                st.warning("Special thread mill recommended for this depth.")
-            else:
-                rpm = (1000 * vc_tm) / (math.pi * tool_dia)
-                feed_min = feed_rev * rpm
-                # Helix travel calculation
-                cut_length = ((D2 - D1) * math.pi * 3) + tap_depth + 4
+                st.warning("Special long-series thread mill may be required.")
 
-                st.write("RPM:", round(rpm, 2))
-                st.write("Feed (mm/min):", round(feed_min, 2))
-                st.write("Cut Length (mm):", round(cut_length, 2))
+            rpm_tm = (1000 * vc_tm) / (math.pi * tool_dia)
+            feed_tm = feed_rev * rpm_tm
+            # Helix path travel distance
+            tm_cut_length = ((diameter - tool_dia) * math.pi * 3) + tap_depth + 4
 
-                if st.button("Calculate Thread Mill Time"):
-                    time_per_hole = cut_length / feed_min
-                    total_time_sec = time_per_hole * count * 60
-                    st.write("Total Time (sec):", round(total_time_sec, 2))
+            st.write(f"**TM RPM:** {round(rpm_tm, 0)} | **TM Feed:** {round(feed_tm, 0)} mm/min")
+
+            if st.button("Calculate Thread Mill Time", key="tm_calc_btn"):
+                tm_time_sec = (tm_cut_length / feed_tm) * count * 60
+                st.subheader(f"Total TM Time: {round(tm_time_sec, 1)} seconds")
 
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
