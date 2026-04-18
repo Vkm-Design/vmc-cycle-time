@@ -513,13 +513,16 @@ elif operation == "Face Milling":
         
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
-    # 2. Surface Finish Warning (PCD for very high finish)
-    if ra_input < 0.8:
-        st.warning("⚠️ High Precision Finish: Special PCD (Polycrystalline Diamond) tooling required for Ra < 0.8.")
+    # 2. Surface Finish & PCD Warning
+    # If Ra is very fine, we change the strategy entirely
+    is_pcd_required = ra_input < 1.2
 
-    # 3. Updated Filtering Logic
-    # We filter by Taper, but allow the tool if it CAN achieve the Ra 
-    # OR if we are going to use a finish pass to get there.
+    if is_pcd_required:
+        st.warning("⚠️ **PCD Tooling Required:** Ra < 1.2 cannot be achieved with standard carbide. "
+                   "This calculator will now leave 0.5mm stock for a separate PCD finish pass. "
+                   "**Note:** You must add the PCD cycle time manually to your total estimate.")
+
+    # 3. Filtering Logic
     suitable_tools = [
         tool for tool in face_mill_data_aluminium 
         if m_taper in tool["spindles"]
@@ -533,7 +536,7 @@ elif operation == "Face Milling":
     shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
     tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
 
-    # 5. Tool Selection Logic
+    # 5. Tool Selection
     temp_W = 100.0 
     selected_tool = None
     if tool_mode == "Auto":
@@ -564,7 +567,7 @@ elif operation == "Face Milling":
             L = max(raw_L, raw_W) 
             W = min(raw_L, raw_W) 
             if raw_W > raw_L:
-                st.caption(f"Note: Path optimized for width step-over (Travel: {L}mm).")
+                st.caption(f"Note: Path optimized for width step-over.")
         else:
             comp_dia = st.number_input("Component Diameter (mm)", value=150.0, key="fm_circ_dia")
             W = comp_dia  
@@ -576,32 +579,36 @@ elif operation == "Face Milling":
         st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
 
         if req_power > m_power:
-            st.error(f"⚠️ Machine Overload! Required {req_power:.2f}kW exceeds limit.")
+            st.error(f"⚠️ Machine Overload!")
         else:
             st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
 
-        # --- PROCESS PARAMETERS (The 0.5mm Finish Pass Logic) ---
+        # --- PROCESS PARAMETERS (PCD Stock Logic) ---
         total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
         
-        # Finish pass logic: Required if Ra is fine (less than 3.2)
-        finish_required = ra_input < 3.2 
-        
-        if finish_required and total_stock > 0.5:
-            finish_pass_stock = 0.5
-            rough_stock = total_stock - finish_pass_stock
-            rough_passes = math.ceil(rough_stock / ap_limit)
-            st.info(f"Strategy: {rough_passes} Roughing passes + 1 Finishing pass (0.5mm at 80% feed).")
+        # Logic: If PCD is required, we ALWAYS leave 0.5mm and only rough the rest.
+        if is_pcd_required:
+            rough_stock = max(0.0, total_stock - 0.5)
+            rough_passes = math.ceil(rough_stock / ap_limit) if rough_stock > 0 else 0
+            st.info(f"PCD STRATEGY: {rough_passes} Roughing passes calculated. 0.5mm stock left for separate PCD tool.")
         else:
-            finish_pass_stock = 0
-            rough_stock = total_stock
-            rough_passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
-            st.info(f"Strategy: {rough_passes} Standard passes.")
+            # Standard finish pass logic for carbide (Ra 1.2 to 3.2)
+            finish_required = ra_input < 3.2 
+            if finish_required and total_stock > 0.5:
+                rough_stock = total_stock - 0.5
+                rough_passes = math.ceil(rough_stock / ap_limit)
+                st.info(f"STANDARD STRATEGY: {rough_passes} Roughing + 1 Finishing pass (0.5mm).")
+            else:
+                rough_stock = total_stock
+                rough_passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
+                st.info("STANDARD STRATEGY: Standard roughing passes.")
 
         # --- CALCULATE CUT LENGTH ---
         if shape == "Rectangular":
             width_passes = math.ceil(W / ae)
             cut_length = (L + tool_dia + 4) * width_passes
         else:
+            # Circular Logic (3-pass check)
             if comp_dia <= ae:
                 cut_length = comp_dia + tool_dia + 10
             else:
@@ -623,11 +630,18 @@ elif operation == "Face Milling":
         # --- FINAL CALCULATION ---
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
             time_rough = (cut_length * rough_passes) / vf
-            time_finish = (cut_length / (vf * 0.8)) if finish_pass_stock > 0 else 0
+            
+            # If standard finish (not PCD), calculate finish time at 80% feed
+            time_finish = 0
+            if not is_pcd_required and ra_input < 3.2 and total_stock > 0.5:
+                time_finish = cut_length / (vf * 0.8)
             
             total_time_min = time_rough + time_finish
             
-            st.subheader("Final Estimates")
+            st.subheader("Roughing Estimates")
             col_a, col_b = st.columns(2)
-            col_a.metric("Total Passes", f"{rough_passes + (1 if finish_pass_stock > 0 else 0)}")
-            col_b.metric("Total Time", f"{total_time_min * 60:.1f} sec")
+            col_a.metric("Roughing Passes", f"{rough_passes}")
+            col_b.metric("Roughing Time", f"{total_time_min * 60:.1f} sec")
+            
+            if is_pcd_required:
+                st.warning("☝️ Remember to add your separate PCD finishing time to this total!")
