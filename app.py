@@ -506,12 +506,10 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
 
-    # 1. Show the user what the system has detected from the Global Sidebar
+    # 1. System Detection Info
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
-    # 2. FILTERING LOGIC
-    # We look at your 'face_mill_data_aluminium' and only keep tools that match the machine's taper
-    # We also check the 'ra' requirement from the sidebar
+    # 2. Filtering Logic (Taper + Ra)
     suitable_tools = [
         tool for tool in face_mill_data_aluminium 
         if m_taper in tool["spindles"] and tool.get("ra", 3.2) <= ra_input
@@ -521,78 +519,24 @@ elif operation == "Face Milling":
         st.error(f"No suitable Face Mills found for {m_taper} with Ra {ra_input}.")
         st.stop()
 
-    # 3. Shape and Tool Mode Selection
-    shape = st.selectbox("Component Shape", ["Rectangular", "Circular"])
-    tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"])
+    # 3. Mode Selection
+    shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
+    tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
 
-    # ... rest of your tool selection (Auto/Manual) and power calculation logic ...
-
-    # ================= 1. COMPONENT INPUTS (Fixed with unique keys) =================
+    # 4. Component Inputs
     if shape == "Rectangular":
-        L = st.number_input("Length (mm)", value=60.0, key="fm_rect_length") # Added unique key
-        W = st.number_input("Width (mm)", value=10.0, key="fm_rect_width")  # Added unique key
-        min_dim = min(L, W)
+        L = st.number_input("Length (mm)", value=60.0, key="fm_L")
+        W = st.number_input("Width (mm)", value=10.0, key="fm_W")
         long_dim = max(L, W)
     else: # Circular
-        comp_dia = st.number_input("Component Diameter (mm)", value=50.0, key="fm_circ_dia") # Added unique key
+        comp_dia = st.number_input("Component Diameter (mm)", value=50.0, key="fm_dia")
         W = comp_dia  
         long_dim = comp_dia
 
-    # 2. Tool Selection Logic
-    tool = None
-    if tool_mode == "Auto":
-        # Strategy: Pick the smallest tool that can cover the width in one pass 
-        # based on your 'max_width' data.
-        for t in sorted(suitable_tools, key=lambda x: x['dia']):
-            if t['max_width'] >= width:
-                tool = t
-                break
-        # Fallback: If width is too large, pick the biggest available tool
-        if not tool:
-            tool = max(suitable_tools, key=lambda x: x['dia'])
-    else:
-        tool_names = [f"Dia {t['dia']}mm" for t in suitable_tools]
-        selected_tool_name = st.selectbox("Select Tool", tool_names)
-        tool = next(t for t in suitable_tools if f"Dia {t['dia']}mm" == selected_tool_name)
-
-    # 3. Calculations and Machine Validation
-    if tool:
-        st.success(f"Selected Tool: Ø{tool['dia']} mm")
-        
-        # Pull parameters from your table
-        rpm = tool['rpm']
-        feed_rate = tool['feed']
-        ap = tool['stock'] # Depth of cut from your table
-        
-        # Power Calculation Formula (Simplified for Aluminium)
-        # Power (kW) = (Width * Depth * Feed) / (60,000 * Efficiency)
-        # We'll use your 'm_power' (Continuous) for validation
-        req_power = (width * ap * feed_rate) / 30000 # Example factor for Al
-        
-        st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
-
-        if req_power > m_power:
-            st.error(f"⚠️ Warning: Required power ({req_power:.2f} kW) exceeds machine continuous capacity ({m_power} kW)!")
-        else:
-            st.info("✅ Power validation successful.")
-
-        # Show final cutting data
-        st.write(f"**RPM:** {rpm} | **Feed:** {feed_rate} mm/min | **DOC (ap):** {ap} mm")
-    # ================= 1. COMPONENT INPUTS (Simplified) =================
-    if shape == "Rectangular":
-        L = st.number_input("Length (mm)", value=60.0)
-        W = st.number_input("Width (mm)", value=10.0)
-        min_dim = min(L, W)
-        long_dim = max(L, W)
-    else: # Circular
-        comp_dia = st.number_input("Component Diameter (mm)", value=50.0)
-        W = comp_dia  # For power calculation width
-        long_dim = comp_dia
-
-    # ================= 2. TOOL SELECTION (Using m_taper and ra_input) =================
+    # 5. Tool Selection Logic
     selected_tool = None
     if tool_mode == "Auto":
-        # Strategy: Pick smallest tool that covers width, matching machine taper
+        # Pick smallest tool that covers width based on table data
         for t in sorted(suitable_tools, key=lambda x: x['dia']):
             if t['max_width'] >= W:
                 selected_tool = t
@@ -600,11 +544,11 @@ elif operation == "Face Milling":
         if not selected_tool:
             selected_tool = max(suitable_tools, key=lambda x: x['dia'])
     else:
-        dia_list = [t["dia"] for t in suitable_tools]
-        dia = st.selectbox("Select Tool Diameter", dia_list)
-        selected_tool = next(t for t in suitable_tools if t["dia"] == dia)
+        tool_names = [f"Dia {t['dia']}mm" for t in suitable_tools]
+        selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
+        selected_tool = next(t for t in suitable_tools if f"Dia {t['dia']}mm" == selected_tool_name)
 
-   # ================= 3. CALCULATIONS & MACHINE POWER CHECK =================
+    # 6. Calculations & Machine Power Check
     if selected_tool:
         tool_dia = selected_tool["dia"]
         max_width = selected_tool["max_width"]
@@ -612,37 +556,38 @@ elif operation == "Face Milling":
         feed = selected_tool["feed"]
         stock_limit = selected_tool["stock"]
 
-        # --- POWER VALIDATION ---
-        # Make sure this uses 'W' from your input section above
+        # Power calculation using W (width/dia) and stock_limit (ap)
         req_power = (W * stock_limit * feed) / 30000 
         
         st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
 
-        # --- PASSES & CYCLE TIME ---
-        # Ra logic: Use ra_input from sidebar (DELETE the local ra input!)
-        stock = st.number_input("Total Stock to Remove (mm)", value=2.0)
+        if req_power > m_power:
+            st.error(f"⚠️ Machine Overload! Required {req_power:.2f}kW exceeds {m_power}kW limit.")
+        else:
+            st.success(f"✅ Selected: Ø{tool_dia}mm | RPM: {rpm} | Feed: {feed}")
+
+        # 7. Passes & Cycle Time
+        total_stock = st.number_input("Total Stock to Remove (mm)", value=2.0, key="fm_total_stock")
         finish_required = ra_input < 1.6 
 
-        rough_stock = stock - 0.5 if finish_required else stock
+        rough_stock = total_stock - 0.5 if finish_required else total_stock
         passes = math.ceil(rough_stock / stock_limit)
         
-        # Calculate Cut Length
+        # Calculate Cut Length based on tool diameter and shape
         if shape == "Rectangular":
             width_passes = math.ceil(W / max_width)
             cut_length = (long_dim + tool_dia + 4) * width_passes
         else: # Circular
-            radial_passes = math.ceil(comp_dia / max_width)
+            radial_passes = math.ceil(W / max_width)
             if radial_passes == 1:
-                cut_length = comp_dia + tool_dia
+                cut_length = W + tool_dia
             else:
-                cut_length = (math.pi * (comp_dia + 5 - tool_dia) + comp_dia + tool_dia) * radial_passes
+                cut_length = (math.pi * (W + 5 - tool_dia) + W + tool_dia) * radial_passes
 
-        # --- FINAL RESULTS ---
-        st.success(f"Tool: Ø{tool_dia} | RPM: {rpm} | Feed: {feed}")
-        
-        if st.button("Calculate Milling Time"):
+        if st.button("Calculate Milling Time", key="fm_calc_btn"):
             time_min = (cut_length * passes) / feed
             if finish_required:
-                time_min += (cut_length / (feed * 0.8))
+                time_min += (cut_length / (feed * 0.8)) # 20% slower for finish
             
-            st.write(f"**Total Time:** {time_min * 60:.2f} seconds")
+            st.write(f"**Total Estimated Time:** {time_min * 60:.2f} seconds")
+            st.write(f"**Passes:** {passes} roughing passes of max {stock_limit}mm")
