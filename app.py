@@ -587,13 +587,12 @@ elif operation == "Face Milling":
         if shape == "Rectangular":
             width_passes = math.ceil(W / ae)
             cut_length = (long_dim + tool_dia + 4) * width_passes
-        else: # Circular
+       else: # This is the Circular case
         comp_dia = st.number_input("Component Diameter (mm)", value=100.0, key="fm_circ_dia")
         W = comp_dia  
         long_dim = comp_dia
 
         # NEW INTERPOLATION LOGIC:
-        # We calculate passes based on RADIUS because interpolation covers both sides.
         # radial_passes = (Part Radius) / (Tool Max Engagement)
         radial_passes = math.ceil((comp_dia / 2) / ae)
         
@@ -602,15 +601,14 @@ elif operation == "Face Milling":
             # Single circular pass around the perimeter
             cut_length = math.pi * comp_dia
         else:
-            # Multiple concentric circles. 
-            # We sum the circumferences of the outer ring and the necessary inner rings.
+            # Multiple concentric circles
             cut_length = 0
             for i in range(radial_passes):
                 # Each inner pass is smaller by the tool's effective width
                 effective_path_dia = comp_dia - (i * ae * 2)
-                if effective_path_dia < 0: effective_path_dia = 0
-                cut_length += math.pi * effective_path_diases
-
+                if effective_path_dia < 0: 
+                    effective_path_dia = 0
+                cut_length += math.pi * effective_path_dia
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
             time_min = (cut_length * passes) / vf
             if finish_required:
