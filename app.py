@@ -506,25 +506,27 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
 
-    # 1. System Detection & Material Guardrail
+    # 1. Material Guardrail
     if material != "Aluminium":
         st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
         st.stop()
         
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
-    # 2. Surface Finish Warning
+    # 2. Surface Finish Warning (PCD for very high finish)
     if ra_input < 0.8:
         st.warning("⚠️ High Precision Finish: Special PCD (Polycrystalline Diamond) tooling required for Ra < 0.8.")
 
-    # 3. Filtering Logic
+    # 3. Updated Filtering Logic
+    # We filter by Taper, but allow the tool if it CAN achieve the Ra 
+    # OR if we are going to use a finish pass to get there.
     suitable_tools = [
         tool for tool in face_mill_data_aluminium 
-        if m_taper in tool["spindles"] and tool.get("ra", 3.2) <= ra_input
+        if m_taper in tool["spindles"]
     ]
 
     if not suitable_tools:
-        st.error(f"No suitable Face Mills found for {m_taper} with Ra {ra_input}.")
+        st.error(f"No suitable Face Mills found for {m_taper} spindle.")
         st.stop()
 
     # 4. Shape & Selection Mode
@@ -578,17 +580,17 @@ elif operation == "Face Milling":
         else:
             st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
 
-        # --- PROCESS PARAMETERS (5.5mm Example Logic) ---
+        # --- PROCESS PARAMETERS (The 0.5mm Finish Pass Logic) ---
         total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
         
-        # Finish pass required for Ra between 0.8 and 3.2
-        finish_required = 0.8 <= ra_input < 3.2 
+        # Finish pass logic: Required if Ra is fine (less than 3.2)
+        finish_required = ra_input < 3.2 
         
         if finish_required and total_stock > 0.5:
             finish_pass_stock = 0.5
             rough_stock = total_stock - finish_pass_stock
             rough_passes = math.ceil(rough_stock / ap_limit)
-            st.info(f"Strategy: {rough_passes} Roughing passes + 1 Finishing pass (0.5mm).")
+            st.info(f"Strategy: {rough_passes} Roughing passes + 1 Finishing pass (0.5mm at 80% feed).")
         else:
             finish_pass_stock = 0
             rough_stock = total_stock
@@ -600,7 +602,6 @@ elif operation == "Face Milling":
             width_passes = math.ceil(W / ae)
             cut_length = (L + tool_dia + 4) * width_passes
         else:
-            # Machinist Realistic Circular Logic (Gap-Aware)
             if comp_dia <= ae:
                 cut_length = comp_dia + tool_dia + 10
             else:
@@ -619,7 +620,7 @@ elif operation == "Face Milling":
                     if pass_count > 15: break
                 cut_length = total_circ_dist + tool_dia
 
-        # --- FINAL CALCULATION AND BUTTON ---
+        # --- FINAL CALCULATION ---
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
             time_rough = (cut_length * rough_passes) / vf
             time_finish = (cut_length / (vf * 0.8)) if finish_pass_stock > 0 else 0
