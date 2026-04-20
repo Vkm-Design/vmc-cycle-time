@@ -266,21 +266,39 @@ else:
 # ==========================================
 if operation == "Drilling":
     st.subheader("Drilling Calculator")
-    dia = st.number_input("Drill Diameter (mm)", value=10.0, step=0.1, key="dr_dia_in")
-    dep = st.number_input("Depth (mm)", value=20.0, step=1.0, key="dr_dep_in")
-    cnt = st.number_input("Number of Holes", value=1, step=1, key="dr_cnt_in")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        dia = st.number_input("Drill Diameter (mm)", value=10.0, step=0.1, key="dr_dia_in")
+        dep = st.number_input("Drawing Depth (mm)", value=20.0, step=1.0, key="dr_dep_in")
+    with col2:
+        # --- DROPDOWN SELECTION ADDED HERE ---
+        hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="dr_hole_type")
+        cnt = st.number_input("Number of Holes", value=1, step=1, key="dr_cnt_in")
+
+    # --- CALCULATION OF ACTUAL CUT LENGTH ---
+    # Drill point length (standard 118 degree point)
+    point_length = (0.18 * dia) if dia < 20 else 0
+    
+    if hole_type == "Blind Hole":
+        # Rule: Depth + 3mm safety + point length
+        actual_cut_depth = dep + 3 + point_length
+    else:
+        # Rule: Depth + 3mm safety + 3mm breakthrough + point length
+        actual_cut_depth = dep + 3 + 3 + point_length
 
     # Use your existing helper function
     rpm, f_min, mx_dep = get_parameters(dia, material)
     
     if rpm:
-        st.write(f"**RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
+        st.write(f"**Travel:** {round(actual_cut_depth, 2)} mm (incl. {round(point_length, 2)}mm point)")
         f_rev = f_min / rpm
+        
         # Drilling Power Formula
         p_req = (f_rev * (rpm * math.pi * dia / 1000) * dia * kc) / (240000 * 0.8)
         t_req = (p_req * 9550) / rpm
         
-        st.write(f"**Power:** {round(p_req, 2)} kW | **Torque:** {round(t_req, 2)} Nm")
+        st.write(f"**Params:** {int(rpm)} RPM | {f_min} mm/min | {round(p_req, 2)} kW | {round(t_req, 1)} Nm")
         
         if p_req <= m_power and t_req <= m_torque:
             st.success("✅ Machine Capacity OK")
@@ -288,7 +306,8 @@ if operation == "Drilling":
             st.error("❌ Machine Capacity Exceeded")
             
         if st.button("Calculate Time", key="drill_time_btn"):
-            st.info(f"Total Time: {round((dep/f_min)*cnt*60, 2)} seconds")
+            total_t = (actual_cut_depth / f_min) * cnt * 60
+            st.info(f"Total Time: {round(total_t, 2)} seconds")
     else:
         st.error("Diameter not in database")
 
@@ -306,23 +325,27 @@ elif operation == "Boring / Hole Milling":
     col1, col2 = st.columns(2)
     with col1:
         f_dia = float(st.number_input("Finish Bore Diameter (mm)", value=33.0, step=0.1, key="bor_f_dia"))
-        b_dep = float(st.number_input("Bore Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
+        b_dep = float(st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
     
-    e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
+    col3, col4 = st.columns(2)
+    with col3:
+        # --- DROPDOWN SELECTION ADDED HERE FOR BORING ---
+        bor_hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="bor_hole_type")
+    with col4:
+        e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
     
+    # Calculate boring travel depth (Flat bottom tool, no point length)
+    actual_boring_depth = b_dep + 3 if bor_hole_type == "Blind Hole" else b_dep + 3 + 3
+
     # --- 2. DATA LOADING & DRILL SELECTION ---
     drill_list = globals().get('drill_data_aluminium') or locals().get('drill_data_aluminium')
-    
     if not drill_list:
-        st.error("Drill database (drill_data_aluminium) is missing.")
+        st.error("Drill database missing.")
         st.stop()
 
     s_dia = 0.0
     drill_row = None
-    max_drill_available = max([float(d.get("max_d", 0)) for d in drill_list])
-
     if e_mode == "Solid":
-        # Find the largest drill in the table that is smaller than f_dia
         qualified_drills = [d for d in drill_list if float(d.get("max_d", 0)) < f_dia]
         if qualified_drills:
             drill_row = max(qualified_drills, key=lambda x: x["max_d"])
@@ -330,85 +353,65 @@ elif operation == "Boring / Hole Milling":
     else:
         s_dia = float(st.number_input("Existing Core Diameter (mm)", value=28.0, key="bor_s_dia"))
 
-    # --- 3. FORCE BORING LOGIC ---
-    # We force boring if:
-    # 1. It's a Core Hole
-    # 2. Finish Dia > Largest available Drill (Ø30)
-    # 3. Size is exactly at drill size but tolerance/Ra is tight
+    # Force Boring Logic
     limit = 0.2 if f_dia > 20 else 0.1
-    needs_boring = False
-    
-    if e_mode == "Core Hole":
-        needs_boring = True 
-    elif f_dia > s_dia: # If finish is bigger than the pre-drill, we MUST bore
-        needs_boring = True
-    elif ra_input < 3.2 or tol_input < limit:
-        needs_boring = True 
+    needs_boring = True if (e_mode == "Core Hole" or f_dia > s_dia or ra_input < 3.2 or tol_input < limit) else False
 
-    # --- 4. EXECUTION ---
+    # --- 3. EXECUTION ---
     total_time_sec = 0.0
 
-    # PART A: DRILLING STEP (Only if Solid)
+    # PART A: DRILLING STEP (Uses through/blind logic)
     if e_mode == "Solid" and drill_row:
-        st.success(f"Step 1: Drilling Ø{s_dia}")
+        dr_point = (0.18 * s_dia) if s_dia < 20 else 0
+        dr_travel = (b_dep + 3 + dr_point) if bor_hole_type == "Blind Hole" else (b_dep + 3 + 3 + dr_point)
+        
+        st.success(f"Step 1: Drilling Ø{s_dia} (Travel: {round(dr_travel,2)}mm)")
         d_rpm = float(drill_row.get("rpm", (1000 * drill_row.get("vc", 0)) / (3.14 * s_dia)))
         d_feed = float(drill_row["feed_min"])
         d_f_rev = d_feed / d_rpm if d_rpm > 0 else 0
         
-        # Power calculation
         p_drill = (d_f_rev * (d_rpm * 3.14 * s_dia / 1000) * s_dia * kc) / (240000 * 0.8)
         t_drill = (p_drill * 9550) / d_rpm if d_rpm > 0 else 0
         
-        d_time = (b_dep / d_feed) * 60
+        d_time = (dr_travel / d_feed) * 60
         total_time_sec += d_time
-        st.write(f"**Params:** {int(d_rpm)} RPM | {int(d_feed)} mm/min | {round(p_drill,2)} kW | {round(t_drill,1)} Nm")
+        st.write(f"**Drill Params:** {int(d_rpm)} RPM | {int(d_feed)} mm/min | {round(p_drill,2)} kW")
 
-    # PART B: BORING STEP
+    # PART B: BORING STEP (Uses flat travel distance)
     if needs_boring:
         st.divider()
-        st.info("Step 2: Boring Cycle")
-        
+        st.info(f"Step 2: Boring Cycle (Travel: {actual_boring_depth}mm)")
         params = get_boring_params(f_dia, material)
         if params:
             max_stk = float(params.get("ap", 0.5)) * 2
             dist_to_cut = f_dia - s_dia
             
-            # Ensure there is actually material to remove
             if dist_to_cut > 0:
                 tools_n = math.ceil(dist_to_cut / max_stk)
                 curr_d1 = s_dia
-                
                 for i in range(tools_n):
                     step_d = s_dia + (dist_to_cut / tools_n) * (i + 1)
                     p = get_boring_params(step_d, material)
-                    
                     if p:
                         rpm_b = float(p.get("rpm", 0))
                         f_b = float(p.get("feed_min", 0))
                         ap_pass = (step_d - curr_d1) / 2
                         
-                        # Safety adjust for L/D > 3
-                        if b_dep > (3 * step_d):
-                            st.warning(f"⚠️ L/D > 3 on Ø{round(step_d,2)}")
+                        if actual_boring_depth > (3 * step_d):
+                            st.warning(f"⚠️ L/D > 3 safety adjust on Ø{round(step_d,2)}")
                             rpm_b *= 0.7
                             f_b *= 0.8
                         
-                        # Power/Torque calculation
                         vc_b = (3.14 * step_d * rpm_b) / 1000
                         f_rev_b = f_b / rpm_b if rpm_b > 0 else 0
                         p_boring = (vc_b * f_rev_b * ap_pass * kc) / (48000)
-                        t_boring = (p_boring * 9550) / rpm_b if rpm_b > 0 else 0
                         
-                        pass_time = (b_dep / f_b) * 60
+                        pass_time = (actual_boring_depth / f_b) * 60
                         total_time_sec += pass_time
                         
                         st.write(f"**Pass {i+1}:** Ø{round(step_d,2)} | {int(rpm_b)} RPM | {int(f_b)} mm/min | **{round(p_boring,2)} kW**")
                         curr_d1 = step_d
-            else:
-                st.warning("Finish diameter matches pre-drill diameter. No boring required.")
-        else:
-            st.error(f"Boring parameters missing for Ø{f_dia}")
-
+    
     st.divider()
     st.metric("Total Combined Cycle Time", f"{round(total_time_sec, 2)} sec")
 elif operation == "Tapping":
