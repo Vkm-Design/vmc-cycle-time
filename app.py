@@ -275,32 +275,31 @@ if operation == "Drilling":
         hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="dr_hole_type")
         cnt = st.number_input("Number of Holes", value=1, step=1, key="dr_cnt_in")
 
-    # --- SMART DRILLING VALIDATION ---
+    # --- SMART DRILLING VALIDATION (MULTIPLE WARNINGS) ---
     st.divider()
-    drill_is_feasible = True
-    dr_warning = ""
+    drill_errors = []
 
     # 1. Surface Finish Check
     if ra_input < 3.2:
-        dr_warning = f"🚨 Ra {ra_input} is too fine for a drill. Switch to 'Boring' or use a Reamer."
-        drill_is_feasible = False
+        drill_errors.append(f"🚨 **Surface Finish:** Ra {ra_input} is too fine for a drill. Switch to 'Boring' or use a Reamer.")
     
     # 2. Tolerance Check
     if dia <= 20 and tol_input < 0.1:
-        dr_warning = "🚨 Tolerance < ±0.1 requires Boring for this diameter."
-        drill_is_feasible = False
+        drill_errors.append(f"🚨 **Tolerance:** ±{tol_input} requires Boring for Ø{dia} (Carbide limit is ±0.1).")
     elif dia > 20 and tol_input < 0.2:
-        dr_warning = "🚨 Tolerance < ±0.2 requires Boring for diameters > 20mm."
-        drill_is_feasible = False
+        drill_errors.append(f"🚨 **Tolerance:** ±{tol_input} requires Boring for Ø{dia} (Drill limit is ±0.2).")
 
-    if not drill_is_feasible:
-        st.error(dr_warning)
+    # Display all errors if they exist
+    if drill_errors:
+        for error in drill_errors:
+            st.error(error)
     else:
         st.success("✅ Parameters feasible for Drilling.")
 
     # --- DRILLING EXECUTION ---
     point_length = (0.18 * dia) if dia < 20 else 0
     actual_cut_depth = (dep + 3 + point_length) if hole_type == "Blind Hole" else (dep + 6 + point_length)
+    # ... (Rest of your drilling RPM/Power code remains the same)
 
     rpm, f_min, mx_dep = get_parameters(dia, material)
     
@@ -339,39 +338,48 @@ elif operation == "Boring / Hole Milling":
     with col4:
         e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
 
-    # --- SMART FEASIBILITY FEEDBACK ---
+    # --- SMART FEASIBILITY FEEDBACK (MULTIPLE NOTES) ---
     st.divider()
+    process_notes = []
     needs_boring = False
-    eng_note = ""
 
-    # A. Surface Finish Logic (PCD / Reamer range)
+    # A. Surface Finish Note
     if ra_input < 0.6:
-        st.error(f"❌ Ra {ra_input} too fine. Consider Grinding/Honing.")
+        process_notes.append(f"❌ **Finish Alert:** Ra {ra_input} too fine for boring. Consider Grinding.")
         needs_boring = True
     elif 0.6 <= ra_input < 1.6:
-        eng_note = "✨ High Finish: **Finish Boring (PCD Insert)** or **Reaming** recommended."
+        process_notes.append("✨ **Finish:** High Finish required. Use **PCD Insert** or **Reaming**.")
         needs_boring = True
     elif 1.6 <= ra_input < 3.2:
-        eng_note = "🛠️ Medium Finish: **Standard Finish Boring Bar** required."
+        process_notes.append("🛠️ **Finish:** Medium Finish. **Standard Finish Boring Bar** required.")
         needs_boring = True
     else:
-        eng_note = "✅ Surface Finish Ra 3.2+ achievable with Drilling."
+        process_notes.append("✅ **Finish:** Ra 3.2+ is achievable with standard Drilling.")
 
-    # B. Tolerance / Diameter Logic
+    # B. Tolerance / Diameter Note
     if f_dia <= 20:
-        if tol_input >= 0.1:
-            if not needs_boring: eng_note = "✅ Feasible with **Carbide Drill** (Tol ±0.1+)."
-        else:
-            eng_note = "🚨 Fine Tol < ±0.1: **Boring/Hole Mill** required."
+        if tol_input < 0.1:
+            process_notes.append(f"🚨 **Precision:** Tol ±{tol_input} requires **Boring/Hole Mill** (Ø <= 20).")
             needs_boring = True
+        else:
+            process_notes.append("✅ **Precision:** ±0.1+ is feasible with Carbide Drill.")
     else: # Dia > 20
-        if tol_input >= 0.2:
-            if not needs_boring: eng_note = "✅ Feasible with **Drill** (Tol ±0.2+)."
-        else:
-            eng_note = "🚨 Tol < ±0.2: **Boring** required for accuracy."
+        if tol_input < 0.2:
+            process_notes.append(f"🚨 **Precision:** Tol ±{tol_input} requires **Boring** (Ø > 20).")
             needs_boring = True
+        else:
+            process_notes.append("✅ **Precision:** ±0.2+ is feasible with standard Drilling.")
 
-    if e_mode == "Core Hole": needs_boring = True
+    # Display all notes
+    for note in process_notes:
+        if "🚨" in note or "❌" in note:
+            st.warning(note)
+        else:
+            st.info(note)
+
+    if e_mode == "Core Hole":
+        needs_boring = True
+    # ... (Rest of your boring execution code remains the same)
 
     st.info(f"**Process Selection:** {eng_note}")
 
