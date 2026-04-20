@@ -263,6 +263,7 @@ else:
     tol_input = 0.1
 # ==========================================
 # ==========================================
+# ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
 if operation == "Drilling":
@@ -276,162 +277,83 @@ if operation == "Drilling":
         hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="dr_hole_type")
         cnt = st.number_input("Number of Holes", value=1, step=1, key="dr_cnt_in")
 
-    # --- SMART DRILLING VALIDATION ---
-    st.divider()
+    # --- SMART VALIDATION ---
     drill_errors = []
-    
     if ra_input < 3.2:
-        drill_errors.append(f"🚨 **Surface Finish:** Ra {ra_input} is too fine for a drill. Switch to Boring or use a Reamer.")
-    
-    if dia <= 20 and tol_input < 0.1:
-        drill_errors.append(f"🚨 **Tolerance:** ±{tol_input} requires Boring for Ø{dia} (Carbide limit ±0.1).")
-    elif dia > 20 and tol_input < 0.2:
-        drill_errors.append(f"🚨 **Tolerance:** ±{tol_input} requires Boring for Ø{dia} (Drill limit ±0.2).")
+        drill_errors.append(f"🚨 **Surface Finish:** Ra {ra_input} too fine for a drill.")
+    if (dia <= 20 and tol_input < 0.1) or (dia > 20 and tol_input < 0.2):
+        drill_errors.append(f"🚨 **Tolerance:** ±{tol_input} requires Boring.")
 
-    if drill_errors:
-        for error in drill_errors:
-            st.error(error)
-    else:
-        st.success("✅ Parameters feasible for Drilling.")
+    for error in drill_errors: st.error(error)
 
-    # Execution
+    # Drilling Power Logic
     point_length = (0.18 * dia) if dia < 20 else 0
     actual_cut_depth = (dep + 3 + point_length) if hole_type == "Blind Hole" else (dep + 6 + point_length)
-    rpm, f_min, mx_dep = get_parameters(dia, material)
+    rpm, f_min, _ = get_parameters(dia, material)
     
     if rpm:
-        st.write(f"**Travel:** {round(actual_cut_depth, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
+        v_c = (math.pi * dia * rpm) / 1000
         f_rev = f_min / rpm
-        p_req = (f_rev * (rpm * math.pi * dia / 1000) * dia * kc) / (240000 * 0.8)
-        t_req = (p_req * 9550) / rpm
-        st.write(f"**Power:** {round(p_req, 2)} kW | **Torque:** {round(t_req, 1)} Nm")
-        
-        if st.button("Calculate Time", key="drill_time_btn"):
-            total_t = (actual_cut_depth / f_min) * cnt * 60
-            st.info(f"Total Time: {round(total_t, 2)} seconds")
-    else:
-        st.error("Diameter not in database")
+        p_req = (f_rev * v_c * dia * kc) / (240000 * 0.8) # Your Drilling Formula
+        st.write(f"**Travel:** {round(actual_cut_depth, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
+        st.write(f"**Power:** {round(p_req, 2)} kW | **Torque:** {round((p_req * 9550) / rpm, 1)} Nm")
 
 # ==========================================
 # 5. OPERATION: BORING / HOLE MILLING
 # ==========================================
 elif operation == "Boring / Hole Milling":
-    if material != "Aluminium":
-        st.error(f"⚠️ Boring data for {material} is under preparation.")
-        st.stop()
-
     st.subheader("Boring & Hole Mill Planner (Aluminium)")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        f_dia = float(st.number_input("Finish Bore Diameter (mm)", value=33.0, step=0.1, key="bor_f_dia"))
-        b_dep = float(st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
-    
-    col3, col4 = st.columns(2)
-    with col3:
-        bor_hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="bor_hole_type")
-    with col4:
-        e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
+    f_dia = float(st.number_input("Finish Bore Diameter (mm)", value=48.0, step=0.1, key="bor_f_dia"))
+    b_dep = float(st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
+    e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True)
 
-    # --- SMART FEASIBILITY FEEDBACK ---
+    # --- FEASIBILITY FEEDBACK ---
     st.divider()
-    process_notes = []
-    needs_boring = False
+    if tol_input < 0.1:
+        st.error(f"🚨 **Fine Precision:** ±{tol_input} requires a Fine Boring Bar.")
+    elif ra_input < 1.6:
+        st.info("✨ **PCD Insert** recommended for Aluminium high-finish.")
 
-    # A. Surface Finish Check
-    if ra_input < 0.6:
-        process_notes.append(f"❌ **Finish Alert:** Ra {ra_input} too fine for boring. Consider Grinding.")
-        needs_boring = True
-    elif 0.6 <= ra_input < 1.6:
-        process_notes.append("✨ **Finish:** High Finish. Use **PCD Insert** or **Reaming**.")
-        needs_boring = True
-    elif 1.6 <= ra_input < 3.2:
-        process_notes.append("🛠️ **Finish:** Medium Finish. **Finish Boring Bar** required.")
-        needs_boring = True
-    else:
-        process_notes.append("✅ **Finish:** Ra 3.2+ achievable with Drilling.")
+    # --- MULTI-TOOL "STOCK JUMP" LOGIC ---
+    # Using your diametrical ap table
+    boring_table = [
+        {'max_range': 30, 'rpm': 2801, 'feed': 560.15, 'max_ap': 6},
+        {'max_range': 35, 'rpm': 2546, 'feed': 509.22, 'max_ap': 6},
+        {'max_range': 40, 'rpm': 2273, 'feed': 454.66, 'max_ap': 8},
+        {'max_range': 45, 'rpm': 1989, 'feed': 477.40, 'max_ap': 10},
+        {'max_range': 50, 'rpm': 1980, 'feed': 435.67, 'max_ap': 10},
+    ]
 
-    # B. Tolerance Check
-    if f_dia <= 20:
-        if tol_input < 0.1:
-            process_notes.append(f"🚨 **Precision:** Tol ±{tol_input} requires Boring (Ø <= 20).")
-            needs_boring = True
-        else:
-            process_notes.append("✅ **Precision:** ±0.1+ feasible with Carbide Drill.")
-    else:
-        if tol_input < 0.2:
-            process_notes.append(f"🚨 **Precision:** Tol ±{tol_input} requires Boring (Ø > 20).")
-            needs_boring = True
-        else:
-            process_notes.append("✅ **Precision:** ±0.2+ feasible with standard Drilling.")
-
-    if e_mode == "Core Hole":
-        needs_boring = True
-
-    # Display all notes (Fixed the eng_note error here)
-    for note in process_notes:
-        if "🚨" in note or "❌" in note:
-            st.error(note)
-        else:
-            st.info(note)
-
-    # --- EXECUTION ---
-    drill_list = globals().get('drill_data_aluminium')
-    s_dia = 0.0
-    drill_row = None
-    actual_boring_depth = b_dep + 3 if bor_hole_type == "Blind Hole" else b_dep + 6
+    actual_bor_dep = b_dep + 3 if "Blind" in locals().get('bor_hole_type', "Blind") else b_dep + 6
+    current_dia = 30.0 if e_mode == "Solid" else float(st.number_input("Core Dia", value=30.0))
+    total_time = 0.0
 
     if e_mode == "Solid":
-        if not needs_boring:
-            qualified = [d for d in drill_list if float(d.get("min_d",0)) <= f_dia <= float(d.get("max_d",0))]
-            if qualified:
-                drill_row = qualified[0]
-                s_dia = f_dia
-        else:
-            qualified = [d for d in drill_list if float(d.get("max_d", 0)) < f_dia]
-            if qualified:
-                drill_row = max(qualified_drills if 'qualified_drills' in locals() else qualified, key=lambda x: x["max_d"])
-                s_dia = float(drill_row["max_d"])
-    else:
-        s_dia = float(st.number_input("Existing Core Diameter (mm)", value=28.0, key="bor_s_dia"))
+        st.success("Step 1: Drilling Ø30.0")
+        total_time += (actual_bor_dep / 560) * 60 # Drill time based on Ø30 parameters
 
-    total_time_sec = 0.0
+    st.info("Step 2: Boring Tool Sequence")
+    while current_dia < f_dia:
+        tool = next((t for t in boring_table if current_dia < t['max_range']), None)
+        if not tool: break
+        
+        # Determine jump size (diametrical ap)
+        target_dia = min(f_dia, current_dia + tool['max_ap'])
+        ap_dia = target_dia - current_dia
+        
+        # Boring Power Formula (As requested)
+        v_c_b = (math.pi * target_dia * tool['rpm']) / 1000
+        f_rev_b = tool['feed'] / tool['rpm']
+        p_bor = (v_c_b * f_rev_b * ap_dia * kc) / 48000
+        
+        pass_time = (actual_bor_dep / tool['feed']) * 60
+        total_time += pass_time
+        
+        st.write(f"**Tool:** Ø{current_dia} ➔ Ø{target_dia} | Power: **{round(p_bor, 2)} kW** | Time: {round(pass_time, 1)}s")
+        current_dia = target_dia
 
-    # Step 1: Pre-Drill
-    if e_mode == "Solid" and drill_row:
-        dr_point = (0.18 * s_dia) if s_dia < 20 else 0
-        dr_travel = (b_dep + 3 + dr_point) if bor_hole_type == "Blind Hole" else (b_dep + 6 + dr_point)
-        st.success(f"Step 1: Drilling Ø{s_dia}")
-        d_rpm = float(drill_row.get("rpm", (1000 * drill_row.get("vc", 0)) / (3.14 * s_dia)))
-        d_feed = float(drill_row["feed_min"])
-        d_time = (dr_travel / d_feed) * 60
-        total_time_sec += d_time
-        st.write(f"Drill Time: {round(d_time,1)}s")
-
-    # Step 2: Boring
-    if needs_boring and f_dia > s_dia:
-        st.divider()
-        st.info(f"Step 2: Boring Cycle (Travel: {actual_boring_depth}mm)")
-        params = get_boring_params(f_dia, material)
-        if params:
-            dist_to_cut = f_dia - s_dia
-            max_stk = float(params.get("ap", 0.5)) * 2
-            tools_n = math.ceil(dist_to_cut / max_stk)
-            for i in range(tools_n):
-                step_d = s_dia + (dist_to_cut / tools_n) * (i + 1)
-                p = get_boring_params(step_d, material)
-                if p:
-                    rpm_b = float(p.get("rpm", 0))
-                    f_b = float(p.get("feed_min", 0))
-                    if actual_boring_depth > (3 * step_d):
-                        rpm_b *= 0.7
-                        f_b *= 0.8
-                    pass_time = (actual_boring_depth / f_b) * 60
-                    total_time_sec += pass_time
-                    st.write(f"**Pass {i+1}:** Ø{round(step_d,2)} | Time: {round(pass_time,1)}s")
-
-    st.divider()
-    st.metric("Total Combined Cycle Time", f"{round(total_time_sec, 2)} sec")
+    st.metric("Total Combined Cycle Time", f"{round(total_time, 2)} sec")
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
