@@ -282,29 +282,36 @@ if operation == "Drilling":
     
     col1, col2 = st.columns(2)
     with col1:
-        dia = st.number_input("Drill Diameter (mm)", value=29.50, step=0.1, key="dr_dia_in")
+        dia = st.number_input("Drill Diameter (mm)", value=25.0, step=0.1, key="dr_dia_in")
         dep = st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="dr_dep_in")
     with col2:
         hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="dr_ht")
         cnt = st.number_input("Number of Holes", value=1, step=1, key="dr_cnt_in")
 
-    # travel logic
-    point_len = (0.18 * dia) if dia < 20 else 0
-    actual_cut_depth = (dep + 3 + point_len) if hole_type == "Blind Hole" else (dep + 6 + point_len)
+    # --- UPDATED TRAVEL LOGIC (U-DRILL VS TWIST DRILL) ---
+    # Point length is only used for diameters <= 20mm
+    point_len = (0.18 * dia) if dia <= 20 else 0
     
+    if hole_type == "Through Hole":
+        actual_travel = dep + 3 + 3 + point_len
+    else:
+        actual_travel = dep + 3 + point_len
+    
+    # Parameter Lookup
     rpm, f_min, _ = get_parameters(dia, material)
     
     if rpm:
         v_c = (math.pi * dia * rpm) / 1000
         f_rev = f_min / rpm
+        # Power = (Frev * Vc * Dia * Kc) / (240000 * 0.8)
         p_req = (f_rev * v_c * dia * kc) / (240000 * 0.8)
-        dr_time = (actual_cut_depth / f_min) * cnt * 60 
+        dr_time = (actual_travel / f_min) * cnt * 60 
         
-        st.write(f"**Travel:** {round(actual_cut_depth, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
+        st.write(f"**Travel:** {round(actual_travel, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
 
         if p_req > machine_power:
-            st.error(f"⚠️ **Power Alert:** {round(p_req,2)}kW exceeds {selected_machine} limit.")
+            st.error(f"🚨 **Power Alert:** {round(p_req,2)}kW exceeds {selected_machine} limit.")
         else:
             st.success(f"✅ Power within machine capacity.")
 
@@ -316,7 +323,7 @@ if operation == "Drilling":
 # ==========================================
 elif operation == "Boring / Hole Milling":
     if material != "Aluminium":
-        st.warning("⚠️ Boring currently optimized for Aluminium.")
+        st.warning("⚠️ Boring optimized for Aluminium.")
         st.stop()
 
     st.subheader(f"Boring Planner ({selected_machine})")
@@ -324,7 +331,7 @@ elif operation == "Boring / Hole Milling":
     col1, col2 = st.columns(2)
     with col1:
         f_dia = float(st.number_input("Finish Bore Diameter (mm)", value=48.0, step=0.1, key="bor_f_dia"))
-        b_dep = float(st.number_input("Bore Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
+        b_dep = float(st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
     
     col3, col4 = st.columns(2)
     with col3:
@@ -332,31 +339,73 @@ elif operation == "Boring / Hole Milling":
     with col4:
         e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
 
-    # Consistent Travel Logic
-    actual_travel = (b_dep + 3) if bor_hole_type == "Blind Hole" else (b_dep + 6)
+    # --- BORING DATA TABLE (cite: image_fab2cf.png) ---
+    boring_table = [
+        {'range': 25, 'rpm': 2864, 'feed': 515.59, 'max_ap': 5},
+        {'range': 30, 'rpm': 2801, 'feed': 560.15, 'max_ap': 6},
+        {'range': 35, 'rpm': 2546, 'feed': 509.22, 'max_ap': 6},
+        {'range': 40, 'rpm': 2273, 'feed': 454.66, 'max_ap': 8},
+        {'range': 45, 'rpm': 1989, 'feed': 477.40, 'max_ap': 10},
+        {'range': 50, 'rpm': 1980, 'feed': 435.67, 'max_ap': 10}
+    ]
+
     total_time_sec = 0.0
 
-    # Step 1: Pre-Drill (Now matches Drilling Calculator exactly)
+    # Step 1: Pre-Drill (Uses same U-Drill vs Twist Drill logic)
     if e_mode == "Solid":
         drill_dia = 30.0
-        # Drill parameters from your table
-        d_rpm = 2801 
-        d_feed = 560.15 
-        d_point = (0.18 * drill_dia) if drill_dia < 20 else 0
-        d_travel = (b_dep + 3 + d_point) if bor_hole_type == "Blind Hole" else (b_dep + 6 + d_point)
+        d_rpm = 2801
+        d_feed = 560.15
+        # Since 30.0 > 20, point_len = 0
+        d_point = (0.18 * drill_dia) if drill_dia <= 20 else 0
         
+        if bor_hole_type == "Through Hole":
+            d_travel = b_dep + 3 + 3 + d_point
+        else:
+            d_travel = b_dep + 3 + d_point
+            
         d_time = (d_travel / d_feed) * 60
         total_time_sec += d_time
         st.success(f"Step 1: Drilling Ø{drill_dia} | Travel: {round(d_travel, 1)}mm | Time: {round(d_time, 2)}s")
         current_dia = drill_dia
     else:
-        current_dia = float(st.number_input("Existing Core Dia", value=30.0, key="c_dia_in"))
+        current_dia = float(st.number_input("Existing Core Dia", value=30.0, key="bor_core_in"))
 
     # Step 2: Boring Sequence
     st.info("Step 2: Boring Tool Sequence")
-    # ... (Keep your existing boring loop here, but use 'actual_travel' for time)
-    # Example for one pass:
-    # p_time = (actual_travel / tool['feed']) * 60
+    # Boring travel is always Depth + 3 (Blind) or Depth + 6 (Through)
+    bor_travel = (b_dep + 3) if bor_hole_type == "Blind Hole" else (b_dep + 6)
+    power_exceeded = False
+
+    while current_dia < f_dia:
+        tool = next((t for t in boring_table if current_dia < t['range']), None)
+        if not tool: break
+        
+        d1, d2 = current_dia, min(f_dia, current_dia + tool['max_ap'])
+        
+        # Power = (Vc * f_rev * radial_ap * Kc) / (60 * 1000 * 0.8)
+        vc = (math.pi * d2 * tool['rpm']) / 1000
+        f_rev = tool['feed'] / tool['rpm']
+        radial_ap = (d2 - d1) / 2
+        
+        p_bor = (vc * f_rev * radial_ap * kc) / (60 * 1000 * 0.8)
+        p_time = (bor_travel / tool['feed']) * 60
+        total_time_sec += p_time
+        
+        st.write(f"**Pass:** Ø{d1} ➔ Ø{d2} | Power: **{round(p_bor, 2)} kW** | Time: {round(p_time, 1)}s")
+        
+        if p_bor > machine_power:
+            power_exceeded = True
+        current_dia = d2
+
+    st.divider()
+    if power_exceeded:
+        st.error(f"❌ **Power Alert:** Sequence exceeds {selected_machine} limit.")
+    else:
+        st.success(f"✅ Power within {selected_machine} capacity.")
+
+    if st.button("Calculate Total Boring Cycle Time", key="bor_total"):
+        st.metric("Total Combined Cycle Time", f"{round(total_time_sec, 2)} sec")
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
