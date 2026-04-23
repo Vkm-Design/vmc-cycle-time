@@ -232,9 +232,13 @@ def select_tool_circular(dia, tools):
     return None
 
 # ==========================================
+# ==========================================
 # 3. GLOBAL SELECTIONS & APP UI
 # ==========================================
 st.title("Smart Machining Calculator")
+
+# MOVE THIS TO THE TOP: Define 'operation' first so the sidebar can use it
+operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
 
 # --- GLOBAL SELECTIONS ---
 st.sidebar.header("Global Settings")
@@ -253,7 +257,7 @@ m_taper = machine_data[machine].get("taper", "BT40")
 st.sidebar.info(f"Machine Cap: {m_power}kW | {m_torque}Nm")
 st.sidebar.markdown("---")
 
-# 3. SMART QUALITY REQUIREMENTS (Conditional Visibility)
+# 3. SMART QUALITY REQUIREMENTS (Now 'operation' is defined, so this won't crash)
 if operation != "Tapping":
     st.sidebar.header("Quality Requirements")
     # Ra is visible for everything except Tapping
@@ -263,15 +267,12 @@ if operation != "Tapping":
     if operation in ["Drilling", "Boring / Hole Milling"]:
         tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.100, format="%.3f", key="sidebar_tol")
     else:
-        tol_input = 0.1
+        tol_input = 0.1 # Default for Face Milling
 else:
+    # Default values for Tapping to prevent calculation errors later
     ra_input, tol_input = 3.2, 0.1
 
 st.sidebar.markdown("---")
-
-# Main Operation Menu
-operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
-# ==========================================
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
