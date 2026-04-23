@@ -25,18 +25,7 @@ machine_data = {
     "Makino PS65 BT40": {"power": 18.5, "torque": 95, "taper": "BT40"},
     "Makino PS65 HSK63": {"power": 18.5, "torque": 95, "taper": "HSK A63"}
 }
-# --- MACHINE SELECTION UI ---
-selected_machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()))
 
-
-# --- ASSIGN GLOBAL VARIABLES ---
-# This pulls the numbers out of your dictionary so the code can use them
-machine_power = machine_data[selected_machine]["power"]
-machine_torque = machine_data[selected_machine]["torque"]
-machine_taper = machine_data[selected_machine]["taper"]
-
-# Visual confirmation for the operator
-st.sidebar.info(f"Machine Cap: {machine_power}kW | {machine_torque}Nm")
 
 drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
@@ -237,27 +226,27 @@ def select_tool_circular(dia, tools):
 # ==========================================
 st.title("Smart Machining Calculator")
 
-# Define 'operation' first so the sidebar can reference it
+# Define operation first so sidebar can use it for visibility logic
 operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
 
-# --- GLOBAL SETTINGS ---
 st.sidebar.header("Global Settings")
 
+# 1. Material Selection
 material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
 kc = kc_data[material]
 
-# THE ONLY MACHINE PICKER: Uses the variable 'machine' for the whole app
+# 2. THE ONLY MACHINE PICKER (Syncs with all logic)
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
-# Lookup machine specs
+# 3. Assign Machine Specs
 m_power = machine_data[machine]["power"]
 m_torque = machine_data[machine]["torque"]
 m_taper = machine_data[machine].get("taper", "BT40") 
 
-st.sidebar.info(f"Machine Cap: {m_power}kW | {m_torque}Nm")
+st.sidebar.info(f"Machine Cap: {m_power}kW | {m_torque}Nm | {m_taper}")
 st.sidebar.markdown("---")
 
-# 4. SMART QUALITY REQUIREMENTS
+# 4. QUALITY REQUIREMENTS (For L/D, Ra, and Tolerance logic)
 if operation != "Tapping":
     st.sidebar.header("Quality Requirements")
     ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=3.2, step=0.1, key="sidebar_ra")
@@ -267,7 +256,9 @@ if operation != "Tapping":
     else:
         tol_input = 0.1
 else:
-    ra_input, tol_input = 3.2, 0.1 # Defaults for Tapping
+    ra_input, tol_input = 3.2, 0.1
+    
+# ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
 if operation == "Drilling":
