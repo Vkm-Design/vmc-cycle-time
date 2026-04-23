@@ -25,7 +25,8 @@ machine_data = {
     "Makino PS65 BT40": {"power": 18.5, "torque": 95, "taper": "BT40"},
     "Makino PS65 HSK63": {"power": 18.5, "torque": 95, "taper": "HSK A63"}
 }
-
+# --- MACHINE SELECTION UI ---
+selected_machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()))
 
 
 # --- ASSIGN GLOBAL VARIABLES ---
