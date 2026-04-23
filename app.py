@@ -236,43 +236,41 @@ def select_tool_circular(dia, tools):
 # ==========================================
 st.title("Smart Machining Calculator")
 
-# Main Operation Menu
-operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
-
 # --- GLOBAL SELECTIONS ---
 st.sidebar.header("Global Settings")
 
-# 1. Material Selection
+# 1. Material & Machine Selection
 material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
 kc = kc_data[material]
 
-# 2. Machine Selection
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
-# 3. Machine Data Lookup
+# 2. Machine Data Lookup
 m_power = machine_data[machine]["power"]
 m_torque = machine_data[machine]["torque"]
 m_taper = machine_data[machine].get("taper", "BT40") 
 
+st.sidebar.info(f"Machine Cap: {m_power}kW | {m_torque}Nm")
 st.sidebar.markdown("---")
 
-# 4. SMART QUALITY REQUIREMENTS (Conditional Visibility)
-# This block handles the visibility for Tapping and Face Milling automatically
+# 3. SMART QUALITY REQUIREMENTS (Conditional Visibility)
 if operation != "Tapping":
     st.sidebar.header("Quality Requirements")
+    # Ra is visible for everything except Tapping
+    ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=3.2, step=0.1, key="sidebar_ra")
     
-    # Surface Finish (Ra) - Visible for everything EXCEPT Tapping
-    ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=1.2, step=0.1, key="sidebar_ra")
-    
-    # Diameter Tolerance - Visible for Drilling/Boring, HIDDEN for Face Milling & Tapping
-    if operation != "Face Milling":
+    # Tolerance is visible only for Drilling and Boring
+    if operation in ["Drilling", "Boring / Hole Milling"]:
         tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.100, format="%.3f", key="sidebar_tol")
     else:
-        tol_input = 0.1 # Default for Face Milling logic
+        tol_input = 0.1
 else:
-    # Default values when Tapping is selected so the rest of the app doesn't crash
-    ra_input = 3.2
-    tol_input = 0.1
+    ra_input, tol_input = 3.2, 0.1
+
+st.sidebar.markdown("---")
+
+# Main Operation Menu
+operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
 # ==========================================
 # ==========================================
 # 4. OPERATION: DRILLING
