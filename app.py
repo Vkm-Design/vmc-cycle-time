@@ -448,7 +448,23 @@ elif operation == "Boring / Hole Milling":
 
     # Rough boring target diameter
     rough_target_dia = f_dia - finish_stock
+    # ==========================================
+    # SPECIAL PROCESS VALIDATION
+    # ==========================================
 
+    if ra_input < 0.8:
+
+        st.warning(
+            "Required surface finish is beyond standard fine boring capability. "
+            "Consider burnishing, honing or special finishing process."
+        )
+
+    if tol_band < 0.015:
+
+        st.warning(
+            "Required tolerance is beyond standard fine boring capability. "
+            "Consider honing, reaming or special precision process."
+        )
     # Strategy display
 
     if fine_boring_required:
