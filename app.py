@@ -853,103 +853,137 @@ elif operation == "Face Milling":
         st.stop()
 
     # 4. Shape & Selection Mode
-    shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
-    tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
+    shape = st.selectbox(
+        "Component Shape",
+        ["Rectangular", "Circular"],
+        key="fm_shape_sel"
+    )
 
-    # 5. Tool Selection
-    temp_W = 100.0 
+    tool_mode = st.selectbox(
+        "Tool Selection Mode",
+        ["Auto", "Manual"],
+        key="fm_mode_sel"
+    )
+
+    # ==========================================
+    # COMPONENT INPUTS FIRST
+    # ==========================================
+
+    if shape == "Rectangular":
+
+        raw_L = st.number_input(
+            "Length (mm)",
+            value=100.0,
+            key="fm_L"
+        )
+
+        raw_W = st.number_input(
+            "Width (mm)",
+            value=40.0,
+            key="fm_W"
+        )
+
+        L = max(raw_L, raw_W)
+        W = min(raw_L, raw_W)
+
+    else:
+
+        comp_dia = st.number_input(
+            "Component Diameter (mm)",
+            value=100.0,
+            key="fm_circ_dia"
+        )
+
+        L = comp_dia
+        W = comp_dia
+
+    # ==========================================
+    # AUTO TOOL TARGET DIA
+    # ==========================================
+
+    if shape == "Rectangular":
+
+        target_dia = W / 0.7
+
+    else:
+
+        target_dia = (comp_dia / 2) / 0.7
+
+    # ==========================================
+    # TOOL SELECTION
+    # ==========================================
+
     selected_tool = None
+
     if tool_mode == "Auto":
 
-        # ==========================================
-        # AUTO TOOL SIZE CALCULATION
-        # ==========================================
-
-        if shape == "Rectangular":
-
-            length = st.number_input(
-                "Pocket Length (mm)",
-                value=100.0,
-                key="fm_len"
-            )
-
-            width = st.number_input(
-                "Pocket Width (mm)",
-                value=30.0,
-                key="fm_wid"
-            )
-
-            # Smaller side controls cutter selection
-            controlling_size = min(length, width)
-
-            # 70% engagement logic
-            target_dia = controlling_size / 0.7
-
-        else:
-
-            pocket_dia = st.number_input(
-                "Pocket Diameter (mm)",
-                value=100.0,
-                key="fm_cir_dia"
-            )
-
-            # Circular interpolation logic
-            target_dia = (pocket_dia / 2) / 0.7
-
-        # ==========================================
-        # SELECT NEXT LARGER CUTTER
-        # ==========================================
-
-        sorted_tools = sorted(
+        possible_tools = sorted(
             suitable_tools,
             key=lambda x: x['dia']
         )
 
-        for t in sorted_tools:
+        for t in possible_tools:
 
             if t['dia'] >= target_dia:
 
-                selected_tool = t
-                break
+                # POWER CHECK
+                ae_check = t['max_width']
+                ap_check = t['stock']
+                vf_check = t['feed']
 
-        # If no larger cutter available
+                efficiency = 0.8
+
+                req_power = (
+                    ae_check
+                    * ap_check
+                    * vf_check
+                    * kc
+                ) / (60e6 * efficiency)
+
+                if req_power <= m_power:
+
+                    selected_tool = t
+                    break
+
+        # fallback smaller cutter
         if not selected_tool:
 
-            selected_tool = max(
-                suitable_tools,
+            selected_tool = min(
+                possible_tools,
                 key=lambda x: x['dia']
             )
 
-        st.info(
-            f"AUTO Selected Cutter Ø{selected_tool['dia']} "
-            f"(Target Ø{round(target_dia,1)})"
+        st.success(
+            f"Auto Selected Cutter Ø{selected_tool['dia']} mm"
         )
+
     else:
-        tool_names = [f"Dia {t['dia']}mm" for t in suitable_tools]
-        selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
-        selected_tool = next(t for t in suitable_tools if f"Dia {t['dia']}mm" == selected_tool_name)
 
-    # 6. Final Calculations
-    if selected_tool:
-        tool_dia = selected_tool["dia"]
-        ae = selected_tool["max_width"] 
-        rpm = selected_tool["rpm"]
-        vf = selected_tool["feed"]      
-        ap_limit = selected_tool["stock"]
+        tool_names = [
+            f"Dia {t['dia']}mm"
+            for t in suitable_tools
+        ]
 
-        # --- COMPONENT INPUTS ---
-        st.divider()
-        if shape == "Rectangular":
-            raw_L = st.number_input("Length (mm)", value=100.0, key="fm_L")
-            raw_W = st.number_input("Width (mm)", value=100.0, key="fm_W")
-            L = max(raw_L, raw_W) 
-            W = min(raw_L, raw_W) 
-            if raw_W > raw_L:
-                st.caption(f"Note: Path optimized for width step-over.")
-        else:
-            comp_dia = st.number_input("Component Diameter (mm)", value=150.0, key="fm_circ_dia")
-            W = comp_dia  
-            L = comp_dia
+        selected_tool_name = st.selectbox(
+            "Select Tool",
+            tool_names,
+            key="fm_tool_manual"
+        )
+
+        selected_tool = next(
+            t for t in suitable_tools
+            if f"Dia {t['dia']}mm" == selected_tool_name
+        )
+
+    # ==========================================
+    # TOOL PARAMETERS
+    # ==========================================
+
+    tool_dia = selected_tool["dia"]
+    ae = selected_tool["max_width"]
+    rpm = selected_tool["rpm"]
+    vf = selected_tool["feed"]
+    ap_limit = selected_tool["stock"]
 
         # --- POWER VALIDATION ---
         efficiency = 0.8
