@@ -437,10 +437,17 @@ elif operation == "Boring / Hole Milling":
     # Convert ± tolerance into total tolerance band
     tol_band = tol_input * 2
 
-    # Fine boring trigger
+    # ==========================================
+    # FINE BORING TRIGGER
+    # ==========================================
+
+    # Fine boring required for:
+    # 1. Tolerance tighter than ±0.1
+    # 2. Surface finish Ra 1.6 or better
+
     fine_boring_required = (
-        tol_band < 0.1 or
-        ra_input <= 2.0
+        tol_band < 0.2 or
+        ra_input <= 1.6
     )
 
     # ==========================================
@@ -458,6 +465,7 @@ elif operation == "Boring / Hole Milling":
         # Rough boring finishes directly to size
         finish_stock = 0.0
         rough_target_dia = f_dia
+
     # ==========================================
     # SPECIAL PROCESS VALIDATION
     # ==========================================
@@ -475,7 +483,10 @@ elif operation == "Boring / Hole Milling":
             "Required tolerance is beyond standard fine boring capability. "
             "Consider honing, reaming or special precision process."
         )
-    # Strategy display
+
+    # ==========================================
+    # STRATEGY DISPLAY
+    # ==========================================
 
     if fine_boring_required:
  
@@ -486,7 +497,7 @@ elif operation == "Boring / Hole Milling":
     else:
 
         st.info(
-            "Standard final boring pass will use rough boring parameters."
+            "Standard rough boring will finish directly to final size."
         )
     # ==========================================
     # INITIALIZE VARIABLES
