@@ -344,7 +344,9 @@ if operation == "Drilling":
             st.success(f"Total Time: {round((actual_travel/f_min)*60*cnt, 2)} seconds")
 
 elif operation == "Boring / Hole Milling":
+
     st.subheader(f"Boring Planner ({machine})")
+
     # ==========================================
     # FINE BORING MATERIAL VALIDATION
     # ==========================================
@@ -354,47 +356,80 @@ elif operation == "Boring / Hole Milling":
         st.warning(
             "Fine boring parameters currently defined only for Aluminium."
         )
-    
+
     col1, col2 = st.columns(2)
+
     with col1:
-        f_dia = float(st.number_input("Finish Bore Diameter (mm)", value=48.0, step=0.1, key="bor_f_dia"))
-        b_dep = float(st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="bor_depth"))
+
+        f_dia = float(
+            st.number_input(
+                "Finish Bore Diameter (mm)",
+                value=48.0,
+                step=0.1,
+                key="bor_f_dia"
+            )
+        )
+
+        b_dep = float(
+            st.number_input(
+                "Drawing Depth (mm)",
+                value=50.0,
+                step=1.0,
+                key="bor_depth"
+            )
+        )
+
     with col2:
-        bor_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="bor_ht")
-        e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
 
-# --- DEPTH VALIDATION ---
+        bor_ht = st.radio(
+            "Hole Type",
+            ["Blind Hole", "Through Hole"],
+            horizontal=True,
+            key="bor_ht"
+        )
 
-if b_dep > 150:
+        e_mode = st.radio(
+            "Starting Condition",
+            ["Solid", "Core Hole"],
+            horizontal=True,
+            key="bor_mode"
+        )
 
-    st.error(
-        f"Depth {b_dep}mm exceeds validated boring limit of 150mm."
-    )
+    # ==========================================
+    # DEPTH VALIDATION
+    # ==========================================
 
-    st.warning(
-        "Check tool weight, machine spindle capability, "
-        "fixture rigidity and process feasibility manually."
-    )
+    if b_dep > 150:
 
-    st.stop()
+        st.error(
+            f"Depth {b_dep}mm exceeds validated boring limit of 150mm."
+        )
 
-# --- L/D VALIDATION ---
+        st.warning(
+            "Check tool weight, machine spindle capability, "
+            "fixture rigidity and process feasibility manually."
+        )
 
-ld_ratio = b_dep / f_dia
+        st.stop()
 
-if ld_ratio > 3:
+    # ==========================================
+    # L/D VALIDATION
+    # ==========================================
 
-    st.error(
-        f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 3."
-    )
+    ld_ratio = b_dep / f_dia
 
-    st.warning(
-        "Check boring bar rigidity, machine capability "
-        "and fixture stability."
-    )
+    if ld_ratio > 3:
 
-    st.stop()
+        st.error(
+            f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 3."
+        )
 
+        st.warning(
+            "Check boring bar rigidity, machine capability "
+            "and fixture stability."
+        )
+
+        st.stop()
 # ==========================================
 # FINAL PASS STRATEGY
 # ==========================================
