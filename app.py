@@ -159,16 +159,32 @@ boring_data_aluminium = [
     {"min": 65, "max": 70, "rpm": 1714, "feed_min": 377.0, "ap": 10.0},
 ]
 
+# ================= FINE BORING DATA =================
+
+fine_boring_data_aluminium = [
+    {"min": 20, "max": 25, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 25, "max": 30, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 30, "max": 35, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 35, "max": 40, "vc": 175, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 40, "max": 45, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 45, "max": 50, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 50, "max": 55, "vc": 200, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 55, "max": 60, "vc": 200, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 60, "max": 65, "vc": 200, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 65, "max": 70, "vc": 200, "feed_rev": 0.12, "ap": 0.5},
+]
+
 # ==========================================
 # 1. MATERIAL MASTER TABLE
 # ==========================================
 material_tables = {
     "Aluminium": {
-        "drill": drill_data_aluminium, 
-        "boring": boring_data_aluminium,     
+        "drill": drill_data_aluminium,
+        "boring": boring_data_aluminium,
+        "fine_boring": fine_boring_data_aluminium,
         "tap": tap_data_aluminium,
-        "threadmill": threadmill_data_aluminium, # ADD THIS LINE
-        "face_mill": face_mill_data_aluminium    # ADD THIS TOO if you have it
+        "threadmill": threadmill_data_aluminium,
+        "face_mill": face_mill_data_aluminium
     },
     "Steel_C22": {"drill": [], "boring": [], "tap": [], "threadmill": []},
     "Steel_C45": {"drill": [], "boring": [], "tap": [], "threadmill": []},
@@ -198,6 +214,24 @@ def get_boring_params(dia, material):
     for row in table:
         if row["min"] <= dia < row["max"]:
             return row
+    return None
+
+def get_fine_boring_params(dia, material):
+
+    if (
+        "fine_boring" in material_tables[material]
+        and len(material_tables[material]["fine_boring"]) > 0
+    ):
+
+        table = material_tables[material]["fine_boring"]
+
+    else:
+        return None
+
+    for row in table:
+        if row["min"] <= dia < row["max"]:
+            return row
+
     return None
 
 def get_diameter(tap):
@@ -311,6 +345,15 @@ if operation == "Drilling":
 
 elif operation == "Boring / Hole Milling":
     st.subheader(f"Boring Planner ({machine})")
+    # ==========================================
+    # FINE BORING MATERIAL VALIDATION
+    # ==========================================
+
+    if material != "Aluminium":
+
+        st.warning(
+            "Fine boring parameters currently defined only for Aluminium."
+        )
     
     col1, col2 = st.columns(2)
     with col1:
@@ -320,19 +363,75 @@ elif operation == "Boring / Hole Milling":
         bor_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="bor_ht")
         e_mode = st.radio("Starting Condition", ["Solid", "Core Hole"], horizontal=True, key="bor_mode")
 
-    # --- 1. L/D RATIO PROTECTION (Ø > 30) ---
-    if f_dia > 30 and b_dep > (3 * f_dia):
-        st.error(f"❗ L/D Alert: Depth {b_dep}mm exceeds 3x limit for Ø{f_dia}. Reduce depth or use manual parameters.")
-        st.stop()
+# --- DEPTH VALIDATION ---
 
-    # --- 2. FINISH PASS TRIGGER (Ra <= 2.0 or Tolerance <= 0.1) ---
-    finish_stock = 0.5 if (ra_input <= 2.0 or tol_input <= 0.1) else 0.0
-    rough_target_dia = f_dia - finish_stock
-    
-    total_time_sec = 0.0
-    current_dia = 0.0
+if b_dep > 150:
 
-    # --- 3. STEP 1: DRILLING (Only if Solid) ---
+    st.error(
+        f"Depth {b_dep}mm exceeds validated boring limit of 150mm."
+    )
+
+    st.warning(
+        "Check tool weight, machine spindle capability, "
+        "fixture rigidity and process feasibility manually."
+    )
+
+    st.stop()
+
+# --- L/D VALIDATION ---
+
+ld_ratio = b_dep / f_dia
+
+if ld_ratio > 3:
+
+    st.error(
+        f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 3."
+    )
+
+    st.warning(
+        "Check boring bar rigidity, machine capability "
+        "and fixture stability."
+    )
+
+    st.stop()
+
+# ==========================================
+# FINAL PASS STRATEGY
+# ==========================================
+
+# Convert ± tolerance into total tolerance band
+tol_band = tol_input * 2
+
+# Fine boring trigger
+fine_boring_required = (
+    tol_band < 0.1 or
+    ra_input <= 2.0
+)
+
+# Always leave 0.5 stock for final pass
+finish_stock = 0.5
+
+# Rough boring target diameter
+rough_target_dia = f_dia - finish_stock
+
+# Strategy display
+
+if fine_boring_required:
+
+    st.warning(
+        "Fine boring activated due to tolerance/surface finish requirement."
+    )
+
+else:
+
+    st.info(
+        "Standard final boring pass will use rough boring parameters."
+    )
+
+total_time_sec = 0.0
+current_dia = 0.0
+
+# --- 3. STEP 1: DRILLING (Only if Solid) ---
     if e_mode == "Solid":
         drill_data = material_tables[material]["drill"]
         # Sort to find the largest drill that is still <= 30mm
@@ -389,18 +488,60 @@ elif operation == "Boring / Hole Milling":
         st.write(f"🔹 Boring Ø{current_dia} ➔ Ø{d2} | Stock: {round(d2-current_dia, 2)}mm | Power: {round(p_bor, 2)}kW | Time: {round(p_time, 1)}s")
         current_dia = d2
 
-    # --- 5. STEP 3: FINISH PASS (80% FEED) ---
-    if finish_stock > 0:
-        f_tool = get_boring_params(current_dia, material)
-        if f_tool:
-            # Trigger 80% feed for high finish
-            finish_feed = f_tool['feed_min'] * 0.8 if ra_input < 2.0 else f_tool['feed_min']
-            f_time = (bor_travel / finish_feed) * 60
-            total_time_sec += f_time
-            st.success(f"Step 3: Finish Pass Ø{current_dia} ➔ Ø{f_dia} (Ra {ra_input}) | Feed: {round(finish_feed, 1)}mm/min | Time: {round(f_time, 1)}s")
+   # ==========================================
+# STEP 3 : FINAL BORING PASS
+# ==========================================
 
-    # --- 6. FINAL CONSOLIDATED CALCULATION ---
-    if st.button("Calculate Total Boring Cycle Time", key="bor_calc_final"):
+  if fine_boring_required:
+
+      f_tool = get_fine_boring_params(f_dia, material)
+
+      if f_tool:
+
+          finish_vc = f_tool["vc"]
+          finish_feed_rev = f_tool["feed_rev"]
+
+          finish_rpm = (1000 * finish_vc) / (math.pi * f_dia)
+
+          finish_feed = finish_feed_rev * finish_rpm
+
+          finish_time = (bor_travel / finish_feed) * 60
+
+          total_time_sec += finish_time
+
+          st.success(
+              f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
+              f"RPM: {finish_rpm} | "
+              f"Feed: {round(finish_feed,1)} mm/min | "
+              f"Time: {round(finish_time,1)}s"
+                    )
+
+    else:
+
+        st.error(
+            "Fine boring data not available for this diameter/material."
+        )
+
+else:
+
+    f_tool = get_boring_params(f_dia, material)
+
+    if f_tool:
+
+        finish_feed = f_tool["feed_min"]
+
+        finish_time = (bor_travel / finish_feed) * 60
+
+        total_time_sec += finish_time
+
+        st.info(
+            f"Step 3: Standard Final Pass Ø{current_dia} ➔ Ø{f_dia} | "
+            f"Feed: {round(finish_feed,1)} mm/min | "
+            f"Time: {round(finish_time,1)}s"
+        )
+
+# --- 6. FINAL CONSOLIDATED CALCULATION ---
+if st.button("Calculate Total Boring Cycle Time", key="bor_calc_final"):
         st.divider()
         st.metric("Total Combined Cycle Time", f"{round(total_time_sec, 2)} sec")
         st.write(f"**Total Time in Minutes:** {round(total_time_sec/60, 2)} min")
