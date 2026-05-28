@@ -899,7 +899,7 @@ elif operation == "Face Milling":
                     break
 
         if not selected_tool:
-            selected_tool = min(possible_tools, key=lambda x: x['dia'])
+            selected_tool = max(possible_tools, key=lambda x: x['dia'])
 
         st.success(f"Auto Selected Cutter Ø{selected_tool['dia']} mm")
 
