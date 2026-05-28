@@ -443,11 +443,21 @@ elif operation == "Boring / Hole Milling":
         ra_input <= 2.0
     )
 
-    # Always leave 0.5 stock for final pass
-    finish_stock = 0.5
+    # ==========================================
+    # STOCK STRATEGY
+    # ==========================================
 
-    # Rough boring target diameter
-    rough_target_dia = f_dia - finish_stock
+    if fine_boring_required:
+
+        # Leave stock for final fine boring
+        finish_stock = 0.5
+        rough_target_dia = f_dia - finish_stock
+
+    else:
+
+        # Rough boring finishes directly to size
+        finish_stock = 0.0
+        rough_target_dia = f_dia
     # ==========================================
     # SPECIAL PROCESS VALIDATION
     # ==========================================
