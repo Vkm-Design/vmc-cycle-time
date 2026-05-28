@@ -860,12 +860,70 @@ elif operation == "Face Milling":
     temp_W = 100.0 
     selected_tool = None
     if tool_mode == "Auto":
-        for t in sorted(suitable_tools, key=lambda x: x['dia']):
-            if t['max_width'] >= temp_W:
+
+        # ==========================================
+        # AUTO TOOL SIZE CALCULATION
+        # ==========================================
+
+        if shape == "Rectangular":
+
+            length = st.number_input(
+                "Pocket Length (mm)",
+                value=100.0,
+                key="fm_len"
+            )
+
+            width = st.number_input(
+                "Pocket Width (mm)",
+                value=30.0,
+                key="fm_wid"
+            )
+
+            # Smaller side controls cutter selection
+            controlling_size = min(length, width)
+
+            # 70% engagement logic
+            target_dia = controlling_size / 0.7
+
+        else:
+
+            pocket_dia = st.number_input(
+                "Pocket Diameter (mm)",
+                value=100.0,
+                key="fm_cir_dia"
+            )
+
+            # Circular interpolation logic
+            target_dia = (pocket_dia / 2) / 0.7
+
+        # ==========================================
+        # SELECT NEXT LARGER CUTTER
+        # ==========================================
+
+        sorted_tools = sorted(
+            suitable_tools,
+            key=lambda x: x['dia']
+        )
+
+        for t in sorted_tools:
+
+            if t['dia'] >= target_dia:
+
                 selected_tool = t
                 break
+
+        # If no larger cutter available
         if not selected_tool:
-            selected_tool = max(suitable_tools, key=lambda x: x['dia'])
+
+            selected_tool = max(
+                suitable_tools,
+                key=lambda x: x['dia']
+            )
+
+        st.info(
+            f"AUTO Selected Cutter Ø{selected_tool['dia']} "
+            f"(Target Ø{round(target_dia,1)})"
+        )
     else:
         tool_names = [f"Dia {t['dia']}mm" for t in suitable_tools]
         selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
