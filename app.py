@@ -430,253 +430,253 @@ elif operation == "Boring / Hole Milling":
         )
 
         st.stop()
-# ==========================================
-# FINAL PASS STRATEGY
-# ==========================================
+    # ==========================================
+    # FINAL PASS STRATEGY
+    # ==========================================
 
-# Convert ± tolerance into total tolerance band
-tol_band = tol_input * 2
+    # Convert ± tolerance into total tolerance band
+    tol_band = tol_input * 2
 
-# Fine boring trigger
-fine_boring_required = (
-    tol_band < 0.1 or
-    ra_input <= 2.0
-)
-
-# Always leave 0.5 stock for final pass
-finish_stock = 0.5
-
-# Rough boring target diameter
-rough_target_dia = f_dia - finish_stock
-
-# Strategy display
-
-if fine_boring_required:
-
-    st.warning(
-        "Fine boring activated due to tolerance/surface finish requirement."
+    # Fine boring trigger
+    fine_boring_required = (
+        tol_band < 0.1 or
+        ra_input <= 2.0
     )
 
-else:
+    # Always leave 0.5 stock for final pass
+    finish_stock = 0.5
 
-    st.info(
-        "Standard final boring pass will use rough boring parameters."
-    )
-# ==========================================
-# INITIALIZE VARIABLES
-# ==========================================
+    # Rough boring target diameter
+    rough_target_dia = f_dia - finish_stock
 
-total_time_sec = 0.0
-current_dia = 0.0
+    # Strategy display
 
-# --- 3. STEP 1: DRILLING (Only if Solid) ---
-
-if e_mode == "Solid":
-
-    drill_data = material_tables[material]["drill"]
-
-    # Sort to find the largest drill that is still <= 30mm
-    sorted_drills = sorted(
-        [d for d in drill_data if d['max_d'] <= 30],
-        key=lambda x: x['max_d'],
-        reverse=True
-    )
-
-    safe_drill_dia = 0.0
-
-    for drill in sorted_drills:
-
-        if drill['max_d'] < rough_target_dia:
-
-            d_params = get_parameters(drill['max_d'], material)
-
-            if d_params[0] is not None and d_params[1] is not None:
-
-                d_rpm, d_fmin = d_params[0], d_params[1]
-
-                p_check = (
-                    (
-                        (d_fmin / d_rpm)
-                        * (math.pi * drill['max_d'] * d_rpm / 1000)
-                        * drill['max_d']
-                        * kc
-                    ) / 192000
-                )
-
-                if p_check <= m_power:
-
-                    safe_drill_dia = drill['max_d']
-                    break
-
-    if safe_drill_dia > 0:
-
-        d_travel = (
-            b_dep
-            + (6 if bor_ht == "Through Hole" else 3)
-            + ((0.18 * safe_drill_dia) if safe_drill_dia <= 20 else 0)
-        )
-
-        d_time = (d_travel / d_fmin) * 60
-
-        total_time_sec += d_time
-
-        st.success(
-            f"Step 1: Drilling Ø{safe_drill_dia} | "
-            f"Power: {round(p_check,2)}kW | "
-            f"Time: {round(d_time, 2)}s"
-        )
-
-        current_dia = safe_drill_dia
-
-    else:
-
-        st.error("❌ No safe drill found (Max Ø30 limit).")
-        st.stop()
-
-else:
-
-    current_dia = float(
-        st.number_input(
-            "Core Dia",
-            value=30.0,
-            key="bor_core_in"
-        )
-    )
-
-# --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
-
-st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
-
-bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
-
-while current_dia < rough_target_dia:
-
-    tool = get_boring_params(current_dia, material)
-
-    if not tool:
-
-        st.warning(f"No boring data found for Ø{current_dia}.")
-        break
-
-    # Max stock increment from table
-    max_dia_increment = tool['ap']
-
-    d2 = min(
-        rough_target_dia,
-        current_dia + max_dia_increment
-    )
-
-    # Boring Power Formula
-    v_c_b = (math.pi * d2 * tool['rpm']) / 1000
-
-    f_rev_b = tool['feed_min'] / tool['rpm']
-
-    radial_ap = (d2 - current_dia) / 2
-
-    p_bor = (
-        v_c_b
-        * f_rev_b
-        * radial_ap
-        * kc
-    ) / 48000
-
-    p_time = (bor_travel / tool['feed_min']) * 60
-
-    total_time_sec += p_time
-
-    st.write(
-        f"🔹 Boring Ø{current_dia} ➔ Ø{d2} | "
-        f"Stock: {round(d2-current_dia, 2)}mm | "
-        f"Power: {round(p_bor, 2)}kW | "
-        f"Time: {round(p_time, 1)}s"
-    )
-
-    current_dia = d2
-
-# ==========================================
-# STEP 3 : FINAL BORING PASS
-# ==========================================
-
-if fine_boring_required:
-
-    f_tool = get_fine_boring_params(f_dia, material)
-
-    if f_tool:
-
-        finish_vc = f_tool["vc"]
-        finish_feed_rev = f_tool["feed_rev"]
-
-        finish_rpm = (
-            (1000 * finish_vc)
-            / (math.pi * f_dia)
-        )
-
-        finish_feed = (
-            finish_feed_rev
-            * finish_rpm
-        )
-
-        finish_time = (
-            (bor_travel / finish_feed)
-            * 60
-        )
-
-        total_time_sec += finish_time
-
-        st.success(
-            f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
-            f"RPM: {round(finish_rpm)} | "
-            f"Feed: {round(finish_feed,1)} mm/min | "
-            f"Time: {round(finish_time,1)}s"
+    if fine_boring_required:
+ 
+        st.warning(
+            "Fine boring activated due to tolerance/surface finish requirement."
         )
 
     else:
-
-        st.error(
-            "Fine boring data not available for this diameter/material."
-        )
-
-else:
-
-    f_tool = get_boring_params(f_dia, material)
-
-    if f_tool:
-
-        finish_feed = f_tool["feed_min"]
-
-        finish_time = (
-            (bor_travel / finish_feed)
-            * 60
-        )
-
-        total_time_sec += finish_time
 
         st.info(
-            f"Step 3: Standard Final Pass Ø{current_dia} ➔ Ø{f_dia} | "
-            f"Feed: {round(finish_feed,1)} mm/min | "
-            f"Time: {round(finish_time,1)}s"
+            "Standard final boring pass will use rough boring parameters."
+        )
+    # ==========================================
+    # INITIALIZE VARIABLES
+    # ==========================================
+
+    total_time_sec = 0.0
+    current_dia = 0.0
+
+    # --- 3. STEP 1: DRILLING (Only if Solid) ---
+
+    if e_mode == "Solid":
+
+        drill_data = material_tables[material]["drill"]
+
+        # Sort to find the largest drill that is still <= 30mm
+        sorted_drills = sorted(
+            [d for d in drill_data if d['max_d'] <= 30],
+            key=lambda x: x['max_d'],
+            reverse=True
         )
 
-# ==========================================
-# FINAL CONSOLIDATED CALCULATION
-# ==========================================
+        safe_drill_dia = 0.0
 
-if st.button(
-    "Calculate Total Boring Cycle Time",
-    key="bor_calc_final"
-):
+        for drill in sorted_drills:
 
-    st.divider()
+            if drill['max_d'] < rough_target_dia:
 
-    st.metric(
-        "Total Combined Cycle Time",
-        f"{round(total_time_sec, 2)} sec"
-    )
+                d_params = get_parameters(drill['max_d'], material)
 
-    st.write(
-        f"**Total Time in Minutes:** "
-        f"{round(total_time_sec/60, 2)} min"
-    )
+                if d_params[0] is not None and d_params[1] is not None:
+
+                    d_rpm, d_fmin = d_params[0], d_params[1]
+
+                    p_check = (
+                        (
+                            (d_fmin / d_rpm)
+                            * (math.pi * drill['max_d'] * d_rpm / 1000)
+                            * drill['max_d']
+                            * kc
+                        ) / 192000
+                    )
+
+                    if p_check <= m_power:
+
+                        safe_drill_dia = drill['max_d']
+                        break
+
+        if safe_drill_dia > 0:
+
+            d_travel = (
+                b_dep
+                + (6 if bor_ht == "Through Hole" else 3)
+                + ((0.18 * safe_drill_dia) if safe_drill_dia <= 20 else 0)
+            )
+
+            d_time = (d_travel / d_fmin) * 60
+
+            total_time_sec += d_time
+
+            st.success(
+                f"Step 1: Drilling Ø{safe_drill_dia} | "
+                f"Power: {round(p_check,2)}kW | "
+                f"Time: {round(d_time, 2)}s"
+            )
+
+            current_dia = safe_drill_dia
+
+        else:
+
+            st.error("❌ No safe drill found (Max Ø30 limit).")
+            st.stop()
+
+    else:
+
+        current_dia = float(
+            st.number_input(
+                "Core Dia",
+                value=30.0,
+                key="bor_core_in"
+            )
+        )
+
+    # --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
+
+    st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
+
+    bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
+
+    while current_dia < rough_target_dia:
+
+        tool = get_boring_params(current_dia, material)
+
+        if not tool:
+
+            st.warning(f"No boring data found for Ø{current_dia}.")
+            break
+
+        # Max stock increment from table
+        max_dia_increment = tool['ap']
+
+        d2 = min(
+            rough_target_dia,
+            current_dia + max_dia_increment
+        )
+
+        # Boring Power Formula
+        v_c_b = (math.pi * d2 * tool['rpm']) / 1000
+
+        f_rev_b = tool['feed_min'] / tool['rpm']
+
+        radial_ap = (d2 - current_dia) / 2
+
+        p_bor = (
+            v_c_b
+            * f_rev_b
+            * radial_ap
+            * kc
+        ) / 48000
+
+        p_time = (bor_travel / tool['feed_min']) * 60
+
+        total_time_sec += p_time
+
+        st.write(
+            f"🔹 Boring Ø{current_dia} ➔ Ø{d2} | "
+            f"Stock: {round(d2-current_dia, 2)}mm | "
+            f"Power: {round(p_bor, 2)}kW | "
+            f"Time: {round(p_time, 1)}s"
+        )
+
+        current_dia = d2
+
+    # ==========================================
+    # STEP 3 : FINAL BORING PASS
+    # ==========================================
+
+    if fine_boring_required:
+
+        f_tool = get_fine_boring_params(f_dia, material)
+
+        if f_tool:
+
+            finish_vc = f_tool["vc"]
+            finish_feed_rev = f_tool["feed_rev"]
+
+            finish_rpm = (
+                (1000 * finish_vc)
+                / (math.pi * f_dia)
+            )
+
+            finish_feed = (
+                finish_feed_rev
+                * finish_rpm
+            )
+
+            finish_time = (
+                (bor_travel / finish_feed)
+                * 60
+            )
+
+            total_time_sec += finish_time
+
+            st.success(
+                f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
+                f"RPM: {round(finish_rpm)} | "
+                f"Feed: {round(finish_feed,1)} mm/min | "
+                f"Time: {round(finish_time,1)}s"
+            )
+
+        else:
+
+            st.error(
+                "Fine boring data not available for this diameter/material."
+            )
+
+    else:
+
+        f_tool = get_boring_params(f_dia, material)
+
+        if f_tool:
+
+            finish_feed = f_tool["feed_min"]
+
+            finish_time = (
+                (bor_travel / finish_feed)
+                * 60
+            )
+
+            total_time_sec += finish_time
+
+            st.info(
+                f"Step 3: Standard Final Pass Ø{current_dia} ➔ Ø{f_dia} | "
+                f"Feed: {round(finish_feed,1)} mm/min | "
+                f"Time: {round(finish_time,1)}s"
+            )
+
+    # ==========================================
+    # FINAL CONSOLIDATED CALCULATION
+    # ==========================================
+
+    if st.button(
+        "Calculate Total Boring Cycle Time",
+        key="bor_calc_final"
+    ):
+
+        st.divider()
+
+        st.metric(
+            "Total Combined Cycle Time",
+            f"{round(total_time_sec, 2)} sec"
+        )
+
+        st.write(
+            f"**Total Time in Minutes:** "
+            f"{round(total_time_sec/60, 2)} min"
+        )
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
