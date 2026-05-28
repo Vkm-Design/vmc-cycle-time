@@ -830,21 +830,22 @@ elif operation == "Face Milling":
     if material != "Aluminium":
         st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
         st.stop()
-        
+
     st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
     # 2. Surface Finish & PCD Warning
-    # If Ra is very fine, we change the strategy entirely
     is_pcd_required = ra_input < 1.2
 
     if is_pcd_required:
-        st.warning("⚠️ **PCD Tooling Required:** Ra < 1.2 cannot be achieved with standard carbide. "
-                   "This calculator will now leave 0.5mm stock for a separate PCD finish pass. "
-                   "**Note:** You must add the PCD cycle time manually to your total estimate.")
+        st.warning(
+            "⚠️ **PCD Tooling Required:** Ra < 1.2 cannot be achieved with standard carbide. "
+            "This calculator will now leave 0.5mm stock for a separate PCD finish pass. "
+            "**Note:** You must add the PCD cycle time manually to your total estimate."
+        )
 
     # 3. Filtering Logic
     suitable_tools = [
-        tool for tool in face_mill_data_aluminium 
+        tool for tool in face_mill_data_aluminium
         if m_taper in tool["spindles"]
     ]
 
@@ -853,207 +854,157 @@ elif operation == "Face Milling":
         st.stop()
 
     # 4. Shape & Selection Mode
-    shape = st.selectbox(
-        "Component Shape",
-        ["Rectangular", "Circular"],
-        key="fm_shape_sel"
-    )
+    shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key="fm_shape_sel")
 
-    tool_mode = st.selectbox(
-        "Tool Selection Mode",
-        ["Auto", "Manual"],
-        key="fm_mode_sel"
-    )
+    tool_mode = st.selectbox("Tool Selection Mode", ["Auto", "Manual"], key="fm_mode_sel")
 
-    # ==========================================
-    # COMPONENT INPUTS FIRST
-    # ==========================================
-
+    # COMPONENT INPUTS
     if shape == "Rectangular":
-
-        raw_L = st.number_input(
-            "Length (mm)",
-            value=100.0,
-            key="fm_L"
-        )
-
-        raw_W = st.number_input(
-            "Width (mm)",
-            value=40.0,
-            key="fm_W"
-        )
-
+        raw_L = st.number_input("Length (mm)", value=100.0, key="fm_L")
+        raw_W = st.number_input("Width (mm)", value=40.0, key="fm_W")
         L = max(raw_L, raw_W)
         W = min(raw_L, raw_W)
-
     else:
-
-        comp_dia = st.number_input(
-            "Component Diameter (mm)",
-            value=100.0,
-            key="fm_circ_dia"
-        )
-
+        comp_dia = st.number_input("Component Diameter (mm)", value=100.0, key="fm_circ_dia")
         L = comp_dia
         W = comp_dia
 
-    # ==========================================
-    # AUTO TOOL TARGET DIA
-    # ==========================================
-
+    # TARGET DIA
     if shape == "Rectangular":
-
         target_dia = W / 0.7
-
     else:
-
         target_dia = (comp_dia / 2) / 0.7
 
-    # ==========================================
     # TOOL SELECTION
-    # ==========================================
-
     selected_tool = None
 
     if tool_mode == "Auto":
 
-        possible_tools = sorted(
-            suitable_tools,
-            key=lambda x: x['dia']
-        )
+        possible_tools = sorted(suitable_tools, key=lambda x: x['dia'])
 
         for t in possible_tools:
 
             if t['dia'] >= target_dia:
 
-                # POWER CHECK
                 ae_check = t['max_width']
                 ap_check = t['stock']
                 vf_check = t['feed']
 
                 efficiency = 0.8
 
-                req_power = (
-                    ae_check
-                    * ap_check
-                    * vf_check
-                    * kc
-                ) / (60e6 * efficiency)
+                req_power = (ae_check * ap_check * vf_check * kc) / (60e6 * efficiency)
 
                 if req_power <= m_power:
-
                     selected_tool = t
                     break
 
-        # fallback smaller cutter
         if not selected_tool:
+            selected_tool = min(possible_tools, key=lambda x: x['dia'])
 
-            selected_tool = min(
-                possible_tools,
-                key=lambda x: x['dia']
-            )
-
-        st.success(
-            f"Auto Selected Cutter Ø{selected_tool['dia']} mm"
-        )
+        st.success(f"Auto Selected Cutter Ø{selected_tool['dia']} mm")
 
     else:
 
-        tool_names = [
-            f"Dia {t['dia']}mm"
-            for t in suitable_tools
-        ]
+        tool_names = [f"Dia {t['dia']}mm" for t in suitable_tools]
 
-        selected_tool_name = st.selectbox(
-            "Select Tool",
-            tool_names,
-            key="fm_tool_manual"
-        )
+        selected_tool_name = st.selectbox("Select Tool", tool_names, key="fm_tool_manual")
 
         selected_tool = next(
             t for t in suitable_tools
             if f"Dia {t['dia']}mm" == selected_tool_name
         )
 
-    # ==========================================
     # TOOL PARAMETERS
-    # ==========================================
-
     tool_dia = selected_tool["dia"]
     ae = selected_tool["max_width"]
     rpm = selected_tool["rpm"]
     vf = selected_tool["feed"]
     ap_limit = selected_tool["stock"]
 
-        # --- POWER VALIDATION ---
-        efficiency = 0.8
-        req_power = (ae * ap_limit * vf * kc) / (60e6 * efficiency)
-        st.metric("Required Power", f"{req_power:.2f} kW", delta=f"Limit: {m_power} kW", delta_color="inverse")
+    # --- POWER VALIDATION ---
+    efficiency = 0.8
+    req_power = (ae * ap_limit * vf * kc) / (60e6 * efficiency)
 
-        if req_power > m_power:
-            st.error(f"⚠️ Machine Overload!")
+    st.metric(
+        "Required Power",
+        f"{req_power:.2f} kW",
+        delta=f"Limit: {m_power} kW",
+        delta_color="inverse"
+    )
+
+    if req_power > m_power:
+        st.error("⚠️ Machine Overload!")
+    else:
+        st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
+
+    # PROCESS PARAMETERS
+    total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
+
+    if is_pcd_required:
+        rough_stock = max(0.0, total_stock - 0.5)
+        rough_passes = math.ceil(rough_stock / ap_limit) if rough_stock > 0 else 0
+        st.info(f"PCD STRATEGY: {rough_passes} Roughing passes. 0.5mm left for PCD.")
+    else:
+        finish_required = ra_input < 3.2
+
+        if finish_required and total_stock > 0.5:
+            rough_stock = total_stock - 0.5
+            rough_passes = math.ceil(rough_stock / ap_limit)
         else:
-            st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
+            rough_stock = total_stock
+            rough_passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
 
-        # --- PROCESS PARAMETERS (PCD Stock Logic) ---
-        total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
-        
-        # Logic: If PCD is required, we ALWAYS leave 0.5mm and only rough the rest.
+    # CUT LENGTH
+    if shape == "Rectangular":
+        width_passes = math.ceil(W / ae)
+        cut_length = (L + tool_dia + 4) * width_passes
+
+    else:
+        if comp_dia <= ae:
+            cut_length = comp_dia + tool_dia + 10
+        else:
+            overhang = tool_dia - ae
+            first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
+
+            current_path_dia = max(first_path_dia, 0)
+            total_circ_dist = 0
+            pass_count = 0
+
+            while True:
+                total_circ_dist += math.pi * current_path_dia
+                pass_count += 1
+
+                inner_edge_pos = (current_path_dia / 2) - (tool_dia / 2)
+
+                if inner_edge_pos <= -2:
+                    break
+
+                current_path_dia -= (ae * 2)
+
+                if current_path_dia < 0:
+                    current_path_dia = 0
+
+                if pass_count > 15:
+                    break
+
+            cut_length = total_circ_dist + tool_dia
+
+    # FINAL CALCULATION
+    if st.button("Calculate Milling Time", key="fm_calc_btn"):
+
+        time_rough = (cut_length * rough_passes) / vf
+
+        time_finish = 0
+        if not is_pcd_required and ra_input < 3.2 and total_stock > 0.5:
+            time_finish = cut_length / (vf * 0.8)
+
+        total_time_min = time_rough + time_finish
+
+        st.subheader("Roughing Estimates")
+
+        col_a, col_b = st.columns(2)
+        col_a.metric("Roughing Passes", f"{rough_passes}")
+        col_b.metric("Roughing Time", f"{total_time_min * 60:.1f} sec")
+
         if is_pcd_required:
-            rough_stock = max(0.0, total_stock - 0.5)
-            rough_passes = math.ceil(rough_stock / ap_limit) if rough_stock > 0 else 0
-            st.info(f"PCD STRATEGY: {rough_passes} Roughing passes calculated. 0.5mm stock left for separate PCD tool.")
-        else:
-            # Standard finish pass logic for carbide (Ra 1.2 to 3.2)
-            finish_required = ra_input < 3.2 
-            if finish_required and total_stock > 0.5:
-                rough_stock = total_stock - 0.5
-                rough_passes = math.ceil(rough_stock / ap_limit)
-                st.info(f"STANDARD STRATEGY: {rough_passes} Roughing + 1 Finishing pass (0.5mm).")
-            else:
-                rough_stock = total_stock
-                rough_passes = math.ceil(rough_stock / ap_limit) if ap_limit > 0 else 1
-                st.info("STANDARD STRATEGY: Standard roughing passes.")
-
-        # --- CALCULATE CUT LENGTH ---
-        if shape == "Rectangular":
-            width_passes = math.ceil(W / ae)
-            cut_length = (L + tool_dia + 4) * width_passes
-        else:
-            # Circular Logic (3-pass check)
-            if comp_dia <= ae:
-                cut_length = comp_dia + tool_dia + 10
-            else:
-                overhang = tool_dia - ae
-                first_path_dia = (comp_dia - tool_dia) + (2 * overhang)
-                current_path_dia = max(first_path_dia, 0)
-                total_circ_dist = 0
-                pass_count = 0
-                while True:
-                    total_circ_dist += math.pi * current_path_dia
-                    pass_count += 1
-                    inner_edge_pos = (current_path_dia / 2) - (tool_dia / 2)
-                    if inner_edge_pos <= -2: break
-                    current_path_dia -= (ae * 2)
-                    if current_path_dia < 0: current_path_dia = 0
-                    if pass_count > 15: break
-                cut_length = total_circ_dist + tool_dia
-
-        # --- FINAL CALCULATION ---
-        if st.button("Calculate Milling Time", key="fm_calc_btn"):
-            time_rough = (cut_length * rough_passes) / vf
-            
-            # If standard finish (not PCD), calculate finish time at 80% feed
-            time_finish = 0
-            if not is_pcd_required and ra_input < 3.2 and total_stock > 0.5:
-                time_finish = cut_length / (vf * 0.8)
-            
-            total_time_min = time_rough + time_finish
-            
-            st.subheader("Roughing Estimates")
-            col_a, col_b = st.columns(2)
-            col_a.metric("Roughing Passes", f"{rough_passes}")
-            col_b.metric("Roughing Time", f"{total_time_min * 60:.1f} sec")
-            
-            if is_pcd_required:
-                st.warning("☝️ Remember to add your separate PCD finishing time to this total!")
+            st.warning("☝️ Add PCD finishing time separately")
