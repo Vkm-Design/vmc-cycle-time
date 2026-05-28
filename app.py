@@ -427,12 +427,15 @@ else:
     st.info(
         "Standard final boring pass will use rough boring parameters."
     )
+# ==========================================
+# INITIALIZE VARIABLES
+# ==========================================
 
 total_time_sec = 0.0
 current_dia = 0.0
 
 # --- 3. STEP 1: DRILLING (Only if Solid) ---
-    if e_mode == "Solid":
+if e_mode == "Solid":
         drill_data = material_tables[material]["drill"]
         # Sort to find the largest drill that is still <= 30mm
         sorted_drills = sorted([d for d in drill_data if d['max_d'] <= 30], key=lambda x: x['max_d'], reverse=True) 
