@@ -673,26 +673,6 @@ elif operation == "Boring / Hole Milling":
                 "Fine boring data not available for this diameter/material."
             )
 
-    else:
-
-        f_tool = get_boring_params(f_dia, material)
-
-        if f_tool:
-
-            finish_feed = f_tool["feed_min"]
-
-            finish_time = (
-                (bor_travel / finish_feed)
-                * 60
-            )
-
-            total_time_sec += finish_time
-
-            st.info(
-                f"Step 3: Standard Final Pass Ø{current_dia} ➔ Ø{f_dia} | "
-                f"Feed: {round(finish_feed,1)} mm/min | "
-                f"Time: {round(finish_time,1)}s"
-            )
 
     # ==========================================
     # FINAL CONSOLIDATED CALCULATION
