@@ -562,29 +562,38 @@ while current_dia < rough_target_dia:
 # STEP 3 : FINAL BORING PASS
 # ==========================================
 
-  if fine_boring_required:
+if fine_boring_required:
 
-      f_tool = get_fine_boring_params(f_dia, material)
+    f_tool = get_fine_boring_params(f_dia, material)
 
-      if f_tool:
+    if f_tool:
 
-          finish_vc = f_tool["vc"]
-          finish_feed_rev = f_tool["feed_rev"]
+        finish_vc = f_tool["vc"]
+        finish_feed_rev = f_tool["feed_rev"]
 
-          finish_rpm = (1000 * finish_vc) / (math.pi * f_dia)
+        finish_rpm = (
+            (1000 * finish_vc)
+            / (math.pi * f_dia)
+        )
 
-          finish_feed = finish_feed_rev * finish_rpm
+        finish_feed = (
+            finish_feed_rev
+            * finish_rpm
+        )
 
-          finish_time = (bor_travel / finish_feed) * 60
+        finish_time = (
+            (bor_travel / finish_feed)
+            * 60
+        )
 
-          total_time_sec += finish_time
+        total_time_sec += finish_time
 
-          st.success(
-              f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
-              f"RPM: {finish_rpm} | "
-              f"Feed: {round(finish_feed,1)} mm/min | "
-              f"Time: {round(finish_time,1)}s"
-                    )
+        st.success(
+            f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
+            f"RPM: {round(finish_rpm)} | "
+            f"Feed: {round(finish_feed,1)} mm/min | "
+            f"Time: {round(finish_time,1)}s"
+        )
 
     else:
 
@@ -600,7 +609,10 @@ else:
 
         finish_feed = f_tool["feed_min"]
 
-        finish_time = (bor_travel / finish_feed) * 60
+        finish_time = (
+            (bor_travel / finish_feed)
+            * 60
+        )
 
         total_time_sec += finish_time
 
@@ -610,11 +622,26 @@ else:
             f"Time: {round(finish_time,1)}s"
         )
 
-# --- 6. FINAL CONSOLIDATED CALCULATION ---
-if st.button("Calculate Total Boring Cycle Time", key="bor_calc_final"):
-        st.divider()
-        st.metric("Total Combined Cycle Time", f"{round(total_time_sec, 2)} sec")
-        st.write(f"**Total Time in Minutes:** {round(total_time_sec/60, 2)} min")
+# ==========================================
+# FINAL CONSOLIDATED CALCULATION
+# ==========================================
+
+if st.button(
+    "Calculate Total Boring Cycle Time",
+    key="bor_calc_final"
+):
+
+    st.divider()
+
+    st.metric(
+        "Total Combined Cycle Time",
+        f"{round(total_time_sec, 2)} sec"
+    )
+
+    st.write(
+        f"**Total Time in Minutes:** "
+        f"{round(total_time_sec/60, 2)} min"
+    )
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
