@@ -604,18 +604,24 @@ elif operation == "Boring / Hole Milling":
         )
 
         # Boring Power Formula
-        v_c_b = (math.pi * d2 * tool['rpm']) / 1000
-
-        f_rev_b = tool['feed_min'] / tool['rpm']
-
-        radial_ap = (d2 - current_dia) / 2
-
-        p_bor = (
-            v_c_b
+        # --- MATERIAL REMOVAL RATE (mm3/min) ---
+        mrr_bor = (
+            (math.pi / 4)
+            * ((d2 ** 2) - (current_dia ** 2))
             * f_rev_b
-            * radial_ap
-            * kc
-        ) / 48000
+            * tool['rpm']
+        )
+
+        # --- POWER CALCULATION (kW) ---
+        efficiency = 0.85
+
+        p_bor = ((mrr_bor * kc) / 60000) / efficiency
+
+        # --- TORQUE (Nm) ---
+        torque_bor = (p_bor * 9550) / tool['rpm']
+
+        # --- MACHINE LOAD (%) ---
+        machine_load = (p_bor / m_power) * 100
 
         p_time = (bor_travel / tool['feed_min']) * 60
 
