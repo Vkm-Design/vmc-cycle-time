@@ -780,7 +780,7 @@ elif operation == "Tapping":
         rpm = (1000 * vc) / (math.pi * diameter)
         feed_min = pitch * rpm
         # Cut length calculation: (Depth + 3 pitches for entry/exit) * 2 for in/out + safety
-        cut_length = (tap_depth + (pitch * 6)) * 2 + 4
+        cut_length = (tap_depth + (pitch * 3)) * 2 + 4
 
         st.divider()
         col1, col2, col3 = st.columns(3)
