@@ -3,7 +3,7 @@ import math
 
 # ================= MATERIAL TABLE =================
 kc_data = {
-    "Aluminium": 800,
+    "Aluminium": 700,
     "Steel_C22": 1700,
     "Steel_C45": 1950,
     "Steel_C60": 2250,
