@@ -54,6 +54,30 @@ drill_data_aluminium = [
             {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
 ]
 
+drill_data_Steel_(Hardness upto 30 HRC)= [
+            {"min_d": 0.5, "max_d": 0.99, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
+            {"min_d": 1, "max_d": 1.99, "rpm": 6365, "feed_min": 95, "max_depth": 5},
+            {"min_d": 2, "max_d": 2.99, "rpm": 5570, "feed_min": 167, "max_depth": 10},
+
+            {"min_d": 3, "max_d": 3.99, "vc": 40, "feed_min": 297, "max_depth": 15},
+            {"min_d": 4, "max_d": 5.99, "vc": 45, "feed_min": 301, "max_depth": 20},
+            {"min_d": 6, "max_d": 7.99, "vc": 50, "feed_min": 301, "max_depth": 30},
+            {"min_d": 8, "max_d": 9.99, "vc": 60, "feed_min": 334, "max_depth": 50},
+            {"min_d": 10, "max_d": 11.99, "vc": 60, "feed_min": 306, "max_depth": 50},
+            {"min_d": 12, "max_d": 13.99, "vc": 60, "feed_min": 255, "max_depth": 60},
+
+            {"min_d": 14, "max_d": 15.99, "rpm": 1478, "feed_min": 259, "max_depth": 70},
+            {"min_d": 16, "max_d": 17.99, "rpm": 1293, "feed_min": 233, "max_depth": 80},
+            {"min_d": 18, "max_d": 20.99, "rpm": 1238, "feed_min": 248, "max_depth": 90},
+            {"min_d": 21, "max_d": 26.99, "rpm": 1364, "feed_min": 205, "max_depth": 105},
+            {"min_d": 27, "max_d": 31.99, "rpm": 1061, "feed_min": 127, "max_depth": 135},
+
+            {"min_d": 32, "max_d": 44.99, "vc": 90, "feed_min": 107, "max_depth": 105},
+            {"min_d": 45, "max_d": 50.99, "vc": 100, "feed_min": 106, "max_depth": 125},
+            {"min_d": 51, "max_d": 65, "vc": 100, "feed_min": 94, "max_depth": 150},
+           
+]
+
 tap_data_aluminium  = [
     {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
     {"tap": "M3.5", "pitch": 0.6, "vc": 5, "max_depth": 10.5},
@@ -87,6 +111,38 @@ tap_data_aluminium  = [
     {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
 ]
 
+tap_data_Steel_(Hardness upto 30 HRC)  = [
+    {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
+    {"tap": "M3.5", "pitch": 0.6, "vc": 5, "max_depth": 10.5},
+    {"tap": "M4", "pitch": 0.7, "vc": 5, "max_depth": 12},
+    {"tap": "M5", "pitch": 0.8, "vc": 6, "max_depth": 15},
+    {"tap": "M6", "pitch": 1, "vc": 8, "max_depth": 18},
+    {"tap": "M7", "pitch": 1, "vc": 8, "max_depth": 21},
+    {"tap": "M8", "pitch": 1.25, "vc": 8, "max_depth": 24},
+    {"tap": "M10", "pitch": 1.5, "vc": 10, "max_depth": 30},
+    {"tap": "M12", "pitch": 1.75, "vc": 12, "max_depth": 36},
+    {"tap": "M14", "pitch": 2, "vc": 15, "max_depth": 42},
+    {"tap": "M16", "pitch": 2, "vc": 15, "max_depth": 48},
+    {"tap": "M16", "pitch": 1, "vc": 15, "max_depth": 48},
+    {"tap": "M16", "pitch": 1.5, "vc": 15, "max_depth": 48},
+    {"tap": "M6", "pitch": 0.5, "vc": 8, "max_depth": 18},
+    {"tap": "M6", "pitch": 0.75, "vc": 8, "max_depth": 18},
+    {"tap": "M8", "pitch": 0.5, "vc": 8, "max_depth": 24},
+    {"tap": "M8", "pitch": 0.75, "vc": 8, "max_depth": 24},
+    {"tap": "M8", "pitch": 1, "vc": 8, "max_depth": 24},
+    {"tap": "M9", "pitch": 1, "vc": 8, "max_depth": 27},
+    {"tap": "M10", "pitch": 0.75, "vc": 10, "max_depth": 30},
+    {"tap": "M10", "pitch": 1.25, "vc": 10, "max_depth": 30},
+    {"tap": "M10", "pitch": 1, "vc": 10, "max_depth": 30},
+    {"tap": "M12", "pitch": 1, "vc": 12, "max_depth": 36},
+    {"tap": "M12", "pitch": 1.25, "vc": 12, "max_depth": 36},
+    {"tap": "M12", "pitch": 1.5, "vc": 12, "max_depth": 36},
+    {"tap": "M14", "pitch": 1, "vc": 15, "max_depth": 42},
+    {"tap": "M14", "pitch": 1.25, "vc": 15, "max_depth": 42},
+    {"tap": "M14", "pitch": 1.5, "vc": 15, "max_depth": 42},
+    {"tap": "M18", "pitch": 2.5, "vc": 20, "max_depth": 54},
+    {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
+]
 threadmill_data_aluminium = [
     {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 30, "feed_rev": 0.06, "max_depth": 7.5},
     {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 30, "feed_rev": 0.09, "max_depth": 10},
@@ -106,7 +162,25 @@ threadmill_data_aluminium = [
     {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
     {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
 ]
-
+threadmill_data_Steel_(Hardness upto 30 HRC) = [
+    {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 15, "feed_rev": 0.06, "max_depth": 7.5},
+    {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 15, "feed_rev": 0.09, "max_depth": 10},
+    {"tap": "M5", "tool_dia": 4, "pitch": 0.8, "vc": 20, "feed_rev": 0.12, "max_depth": 12.5},
+    {"tap": "M6", "tool_dia": 4.8, "pitch": 1, "vc": 25, "feed_rev": 0.14, "max_depth": 15},
+    {"tap": "M8", "tool_dia": 6.4, "pitch": 1.25, "vc": 30, "feed_rev": 0.15, "max_depth": 20},
+    {"tap": "M8", "tool_dia": 6.4, "pitch": 1, "vc": 30, "feed_rev": 0.15, "max_depth": 20},
+    {"tap": "M10", "tool_dia": 7.95, "pitch": 1.5, "vc": 30, "feed_rev": 0.15, "max_depth": 25},
+    {"tap": "M10", "tool_dia": 7.95, "pitch": 1, "vc": 30, "feed_rev": 0.15, "max_depth": 25},
+    {"tap": "M10", "tool_dia": 7.95, "pitch": 1.25, "vc": 30, "feed_rev": 0.15, "max_depth": 25},
+    {"tap": "M12", "tool_dia": 9.95, "pitch": 1.75, "vc": 45, "feed_rev": 0.15, "max_depth": 30},
+    {"tap": "M12", "tool_dia": 9.95, "pitch": 1.5, "vc": 45, "feed_rev": 0.15, "max_depth": 30},
+    {"tap": "M14", "tool_dia": 11.2, "pitch": 2, "vc": 45, "feed_rev": 0.20, "max_depth": 35},
+    {"tap": "M14", "tool_dia": 11.2, "pitch": 1.5, "vc": 45, "feed_rev": 0.20, "max_depth": 35},
+    {"tap": "M16", "tool_dia": 12.8, "pitch": 2, "vc": 60, "feed_rev": 0.20, "max_depth": 40},
+    {"tap": "M16", "tool_dia": 12.8, "pitch": 1.5, "vc": 60, "feed_rev": 0.20, "max_depth": 40},
+    {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 70, "feed_rev": 0.21, "max_depth": 50},
+    {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 70, "feed_rev": 0.21, "max_depth": 50},
+]
 face_mill_data_aluminium = [
     {"dia": 3, "stock": 1, "vc": 50, "rpm": 5304, "feed": 477.4, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 6, "stock": 1.5, "vc": 70, "rpm": 3713, "feed": 445.6, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
@@ -125,6 +199,23 @@ face_mill_data_aluminium = [
     {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
 ]
 
+face_mill_data_Steel_(Hardness upto 30 HRC) = [
+    {"dia": 3, "stock": 0.7, "vc": 40, "rpm": 4244, "feed": 213.9, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 6, "stock": 1.4, "vc": 60, "rpm": 3183, "feed": 244.4, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 8, "stock": 1.8, "vc": 80, "rpm": 3183, "feed": 320.8, "max_width": 6.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 10, "stock": 2.1, "vc": 80, "rpm": 2546, "feed": 336.9, "max_width": 8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 12, "stock": 2.2, "vc": 100, "rpm": 2652, "feed": 417.7, "max_width": 9.6, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 14, "stock": 2.5, "vc": 120, "rpm": 2728, "feed": 491, "max_width": 11.2, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 16, "stock": 2.9, "vc": 120, "rpm": 2387, "feed": 458.3, "max_width": 12.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 20, "stock": 3.2, "vc": 140, "rpm": 2228, "feed": 467.9, "max_width": 16, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 25, "stock": 2, "vc": 100, "rpm": 1273, "feed": 305.5, "max_width": 17.5, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 32, "stock": 2, "vc": 100, "rpm": 995, "feed": 305.5, "max_width": 22.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 40, "stock": 2, "vc": 120, "rpm": 995, "feed": 381.9, "max_width": 28, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 50, "stock": 2, "vc": 140, "rpm": 891, "feed": 445.6, "max_width": 35, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 63, "stock": 2, "vc": 140, "rpm": 707, "feed": 381.9, "max_width": 44.1, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 80, "stock": 2, "vc": 140, "rpm": 557, "feed": 356.5, "max_width": 56, "spindles": ["HSK A63","HSK A100","BT40","BT50"]},
+    {"dia": 100, "stock": 2, "vc": 140, "rpm": 446, "feed": 356.5, "max_width": 70, "spindles": ["HSK A100","BT50"]},
+]
 boring_data_aluminium = [
     {"min": 0, "max": 1, "rpm": 7957, "feed_min": 159.1, "ap": 0.1},
     {"min": 1, "max": 2, "rpm": 7161, "feed_min": 143.2, "ap": 0.2},
@@ -158,6 +249,37 @@ boring_data_aluminium = [
     {"min": 65, "max": 70, "rpm": 1714, "feed_min": 377.0, "ap": 10.0},
 ]
 
+boring_data_Steel_(Hardness upto 30 HRC) = [
+    {"min": 2, "max": 2.99, "rpm": 4244, "feed_min": 127.3, "ap": 0.2},
+    {"min": 3, "max": 3.99, "rpm": 3183, "feed_min": 191, "ap": 0.3},
+    {"min": 4, "max": 4.99, "rpm": 2864, "feed_min": 171.9, "ap": 0.5},
+    {"min": 5, "max": 5.99, "rpm": 2652, "feed_min": 185.7, "ap": 1},
+    {"min": 6, "max": 6.99, "rpm": 2273, "feed_min": 204.6, "ap": 1.5},
+    {"min": 7, "max": 7.99, "rpm": 2387, "feed_min": 214.8, "ap": 1.5},
+    {"min": 8, "max": 8.99, "rpm": 2358, "feed_min": 235.8, "ap": 2},
+    {"min": 9, "max": 9.99, "rpm": 1910, "feed_min": 191, "ap": 2},
+    {"min": 10, "max": 10.99, "rpm": 1736, "feed_min": 208.3, "ap": 2},
+    {"min": 11, "max": 11.99, "rpm": 1591, "feed_min": 191, "ap": 2.5},
+    {"min": 12, "max": 12.99, "rpm": 1469, "feed_min": 176.3, "ap": 2.5},
+    {"min": 13, "max": 13.99, "rpm": 1364, "feed_min": 204.6, "ap": 2.5},
+    {"min": 14, "max": 14.99, "rpm": 1379, "feed_min": 206.9, "ap": 2.5},
+    {"min": 15, "max": 15.99, "rpm": 1293, "feed_min": 193.9, "ap": 2.5},
+    {"min": 16, "max": 16.99, "rpm": 1217, "feed_min": 182.5, "ap": 3},
+    {"min": 17, "max": 17.99, "rpm": 1238, "feed_min": 185.7, "ap": 3},
+    {"min": 18, "max": 18.99, "rpm": 1173, "feed_min": 175.9, "ap": 3},
+    {"min": 19, "max": 19.99, "rpm": 1432, "feed_min": 214.8, "ap": 3},
+    {"min": 20, "max": 24.99, "rpm": 1910, "feed_min": 306, "ap": 3.0},
+    {"min": 25, "max": 29.99, "rpm": 1528, "feed_min": 244, "ap": 3.0},
+    {"min": 30, "max": 34.99, "rpm": 1485, "feed_min": 297, "ap": 3.0},
+    {"min": 35, "max": 39.99, "rpm": 1455, "feed_min": 291, "ap": 4.0},
+    {"min": 40, "max": 44.99, "rpm": 1432, "feed_min": 286, "ap": 4.0},
+    {"min": 45, "max": 49.99, "rpm": 1132, "feed_min": 249, "ap": 4.0},
+    {"min": 50, "max": 54.99, "rpm": 1018, "feed_min": 224, "ap": 5.0},
+    {"min": 55, "max": 59.99, "rpm": 810, "feed_min": 178, "ap": 5.0},
+    {"min": 60, "max": 64.99, "rpm": 743, "feed_min": 163, "ap": 6.0},
+    {"min": 65, "max": 69.99, "rpm": 545, "feed_min": 129.0, "ap": 6.0},
+    {"min": 70, "max": 85, "rpm": 500, "feed_min": 100.0, "ap": 6.0},
+]
 # ================= FINE BORING DATA =================
 
 fine_boring_data_aluminium = [
@@ -173,6 +295,19 @@ fine_boring_data_aluminium = [
     {"min": 65, "max": 70, "vc": 200, "feed_rev": 0.12, "ap": 0.5},
 ]
 
+fine_boring_Steel_(Hardness upto 30 HRC) = [
+    {"min": 20, "max": 24.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
+    {"min": 25, "max": 29.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
+    {"min": 30, "max": 34.99, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
+    {"min": 35, "max": 39.99, "vc": 160, "feed_rev": 0.08, "ap": 0.4},
+    {"min": 40, "max": 44.99, "vc": 170, "feed_rev": 0.08, "ap": 0.4},
+    {"min": 45, "max": 49.99, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 50, "max": 54.99, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 55, "max": 59.99, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 60, "max": 64.99, "vc": 160, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 65, "max": 69.99, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
+    {"min": 70, "max": 80, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
+]
 # ==========================================
 # 1. MATERIAL MASTER TABLE
 # ==========================================
