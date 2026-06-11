@@ -296,7 +296,7 @@ fine_boring_data_aluminium = [
     {"min": 65, "max": 70, "vc": 200, "feed_rev": 0.12, "ap": 0.5},
 ]
 
-fine_boring_Steel_Hardness_upto_30_HRC = [
+fine_boring__data_Steel_Hardness_upto_30_HRC = [
     {"min": 20, "max": 24.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
     {"min": 25, "max": 29.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
     {"min": 30, "max": 34.99, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
