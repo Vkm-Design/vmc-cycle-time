@@ -362,7 +362,7 @@ def get_parameters(diameter, material):
     table = material_tables[material]["drill"]
 
     for row in table:
-        if row["min_d"] <= diameter < row["max_d"]:
+        if row["min_d"] <= diameter <= row["max_d"]:
 
             if "rpm" in row:
                 rpm = row["rpm"]
