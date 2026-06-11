@@ -756,9 +756,8 @@ elif operation == "Boring / Hole Milling":
 
         drill_data = material_tables[material]["drill"]
 
-        # Sort to find the largest drill that is still <= 30mm
         sorted_drills = sorted(
-            [d for d in drill_data if d['max_d'] <= 30],
+            drill_data,
             key=lambda x: x['max_d'],
             reverse=True
         )
@@ -811,7 +810,9 @@ elif operation == "Boring / Hole Milling":
 
         else:
 
-            st.error("❌ No safe drill found (Max Ø30 limit).")
+            st.error(   
+                f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
+            )
             st.stop()
 
     else:
