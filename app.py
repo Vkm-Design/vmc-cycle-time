@@ -382,13 +382,27 @@ def get_parameters(diameter, material):
     return None, None, None
 
 def get_boring_params(dia, material):
+
     if "boring" in material_tables[material] and len(material_tables[material]["boring"]) > 0:
         table = material_tables[material]["boring"]
     else:
         table = material_tables["Aluminium"]["boring"]
+
     for row in table:
         if row["min"] <= dia < row["max"]:
-            return row
+
+            result = row.copy()
+
+            if material == "Steel_Hardness_30_to_40_HRC":
+                result["rpm"] *= 0.90
+                result["feed_min"] *= 0.95
+
+            elif material == "Stainless_Steel":
+                result["rpm"] *= 0.80
+                result["feed_min"] *= 0.90
+
+            return result
+
     return None
 
 def get_fine_boring_params(dia, material):
@@ -397,15 +411,24 @@ def get_fine_boring_params(dia, material):
         "fine_boring" in material_tables[material]
         and len(material_tables[material]["fine_boring"]) > 0
     ):
-
         table = material_tables[material]["fine_boring"]
-
     else:
         return None
 
     for row in table:
         if row["min"] <= dia < row["max"]:
-            return row
+
+            result = row.copy()
+
+            if material == "Steel_Hardness_30_to_40_HRC":
+                result["vc"] *= 0.90
+                result["feed_rev"] *= 0.95
+
+            elif material == "Stainless_Steel":
+                result["vc"] *= 0.80
+                result["feed_rev"] *= 0.90
+
+            return result
 
     return None
 
