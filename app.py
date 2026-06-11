@@ -352,13 +352,25 @@ material_tables = {
 # ==========================================
 def get_parameters(diameter, material):
     table = material_tables[material]["drill"]
+
     for row in table:
         if row["min_d"] <= diameter < row["max_d"]:
+
             if "rpm" in row:
                 rpm = row["rpm"]
             else:
                 rpm = (1000 * row["vc"]) / (math.pi * diameter)
-            return rpm, row["feed_min"], row["max_depth"]
+
+            feed = row["feed_min"]
+            max_depth = row["max_depth"]
+
+            # Harder steel correction
+            if material == "Steel_Hardness_30_to_40_HRC":
+                rpm *= 0.90      # 10% lower speed
+                feed *= 0.95     # 5% lower feed
+
+            return rpm, feed, max_depth
+
     return None, None, None
 
 def get_boring_params(dia, material):
