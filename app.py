@@ -54,7 +54,7 @@ drill_data_aluminium = [
             {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
 ]
 
-drill_data_Steel_(Hardness_upto_30_HRC)= [
+drill_data_Steel_(Hardness_upto_30_HRC) = [
             {"min_d": 0.5, "max_d": 0.99, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
             {"min_d": 1, "max_d": 1.99, "rpm": 6365, "feed_min": 95, "max_depth": 5},
             {"min_d": 2, "max_d": 2.99, "rpm": 5570, "feed_min": 167, "max_depth": 10},
@@ -111,7 +111,7 @@ tap_data_aluminium  = [
     {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
 ]
 
-tap_data_Steel_(Hardness_upto_30_HRC)  = [
+tap_data_Steel_(Hardness_upto_30_HRC) = [
     {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
     {"tap": "M3.5", "pitch": 0.6, "vc": 5, "max_depth": 10.5},
     {"tap": "M4", "pitch": 0.7, "vc": 5, "max_depth": 12},
