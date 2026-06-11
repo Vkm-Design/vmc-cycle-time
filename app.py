@@ -475,12 +475,41 @@ kc = kc_data[material]
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
 # 3. Assign Machine Specs
-m_power = machine_data[machine]["power"]
-m_torque = machine_data[machine]["torque"]
-m_taper = machine_data[machine].get("taper", "BT40") 
 
-st.sidebar.info(f"Machine Cap: {m_power}kW | {m_torque}Nm | {m_taper}")
+default_power = machine_data[machine]["power"]
+default_torque = machine_data[machine]["torque"]
+m_taper = machine_data[machine].get("taper", "BT40")
+
+m_power = st.sidebar.number_input(
+    "Available Spindle Power (kW)",
+    min_value=0.1,
+    value=float(default_power),
+    step=0.5,
+    key="global_power"
+)
+
+m_torque = st.sidebar.number_input(
+    "Available Spindle Torque (Nm)",
+    min_value=0.1,
+    value=float(default_torque),
+    step=1.0,
+    key="global_torque"
+)
+
+st.sidebar.info(
+    f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}"
+)
+
 st.sidebar.markdown("---")
+
+# Effective machine capability used for calculations
+usable_power = m_power * 0.85
+usable_torque = m_torque * 0.85
+
+st.sidebar.caption(
+    f"Calculation uses 85% capacity: "
+    f"{usable_power:.2f} kW | {usable_torque:.1f} Nm"
+)
 
 # 4. QUALITY REQUIREMENTS (For L/D, Ra, and Tolerance logic)
 if operation != "Tapping":
