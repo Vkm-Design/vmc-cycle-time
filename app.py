@@ -5,7 +5,7 @@ import math
 kc_data = {
     "Aluminium": 700,
     "Steel_Hardness_upto_30_HRC": 1950,
-    "Steel_Hardnes_30_to_40_HRC": 2250,
+    "Steel_Hardness_30_to_40_HRC": 2250,
     "Stainless_Steel": 2400
 }
 
@@ -315,15 +315,36 @@ fine_boring__data_Steel_Hardness_upto_30_HRC = [
 # ==========================================
 material_tables = {
     "Aluminium": {
-        "drill": drill_data_aluminium, 
-        "boring": boring_data_aluminium,     
+        "drill": drill_data_aluminium,
+        "boring": boring_data_aluminium,
         "tap": tap_data_aluminium,
-        "threadmill": threadmill_data_aluminium, # ADD THIS LINE
-        "face_mill": face_mill_data_aluminium    # ADD THIS TOO if you have it
+        "threadmill": threadmill_data_aluminium,
+        "face_mill": face_mill_data_aluminium
     },
-    "Steel_Hardness_upto_30_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Steel_Hardnes_30_to_40_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
+
+    "Steel_Hardness_upto_30_HRC": {
+        "drill": drill_data_Steel_Hardness_upto_30_HRC,
+        "boring": boring_data_Steel_Hardness_upto_30_HRC,
+        "tap": tap_data_Steel_Hardness_upto_30_HRC,
+        "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
+        "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
+    },
+
+    "Steel_Hardness_30_to_40_HRC": {
+        "drill": drill_data_Steel_Hardness_upto_30_HRC,
+        "boring": boring_data_Steel_Hardness_upto_30_HRC,
+        "tap": tap_data_Steel_Hardness_upto_30_HRC,
+        "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
+        "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
+    },
+
+    "Stainless_Steel": {
+        "drill": drill_data_Steel_Hardness_upto_30_HRC,
+        "boring": boring_data_Steel_Hardness_upto_30_HRC,
+        "tap": tap_data_Steel_Hardness_upto_30_HRC,
+        "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
+        "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
+    }
 }
 
 # ==========================================
