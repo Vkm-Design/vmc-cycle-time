@@ -579,6 +579,11 @@ if operation == "Drilling":
         st.write(f"**Travel:** {round(actual_travel, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
 
+        st.write(
+            f"Checking Ø{drill['max_d']} | RPM={round(d_rpm)} | "
+            f"Feed={round(d_fmin)} | Power={round(p_check,2)} kW"
+        )
+
         if p_req > m_power:
             st.error(f"🚨 Power Alert: {round(p_req,2)}kW exceeds {machine} limit.")
         
