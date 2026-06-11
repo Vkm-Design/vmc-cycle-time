@@ -4,8 +4,8 @@ import math
 # ================= MATERIAL TABLE =================
 kc_data = {
     "Aluminium": 700,
-    "Steel_(Hardness_upto_30_HRC)": 1950,
-    "Steel_(Hardnes_30_to_40_HRC)": 2250,
+    "Steel_Hardness_upto_30_HRC": 1950,
+    "Steel_Hardnes_30_to_40_HRC": 2250,
     "Stainless_Steel": 2400
 }
 
@@ -54,7 +54,7 @@ drill_data_aluminium = [
             {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
 ]
 
-drill_data_Steel_(Hardness_upto_30_HRC) = [
+drill_data_Steel_Hardness_upto_30_HRC = [
             {"min_d": 0.5, "max_d": 0.99, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
             {"min_d": 1, "max_d": 1.99, "rpm": 6365, "feed_min": 95, "max_depth": 5},
             {"min_d": 2, "max_d": 2.99, "rpm": 5570, "feed_min": 167, "max_depth": 10},
@@ -111,7 +111,7 @@ tap_data_aluminium  = [
     {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
 ]
 
-tap_data_Steel_(Hardness_upto_30_HRC) = [
+tap_data_Steel_Hardness_upto_30_HRC = [
     {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
     {"tap": "M3.5", "pitch": 0.6, "vc": 5, "max_depth": 10.5},
     {"tap": "M4", "pitch": 0.7, "vc": 5, "max_depth": 12},
@@ -162,7 +162,7 @@ threadmill_data_aluminium = [
     {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
     {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
 ]
-threadmill_data_Steel_(Hardness_upto_30_HRC) = [
+threadmill_data_Steel_Hardness_upto_30_HRC = [
     {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 15, "feed_rev": 0.06, "max_depth": 7.5},
     {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 15, "feed_rev": 0.09, "max_depth": 10},
     {"tap": "M5", "tool_dia": 4, "pitch": 0.8, "vc": 20, "feed_rev": 0.12, "max_depth": 12.5},
@@ -199,7 +199,7 @@ face_mill_data_aluminium = [
     {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
 ]
 
-face_mill_data_Steel_(Hardness_upto_30_HRC) = [
+face_mill_data_Steel_Hardness_upto_30_HRC = [
     {"dia": 3, "stock": 0.7, "vc": 40, "rpm": 4244, "feed": 213.9, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 6, "stock": 1.4, "vc": 60, "rpm": 3183, "feed": 244.4, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 8, "stock": 1.8, "vc": 80, "rpm": 3183, "feed": 320.8, "max_width": 6.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
@@ -249,7 +249,7 @@ boring_data_aluminium = [
     {"min": 65, "max": 70, "rpm": 1714, "feed_min": 377.0, "ap": 10.0},
 ]
 
-boring_data_Steel_(Hardness_upto_30_HRC) = [
+boring_data_Steel_Hardness_upto_30_HRC = [
     {"min": 2, "max": 2.99, "rpm": 4244, "feed_min": 127.3, "ap": 0.2},
     {"min": 3, "max": 3.99, "rpm": 3183, "feed_min": 191, "ap": 0.3},
     {"min": 4, "max": 4.99, "rpm": 2864, "feed_min": 171.9, "ap": 0.5},
@@ -295,7 +295,7 @@ fine_boring_data_aluminium = [
     {"min": 65, "max": 70, "vc": 200, "feed_rev": 0.12, "ap": 0.5},
 ]
 
-fine_boring_Steel_(Hardness_upto_30_HRC) = [
+fine_boring_Steel_Hardness_upto_30_HRC = [
     {"min": 20, "max": 24.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
     {"min": 25, "max": 29.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
     {"min": 30, "max": 34.99, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
@@ -320,8 +320,8 @@ material_tables = {
         "threadmill": threadmill_data_aluminium,
         "face_mill": face_mill_data_aluminium
     },
-    "Steel_(Hardness_upto_30_HRC)": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Steel_(Hardnes_30_to_40_HRC)": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_Hardness_upto_30_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_Hardnes_30_to_40_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
     "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
 }
 
