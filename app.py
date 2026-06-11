@@ -320,7 +320,14 @@ material_tables = {
         "threadmill": threadmill_data_aluminium,
         "face_mill": face_mill_data_aluminium
     },
-    "Steel_Hardness_upto_30_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_Hardness_upto_30_HRC": {
+         "drill": drill_data_Steel_Hardness_upto_30_HRC,
+         "boring": boring_data_Steel_Hardness_upto_30_HRC,
+         "fine_boring": fine_boring_data_Steel_Hardness_upto_30_HRC,
+         "tap": tap_data_Steel_Hardness_upto_30_HRC,
+         "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
+         "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
+    },
     "Steel_Hardnes_30_to_40_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
     "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
 }
