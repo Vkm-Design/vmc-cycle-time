@@ -4,9 +4,8 @@ import math
 # ================= MATERIAL TABLE =================
 kc_data = {
     "Aluminium": 700,
-    "Steel_C22": 1700,
-    "Steel_C45": 1950,
-    "Steel_C60": 2250,
+    "Steel_(Hardness upto 30 HRC)": 1950,
+    "Steel_(Hardnes 30-40 HRC)": 2250,
     "Stainless_Steel": 2400
 }
 
@@ -186,9 +185,8 @@ material_tables = {
         "threadmill": threadmill_data_aluminium,
         "face_mill": face_mill_data_aluminium
     },
-    "Steel_C22": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Steel_C45": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Steel_C60": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_(Hardness upto 30 HRC)": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_(Hardnes 30-40 HRC)": {"drill": [], "boring": [], "tap": [], "threadmill": []},
     "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
 }
 
