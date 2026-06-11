@@ -373,6 +373,10 @@ def get_parameters(diameter, material):
                 rpm *= 0.90      # 10% lower speed
                 feed *= 0.95     # 5% lower feed
 
+            elif material == "Stainless_Steel":
+                rpm *= 0.75
+                feed *= 0.80
+
             return rpm, feed, max_depth
 
     return None, None, None
