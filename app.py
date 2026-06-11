@@ -765,6 +765,7 @@ elif operation == "Boring / Hole Milling":
         safe_drill_dia = 0.0
 
         for drill in sorted_drills:
+            st.write(f"Trying drill Ø{drill['max_d']}")
 
             if drill['max_d'] < rough_target_dia:
 
