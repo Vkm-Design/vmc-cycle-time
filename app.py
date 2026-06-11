@@ -321,6 +321,7 @@ material_tables = {
     "Aluminium": {
         "drill": drill_data_aluminium,
         "boring": boring_data_aluminium,
+        "fine_boring": boring_data_aluminium,
         "tap": tap_data_aluminium,
         "threadmill": threadmill_data_aluminium,
         "face_mill": face_mill_data_aluminium
@@ -329,6 +330,7 @@ material_tables = {
     "Steel_Hardness_upto_30_HRC": {
         "drill": drill_data_Steel_Hardness_upto_30_HRC,
         "boring": boring_data_Steel_Hardness_upto_30_HRC,
+        "fine_boring": boring_data_Steel_Hardness_upto_30_HRC,
         "tap": tap_data_Steel_Hardness_upto_30_HRC,
         "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
         "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
@@ -337,6 +339,7 @@ material_tables = {
     "Steel_Hardness_30_to_40_HRC": {
         "drill": drill_data_Steel_Hardness_upto_30_HRC,
         "boring": boring_data_Steel_Hardness_upto_30_HRC,
+        "fine_boring": boring_data_Steel_Hardness_upto_30_HRC
         "tap": tap_data_Steel_Hardness_upto_30_HRC,
         "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
         "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
@@ -345,6 +348,7 @@ material_tables = {
     "Stainless_Steel": {
         "drill": drill_data_Steel_Hardness_upto_30_HRC,
         "boring": boring_data_Steel_Hardness_upto_30_HRC,
+        "fine_boring": boring_data_Steel_Hardness_upto_30_HRC
         "tap": tap_data_Steel_Hardness_upto_30_HRC,
         "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
         "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
