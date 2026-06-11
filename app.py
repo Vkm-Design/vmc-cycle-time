@@ -474,6 +474,17 @@ kc = kc_data[material]
 # 2. THE ONLY MACHINE PICKER (Syncs with all logic)
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
+# Detect machine change
+if "last_machine" not in st.session_state:
+    st.session_state.last_machine = machine
+
+if st.session_state.last_machine != machine:
+
+    st.session_state.global_power = machine_data[machine]["power"]
+    st.session_state.global_torque = machine_data[machine]["torque"]
+
+    st.session_state.last_machine = machine
+
 # 3. Assign Machine Specs
 
 default_power = machine_data[machine]["power"]
