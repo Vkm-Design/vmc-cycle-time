@@ -280,6 +280,7 @@ boring_data_Steel_Hardness_upto_30_HRC = [
     {"min": 65, "max": 69.99, "rpm": 545, "feed_min": 129.0, "ap": 6.0},
     {"min": 70, "max": 85, "rpm": 500, "feed_min": 100.0, "ap": 6.0},
 ]
+
 # ================= FINE BORING DATA =================
 
 fine_boring_data_aluminium = [
@@ -308,6 +309,7 @@ fine_boring_Steel_Hardness_upto_30_HRC = [
     {"min": 65, "max": 69.99, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
     {"min": 70, "max": 80, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
 ]
+
 # ==========================================
 # 1. MATERIAL MASTER TABLE
 # ==========================================
