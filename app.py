@@ -770,7 +770,7 @@ elif operation == "Boring / Hole Milling":
             if drill['max_d'] < rough_target_dia:
 
                 d_params = get_parameters(drill['max_d'], material)
-
+                st.write(f"Params for Ø{drill['max_d']} = {d_params}")
                 if d_params[0] is not None and d_params[1] is not None:
 
                     d_rpm, d_fmin = d_params[0], d_params[1]
