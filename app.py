@@ -549,11 +549,13 @@ elif operation == "Boring / Hole Milling":
     # FINE BORING MATERIAL VALIDATION
     # ==========================================
 
-    if material != "Aluminium":
-
+    if (
+        "fine_boring" not in material_tables[material]
+        or len(material_tables[material]["fine_boring"]) == 0
+       ):
         st.warning(
-            "Fine boring parameters currently defined only for Aluminium."
-        )
+            f"Fine boring parameters currently not defined for {material}."
+       )
 
     col1, col2 = st.columns(2)
 
