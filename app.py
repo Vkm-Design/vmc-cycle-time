@@ -321,9 +321,8 @@ material_tables = {
         "threadmill": threadmill_data_aluminium, # ADD THIS LINE
         "face_mill": face_mill_data_aluminium    # ADD THIS TOO if you have it
     },
-    "Steel_C22": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Steel_C45": {"drill": [], "boring": [], "tap": [], "threadmill": []},
-    "Steel_C60": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_Hardness_upto_30_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_Hardnes_30_to_40_HRC": {"drill": [], "boring": [], "tap": [], "threadmill": []},
     "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
 }
 
