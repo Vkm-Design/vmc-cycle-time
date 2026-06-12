@@ -780,9 +780,14 @@ elif operation == "Boring / Hole Milling":
         safe_drill_dia = 0.0
 
         for drill in sorted_drills:
-            if drill['max_d'] <= (rough_target_dia - 1.0):
-
-                d_params = get_parameters(drill['max_d'], material)
+            # Best possible drill from this range row
+            best_dia_in_range = min(drill['max_d'] - 0.01, rough_target_dia - 1.0)
+    
+            # Must still be within this row's valid range
+            if best_dia_in_range < drill['min_d']:
+                continue  # no valid drill in this range for our target
+                
+                d_params = get_parameters(best_dia_in_range, material)
                 
                 if d_params[0] is not None and d_params[1] is not None:
 
