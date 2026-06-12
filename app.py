@@ -765,12 +765,10 @@ elif operation == "Boring / Hole Milling":
         safe_drill_dia = 0.0
 
         for drill in sorted_drills:
-            st.write(f"Trying drill Ø{drill['max_d']}")
-
             if drill['max_d'] < rough_target_dia:
 
                 d_params = get_parameters(drill['max_d'], material)
-                st.write(f"Params for Ø{drill['max_d']} = {d_params}")
+                
                 if d_params[0] is not None and d_params[1] is not None:
 
                     d_rpm, d_fmin = d_params[0], d_params[1]
@@ -841,7 +839,6 @@ elif operation == "Boring / Hole Milling":
 
     while current_dia < rough_target_dia:
 
-        st.write(f"Current Dia = {current_dia}")
         tool = get_boring_params(current_dia, material)
 
         if not tool:
@@ -852,10 +849,10 @@ elif operation == "Boring / Hole Milling":
         # Max stock increment from table
         max_dia_increment = tool['ap']
 
-        d2 = min(
+        d2 = round(min(
             rough_target_dia,
             current_dia + max_dia_increment
-        )
+        ),3)
 
         # Feed per revolution
         f_rev_b = tool['feed_min'] / tool['rpm']
@@ -889,7 +886,7 @@ elif operation == "Boring / Hole Milling":
             f"Time: {round(p_time, 1)}s"
         )
 
-        current_dia = d2
+        current_dia = round(d2, 3)
 
     # ==========================================
     # STEP 3 : FINAL BORING PASS
