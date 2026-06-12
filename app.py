@@ -373,7 +373,7 @@ def get_parameters(diameter, material):
     table = material_tables[material]["drill"]
 
     for row in table:
-        if row["min_d"] <= diameter <= row["max_d"]:
+        if row["min_d"] <= diameter < row["max_d"]:  # changed <= to < for max_d
 
             if "rpm" in row:
                 rpm = row["rpm"]
@@ -780,11 +780,16 @@ elif operation == "Boring / Hole Milling":
         safe_drill_dia = 0.0
 
         for drill in sorted_drills:
-            if drill['max_d'] < rough_target_dia:
-                d_params = get_parameters(drill['max_d'], material)
+                if drill['min_d'] >= rough_target_dia - 1.0:
+                    continue  # entire range is too close to target, skip
+    
+                # Best drill within this range, leaving 1mm stock
+                actual_dia = min(drill['max_d'] - 0.01, rough_target_dia - 1.0)
+                actual_dia = round(actual_dia, 2)
+    
+                d_params = get_parameters(actual_dia, material)
                 if d_params[0] is not None and d_params[1] is not None:
                     d_rpm, d_fmin = d_params[0], d_params[1]
-
                     p_check = (
                         (
                             (d_fmin / d_rpm)
