@@ -288,6 +288,11 @@ boring_data_Steel_Hardness_upto_30_HRC = [
 # ================= FINE BORING DATA =================
 
 fine_boring_data_aluminium = [
+    {"min": 3, "max": 5, "rpm": 6365, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 5, "max": 8, "rpm": 5729, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 8, "max": 12, "rpm": 5570, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 12, "max": 16, "rpm": 4244, "feed_rev": 0.08, "ap": 0.5},
+    {"min": 16, "max": 20, "rpm": 3581, "feed_rev": 0.08, "ap": 0.5},
     {"min": 20, "max": 25, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
     {"min": 25, "max": 30, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
     {"min": 30, "max": 35, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
@@ -301,6 +306,12 @@ fine_boring_data_aluminium = [
 ]
 
 fine_boring__data_Steel_Hardness_upto_30_HRC = [
+
+    {"min": 3, "max": 5, "rpm": 4244, "feed_rev": 0.06, "ap": 0.5},
+    {"min": 5, "max": 8, "rpm": 3183, "feed_rev": 0.12, "ap": 0.5},
+    {"min": 8, "max": 12, "rpm": 2785, "feed_rev": 0.06, "ap": 0.5},
+    {"min": 12, "max": 16, "rpm": 2652, "feed_rev": 0.07, "ap": 0.5},
+    {"min": 16, "max": 20, "rpm": 2387, "feed_rev": 0.08, "ap": 0.5},
     {"min": 20, "max": 25, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
     {"min": 25, "max": 30, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
     {"min": 30, "max": 35, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
@@ -423,6 +434,10 @@ def get_fine_boring_params(dia, material):
         if row["min"] <= dia < row["max"]:
 
             result = row.copy()
+
+            # Handle both rpm-direct and vc-based rows
+            if "rpm" not in result:
+                result["rpm"] = (1000 * result["vc"]) / (math.pi * dia)
 
             if material == "Steel_Hardness_30_to_40_HRC":
                 result["vc"] *= 0.90
@@ -897,15 +912,10 @@ elif operation == "Boring / Hole Milling":
         f_tool = get_fine_boring_params(f_dia, material)
 
         if f_tool:
-
-            finish_vc = f_tool["vc"]
             finish_feed_rev = f_tool["feed_rev"]
 
-            finish_rpm = (
-                (1000 * finish_vc)
-                / (math.pi * f_dia)
-            )
-
+            finish_rpm = f_tool["rpm"]
+                
             finish_feed = (
                 finish_feed_rev
                 * finish_rpm
