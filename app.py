@@ -797,13 +797,13 @@ elif operation == "Boring / Hole Milling":
                         (
                             (d_fmin / d_rpm)
                             * (math.pi * actual_dia  * d_rpm / 1000)
-                            * drill['max_d']
+                            * actual_dia
                             * kc
                         ) / 192000
                     )
                     if p_check <= m_power:
 
-                        safe_drill_dia = drill['max_d']
+                        safe_drill_dia = actual_dia
                         break
 
         if safe_drill_dia > 0:
