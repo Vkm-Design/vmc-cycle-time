@@ -714,16 +714,19 @@ elif operation == "Boring / Hole Milling":
     # ==========================================
 
     if fine_boring_required:
-
-        # Leave stock for final fine boring
-        finish_stock = 0.5
+        f_tool_check = get_fine_boring_params(f_dia, material)
+        finish_stock = f_tool_check["ap"] if f_tool_check else 0.5  # fallback 0.5
         rough_target_dia = f_dia - finish_stock
-
     else:
-
-        # Rough boring finishes directly to size
         finish_stock = 0.0
         rough_target_dia = f_dia
+
+    if f_dia <= 5:
+        drill_stock = 0.5
+    elif f_dia <= 10:
+        drill_stock = 0.7
+    else:
+        drill_stock = 1.0
 
     # ==========================================
     # SPECIAL PROCESS VALIDATION
@@ -780,7 +783,7 @@ elif operation == "Boring / Hole Milling":
         safe_drill_dia = 0.0
 
         for drill in sorted_drills:
-                actual_dia = min(drill['max_d'] - 0.01, rough_target_dia - 1.0)
+                actual_dia = min(drill['max_d'] - 0.01, rough_target_dia - drill_stock)
                 actual_dia = round(actual_dia, 2)
 
                 # actual_dia must fall within this row's own range
