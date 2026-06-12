@@ -781,7 +781,7 @@ elif operation == "Boring / Hole Milling":
 
         for drill in sorted_drills:
                 if drill['min_d'] >= rough_target_dia - 1.0:
-                    continue  
+                    continue  # entire range is too close to target, skip
     
                 # Best drill within this range, leaving 1mm stock
                 actual_dia = min(drill['max_d'] - 0.01, rough_target_dia - 1.0)
