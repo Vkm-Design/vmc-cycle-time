@@ -789,14 +789,14 @@ elif operation == "Boring / Hole Milling":
 
                 # Safety check — drill must always be smaller than bore target
                 if actual_dia >= rough_target_dia:
-    
+                    continue
                 d_params = get_parameters(actual_dia, material)
                 if d_params[0] is not None and d_params[1] is not None:
                     d_rpm, d_fmin = d_params[0], d_params[1]
                     p_check = (
                         (
                             (d_fmin / d_rpm)
-                            * (math.pi * drill['max_d'] * d_rpm / 1000)
+                            * (math.pi * actual_dia  * d_rpm / 1000)
                             * drill['max_d']
                             * kc
                         ) / 192000
