@@ -254,34 +254,34 @@ boring_data_aluminium = [
 ]
 
 boring_data_Steel_Hardness_upto_30_HRC = [
-    {"min": 2, "max": 2.99, "rpm": 4244, "feed_min": 127.3, "ap": 0.2},
-    {"min": 3, "max": 3.99, "rpm": 3183, "feed_min": 191, "ap": 0.3},
-    {"min": 4, "max": 4.99, "rpm": 2864, "feed_min": 171.9, "ap": 0.5},
-    {"min": 5, "max": 5.99, "rpm": 2652, "feed_min": 185.7, "ap": 1},
-    {"min": 6, "max": 6.99, "rpm": 2273, "feed_min": 204.6, "ap": 1.5},
-    {"min": 7, "max": 7.99, "rpm": 2387, "feed_min": 214.8, "ap": 1.5},
-    {"min": 8, "max": 8.99, "rpm": 2358, "feed_min": 235.8, "ap": 2},
-    {"min": 9, "max": 9.99, "rpm": 1910, "feed_min": 191, "ap": 2},
-    {"min": 10, "max": 10.99, "rpm": 1736, "feed_min": 208.3, "ap": 2},
-    {"min": 11, "max": 11.99, "rpm": 1591, "feed_min": 191, "ap": 2.5},
-    {"min": 12, "max": 12.99, "rpm": 1469, "feed_min": 176.3, "ap": 2.5},
-    {"min": 13, "max": 13.99, "rpm": 1364, "feed_min": 204.6, "ap": 2.5},
-    {"min": 14, "max": 14.99, "rpm": 1379, "feed_min": 206.9, "ap": 2.5},
-    {"min": 15, "max": 15.99, "rpm": 1293, "feed_min": 193.9, "ap": 2.5},
-    {"min": 16, "max": 16.99, "rpm": 1217, "feed_min": 182.5, "ap": 3},
-    {"min": 17, "max": 17.99, "rpm": 1238, "feed_min": 185.7, "ap": 3},
-    {"min": 18, "max": 18.99, "rpm": 1173, "feed_min": 175.9, "ap": 3},
-    {"min": 19, "max": 19.99, "rpm": 1432, "feed_min": 214.8, "ap": 3},
-    {"min": 20, "max": 24.99, "rpm": 1910, "feed_min": 306, "ap": 3.0},
-    {"min": 25, "max": 29.99, "rpm": 1528, "feed_min": 244, "ap": 3.0},
-    {"min": 30, "max": 34.99, "rpm": 1485, "feed_min": 297, "ap": 3.0},
-    {"min": 35, "max": 39.99, "rpm": 1455, "feed_min": 291, "ap": 4.0},
-    {"min": 40, "max": 44.99, "rpm": 1432, "feed_min": 286, "ap": 4.0},
-    {"min": 45, "max": 49.99, "rpm": 1132, "feed_min": 249, "ap": 4.0},
-    {"min": 50, "max": 54.99, "rpm": 1018, "feed_min": 224, "ap": 5.0},
-    {"min": 55, "max": 59.99, "rpm": 810, "feed_min": 178, "ap": 5.0},
-    {"min": 60, "max": 64.99, "rpm": 743, "feed_min": 163, "ap": 6.0},
-    {"min": 65, "max": 69.99, "rpm": 545, "feed_min": 129.0, "ap": 6.0},
+    {"min": 2, "max": 3, "rpm": 4244, "feed_min": 127.3, "ap": 0.2},
+    {"min": 3, "max": 4, "rpm": 3183, "feed_min": 191, "ap": 0.3},
+    {"min": 4, "max": 5, "rpm": 2864, "feed_min": 171.9, "ap": 0.5},
+    {"min": 5, "max": 6, "rpm": 2652, "feed_min": 185.7, "ap": 1},
+    {"min": 6, "max": 7, "rpm": 2273, "feed_min": 204.6, "ap": 1.5},
+    {"min": 7, "max": 8, "rpm": 2387, "feed_min": 214.8, "ap": 1.5},
+    {"min": 8, "max": 9, "rpm": 2358, "feed_min": 235.8, "ap": 2},
+    {"min": 9, "max": 10, "rpm": 1910, "feed_min": 191, "ap": 2},
+    {"min": 10, "max": 11, "rpm": 1736, "feed_min": 208.3, "ap": 2},
+    {"min": 11, "max": 12, "rpm": 1591, "feed_min": 191, "ap": 2.5},
+    {"min": 12, "max": 13, "rpm": 1469, "feed_min": 176.3, "ap": 2.5},
+    {"min": 13, "max": 14, "rpm": 1364, "feed_min": 204.6, "ap": 2.5},
+    {"min": 14, "max": 15, "rpm": 1379, "feed_min": 206.9, "ap": 2.5},
+    {"min": 15, "max": 16, "rpm": 1293, "feed_min": 193.9, "ap": 2.5},
+    {"min": 16, "max": 17, "rpm": 1217, "feed_min": 182.5, "ap": 3},
+    {"min": 17, "max": 18, "rpm": 1238, "feed_min": 185.7, "ap": 3},
+    {"min": 18, "max": 19, "rpm": 1173, "feed_min": 175.9, "ap": 3},
+    {"min": 19, "max": 20, "rpm": 1432, "feed_min": 214.8, "ap": 3},
+    {"min": 20, "max": 21, "rpm": 1910, "feed_min": 306, "ap": 3.0},
+    {"min": 25, "max": 30, "rpm": 1528, "feed_min": 244, "ap": 3.0},
+    {"min": 30, "max": 35, "rpm": 1485, "feed_min": 297, "ap": 3.0},
+    {"min": 35, "max": 40, "rpm": 1455, "feed_min": 291, "ap": 4.0},
+    {"min": 40, "max": 45, "rpm": 1432, "feed_min": 286, "ap": 4.0},
+    {"min": 45, "max": 50, "rpm": 1132, "feed_min": 249, "ap": 4.0},
+    {"min": 50, "max": 55, "rpm": 1018, "feed_min": 224, "ap": 5.0},
+    {"min": 55, "max": 60, "rpm": 810, "feed_min": 178, "ap": 5.0},
+    {"min": 60, "max": 65, "rpm": 743, "feed_min": 163, "ap": 6.0},
+    {"min": 65, "max": 70, "rpm": 545, "feed_min": 129.0, "ap": 6.0},
     {"min": 70, "max": 85, "rpm": 500, "feed_min": 100.0, "ap": 6.0},
 ]
 
@@ -301,16 +301,16 @@ fine_boring_data_aluminium = [
 ]
 
 fine_boring__data_Steel_Hardness_upto_30_HRC = [
-    {"min": 20, "max": 24.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
-    {"min": 25, "max": 29.99, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
-    {"min": 30, "max": 34.99, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
-    {"min": 35, "max": 39.99, "vc": 160, "feed_rev": 0.08, "ap": 0.4},
-    {"min": 40, "max": 44.99, "vc": 170, "feed_rev": 0.08, "ap": 0.4},
-    {"min": 45, "max": 49.99, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 50, "max": 54.99, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 55, "max": 59.99, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 60, "max": 64.99, "vc": 160, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 65, "max": 69.99, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
+    {"min": 20, "max": 25, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
+    {"min": 25, "max": 30, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
+    {"min": 30, "max": 35, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
+    {"min": 35, "max": 40, "vc": 160, "feed_rev": 0.08, "ap": 0.4},
+    {"min": 40, "max": 45, "vc": 170, "feed_rev": 0.08, "ap": 0.4},
+    {"min": 45, "max": 50, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 50, "max": 55, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 55, "max": 60, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 60, "max": 65, "vc": 160, "feed_rev": 0.10, "ap": 0.5},
+    {"min": 65, "max": 70, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
     {"min": 70, "max": 80, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
 ]
 
@@ -841,6 +841,7 @@ elif operation == "Boring / Hole Milling":
 
     while current_dia < rough_target_dia:
 
+        st.write(f"Current Dia = {current_dia}")
         tool = get_boring_params(current_dia, material)
 
         if not tool:
