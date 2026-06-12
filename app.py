@@ -793,14 +793,6 @@ elif operation == "Boring / Hole Milling":
                             * kc
                         ) / 192000
                     )
-
-                    st.write(
-                        f"Checking Ø{drill['max_d']} | "
-                        f"RPM={round(d_rpm)} | "
-                        f"Feed={round(d_fmin)} | "
-                        f"Power={round(p_check,2)} kW"
-                    )
-
                     if p_check <= m_power:
 
                         safe_drill_dia = drill['max_d']
