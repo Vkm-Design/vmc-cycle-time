@@ -272,7 +272,7 @@ boring_data_Steel_Hardness_upto_30_HRC = [
     {"min": 17, "max": 18, "rpm": 1238, "feed_min": 185.7, "ap": 3},
     {"min": 18, "max": 19, "rpm": 1173, "feed_min": 175.9, "ap": 3},
     {"min": 19, "max": 20, "rpm": 1432, "feed_min": 214.8, "ap": 3},
-    {"min": 20, "max": 21, "rpm": 1910, "feed_min": 306, "ap": 3.0},
+    {"min": 20, "max": 25, "rpm": 1910, "feed_min": 306, "ap": 3.0},
     {"min": 25, "max": 30, "rpm": 1528, "feed_min": 244, "ap": 3.0},
     {"min": 30, "max": 35, "rpm": 1485, "feed_min": 297, "ap": 3.0},
     {"min": 35, "max": 40, "rpm": 1455, "feed_min": 291, "ap": 4.0},
