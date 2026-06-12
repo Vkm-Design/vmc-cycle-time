@@ -783,11 +783,12 @@ elif operation == "Boring / Hole Milling":
             # Best possible drill from this range row
             best_dia_in_range = min(drill['max_d'] - 0.01, rough_target_dia - 1.0)
     
-            # Must still be within this row's valid range
+            
             if best_dia_in_range < drill['min_d']:
-                continue  # no valid drill in this range for our target
+                continue  
                 
-                d_params = get_parameters(best_dia_in_range, material)
+                # Use drill's own max_d for parameter lookup (guaranteed to be in table)
+                d_params = get_parameters(drill['max_d'] - 0.01, material)
                 
                 if d_params[0] is not None and d_params[1] is not None:
 
