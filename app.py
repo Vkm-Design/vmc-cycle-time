@@ -1003,7 +1003,8 @@ elif operation == "Tapping":
 
     elif material == "Stainless_Steel":
         vc *= 0.80
-     max_depth = selected_row["max_depth"]
+
+    max_depth = selected_row["max_depth"]
 
     # 3. Input Parameters
     tap_type = st.selectbox("Tap Type", ["Through", "Blind"], key="tap_type_sel")
