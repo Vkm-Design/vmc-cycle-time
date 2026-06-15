@@ -1113,12 +1113,11 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
 
-    # 1. Material Guardrail
-    if material != "Aluminium":
-        st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
-        st.stop()
+    st.info(
+     f"Machine: {machine} | Spindle: {m_taper} | Material: {material}"
+     )
 
-    st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
+    
 
     # 2. Surface Finish & PCD Warning
     is_pcd_required = ra_input < 1.2
@@ -1131,8 +1130,10 @@ elif operation == "Face Milling":
         )
 
     # 3. Filtering Logic
+    face_table = material_tables[material]["face_mill"]
+
     suitable_tools = [
-        tool for tool in face_mill_data_aluminium
+        tool for tool in face_table
         if m_taper in tool["spindles"]
     ]
 
