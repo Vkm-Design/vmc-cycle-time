@@ -1205,8 +1205,18 @@ elif operation == "Face Milling":
     # TOOL PARAMETERS
     tool_dia = selected_tool["dia"]
     ae = selected_tool["max_width"]
+
     rpm = selected_tool["rpm"]
     vf = selected_tool["feed"]
+
+    if material == "Steel_Hardness_30_to_40_HRC":
+        rpm *= 0.90
+        vf *= 0.95
+
+    elif material == "Stainless_Steel":
+        rpm *= 0.80
+        vf *= 0.90
+
     ap_limit = selected_tool["stock"]
 
     # --- POWER VALIDATION ---
