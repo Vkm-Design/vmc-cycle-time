@@ -1002,7 +1002,7 @@ elif operation == "Tapping":
         vc *= 0.90
 
         elif material == "Stainless_Steel":
-        vc *= 0.80
+             vc *= 0.80
      max_depth = selected_row["max_depth"]
 
     # 3. Input Parameters
