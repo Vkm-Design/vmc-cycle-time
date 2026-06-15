@@ -967,11 +967,15 @@ elif operation == "Tapping":
     st.title("Tapping Calculator")
 
     # 1. Material Guardrail
-    if material != "Aluminium":
-        st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
-        st.stop()
 
-    st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
+    if (
+        "tap" not in material_tables[material]
+        or len(material_tables[material]["tap"]) == 0
+    ):
+        st.error(
+            f"⚠️ Tap data not available for {material}."
+        )
+        st.stop()
 
     # 2. Tap Data Selection
     if material in material_tables:
@@ -993,6 +997,12 @@ elif operation == "Tapping":
     diameter = get_diameter(selected_tap)
     pitch = selected_row["pitch"]
     vc = selected_row["vc"]
+
+    if material == "Steel_Hardness_30_to_40_HRC":
+        vc *= 0.90
+
+    elif material == "Stainless_Steel":
+    vc *= 0.80
     max_depth = selected_row["max_depth"]
 
     # 3. Input Parameters
@@ -1074,6 +1084,14 @@ elif operation == "Tapping":
         else:
             vc_tm = tm_row["vc"]
             feed_rev = tm_row["feed_rev"]
+
+            if material == "Steel_Hardness_30_to_40_HRC":
+                vc_tm *= 0.90
+                feed_rev *= 0.95
+
+            elif material == "Stainless_Steel":
+                 vc_tm *= 0.80
+                 feed_rev *= 0.90
             tool_dia = tm_row["tool_dia"]
             max_depth_tm = tm_row["max_depth"]
 
