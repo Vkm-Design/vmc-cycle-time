@@ -590,9 +590,11 @@ if operation == "Drilling":
         
         v_c = (math.pi * dia * rpm) / 1000
         p_req = ((f_min / rpm) * v_c * dia * kc) / (240000 * 0.8)
+        torque_req = (p_req * 9550) / rpm
         
         st.write(f"**Travel:** {round(actual_travel, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
+        st.write(f"**Torque Required:** {round(torque_req, 2)} Nm")
         
         if p_req > m_power:
             st.error(f"🚨 Power Alert: {round(p_req,2)}kW exceeds {machine} limit.")
@@ -804,7 +806,13 @@ elif operation == "Boring / Hole Milling":
                             * kc
                         ) / 192000
                     )
-                    if p_check <= m_power:
+
+                    torque_req = (p_check * 9550) / d_rpm
+                    
+                    if (
+                        p_check <= usable_power
+                        and torque_req <= usable_torque
+                    ):
 
                         safe_drill_dia = actual_dia
                         break
