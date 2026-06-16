@@ -1326,13 +1326,18 @@ if mode == "🔧 Individual Operation":
         # PROCESS PARAMETERS
         total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
     
-        if is_pcd_required:
+        if ra_input < 0.8:
+            rough_stock = max(0.0, total_stock - 0.5)
+            rough_passes = math.ceil(rough_stock / ap_limit) if rough_stock > 0 else 0
+            st.info(f"SPECIAL PROCESS STRATEGY: {rough_passes} Roughing passes. 0.5mm left for special finishing.")
+
+        elif is_pcd_required:
             rough_stock = max(0.0, total_stock - 0.5)
             rough_passes = math.ceil(rough_stock / ap_limit) if rough_stock > 0 else 0
             st.info(f"PCD STRATEGY: {rough_passes} Roughing passes. 0.5mm left for PCD.")
+
         else:
-            finish_required = ra_input < 3.2
-    
+            finish_required = ra_input < 2.0
             if finish_required and total_stock > 0.5:
                 rough_stock = total_stock - 0.5
                 rough_passes = math.ceil(rough_stock / ap_limit)
