@@ -485,7 +485,7 @@ mode = st.radio(
 )
 st.divider()
 
-if mode == "Individual Operation":    
+if mode == "🔧 Individual Operation":    
     operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
     
     st.sidebar.header("Global Settings")
@@ -1338,5 +1338,5 @@ if mode == "Individual Operation":
             if is_pcd_required:
                 st.warning("☝️ Add PCD finishing time separately")
 
-elif mode == "Combined Operations":
+elif mode == "⚙️ Combined Operations":
     st.info("⚙️ Combined Operations mode — coming soon!")
