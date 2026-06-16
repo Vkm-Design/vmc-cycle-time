@@ -1148,18 +1148,35 @@ if mode == "🔧 Individual Operation":
          f"Machine: {machine} | Spindle: {m_taper} | Material: {material}"
          )
     
-        
-    
         # 2. Surface Finish & PCD Warning
-        is_pcd_required = ra_input < 1.2
-    
-        if is_pcd_required:
-            st.warning(
-                "⚠️ **PCD Tooling Required:** Ra < 1.2 cannot be achieved with standard carbide. "
-                "This calculator will now leave 0.5mm stock for a separate PCD finish pass. "
-                "**Note:** You must add the PCD cycle time manually to your total estimate."
-            )
-    
+        if material == "Aluminium":
+            if ra_input < 0.8:
+                is_pcd_required = False
+                st.warning(
+                    "⚠️ Ra < 0.8 is beyond standard milling capability for Aluminium. "
+                    "Special process required — calculate separately."
+                )
+            elif ra_input < 2.0:
+                is_pcd_required = True
+                st.warning(
+                    "⚠️ PCD Tooling Required: 0.5mm stock left for PCD finish pass. "
+                    "Finish pass: RPM +10%, Feed -10%."
+                )
+            else:
+                is_pcd_required = False
+        else:
+            is_pcd_required = False
+            if ra_input < 0.8:
+                st.warning(
+                    "⚠️ Ra < 0.8 requires Grinding or special process for Steel. "
+                    "Calculate separately."
+                )
+            elif ra_input < 2.0:
+                st.info(
+                    "💡 Wiper geometry insert recommended for Steel finish pass. "
+                    "Feed will be reduced by 20%."
+                )
+       
         # 3. Filtering Logic
         face_table = material_tables[material]["face_mill"]
     
@@ -1249,6 +1266,17 @@ if mode == "🔧 Individual Operation":
             vf *= 0.90
     
         ap_limit = selected_tool["stock"]
+
+        # FINISH PASS PARAMETERS
+        if is_pcd_required:
+            finish_rpm = rpm * 1.10
+            finish_vf = vf * 0.90
+        elif material != "Aluminium" and ra_input < 2.0 and ra_input >= 0.8:
+            finish_rpm = rpm
+            finish_vf = vf * 0.80
+        else:
+            finish_rpm = rpm
+            finish_vf = vf
     
         # --- POWER VALIDATION ---
         efficiency = 0.8
@@ -1257,14 +1285,43 @@ if mode == "🔧 Individual Operation":
         st.metric(
             "Required Power",
             f"{req_power:.2f} kW",
-            delta=f"Limit: {m_power} kW",
+            delta=f"Usable Limit: {usable_power:.2f} kW",
             delta_color="inverse"
         )
-    
-        if req_power > m_power:
-            st.error("⚠️ Machine Overload!")
-        else:
-            st.success(f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm} | Feed: {vf} mm/min")
+        # --- TORQUE CALCULATION ---
+        torque_req = (req_power * 9550) / rpm
+
+        power_load = (req_power / usable_power) * 100
+        torque_load = (torque_req / usable_torque) * 100
+
+        st.write(
+            f"**Torque Required:** {torque_req:.1f} Nm"
+        )
+
+        st.write(
+            f"**Machine Load:** Power {power_load:.0f}% | "
+            f"Torque {torque_load:.0f}%"
+        )
+
+        if req_power > usable_power:
+            st.error(
+                f"🚨 Power Alert: {req_power:.2f} kW exceeds "
+                f"usable limit ({usable_power:.2f} kW)"
+            )
+
+        if torque_req > usable_torque:
+            st.error(
+                f"🚨 Torque Alert: {torque_req:.1f} Nm exceeds "
+                f"usable limit ({usable_torque:.1f} Nm)"
+            )
+
+        if (
+            req_power <= usable_power
+            and torque_req <= usable_torque
+        ):
+            st.success(
+                f"✅ Tool: Ø{tool_dia}mm | RPM: {rpm:.0f} | Feed: {vf:.0f} mm/min"
+            )
     
         # PROCESS PARAMETERS
         total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
@@ -1324,8 +1381,8 @@ if mode == "🔧 Individual Operation":
             time_rough = (cut_length * rough_passes) / vf
     
             time_finish = 0
-            if not is_pcd_required and ra_input < 3.2 and total_stock > 0.5:
-                time_finish = cut_length / (vf * 0.8)
+            if ra_input >= 0.8 and ra_input < 2.0 and total_stock > 0.5:
+                time_finish = cut_length / finish_vf
     
             total_time_min = time_rough + time_finish
     
@@ -1335,8 +1392,17 @@ if mode == "🔧 Individual Operation":
             col_a.metric("Roughing Passes", f"{rough_passes}")
             col_b.metric("Roughing Time", f"{total_time_min * 60:.1f} sec")
     
-            if is_pcd_required:
-                st.warning("☝️ Add PCD finishing time separately")
+            if ra_input < 0.8:
+                if material == "Aluminium":
+                    st.warning(
+                        "☝️ Roughing and finish milling time included. "
+                        "Additional special finishing process required to achieve final Ra."
+                    )    
+                else:
+                    st.warning(
+                        "☝️ Roughing and finish milling time included. "
+                        "Grinding or special finishing process required to achieve final Ra."
+                    )
 
-elif mode == "⚙️ Combined Operations":
+    elif mode == "⚙️ Combined Operations":
     st.info("⚙️ Combined Operations mode — coming soon!")
