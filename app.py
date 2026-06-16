@@ -591,6 +591,9 @@ if operation == "Drilling":
         v_c = (math.pi * dia * rpm) / 1000
         p_req = ((f_min / rpm) * v_c * dia * kc) / (240000 * 0.8)
         torque_req = (p_req * 9550) / rpm
+
+        power_load = (p_req / usable_power) * 100
+        torque_load = (torque_req / usable_torque) * 100
         
         st.write(f"**Travel:** {round(actual_travel, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
