@@ -596,8 +596,16 @@ if operation == "Drilling":
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
         st.write(f"**Torque Required:** {round(torque_req, 2)} Nm")
         
-        if p_req > m_power:
-            st.error(f"🚨 Power Alert: {round(p_req,2)}kW exceeds {machine} limit.")
+        if p_req > usable_power or torque_req > usable_torque:
+            if p_req > usable_power:
+                st.error(
+                    f"🚨 Power Alert: {p_req:.2f} kW exceeds usable machine limit ({usable_power:.2f} kW)"
+                )
+
+            if torque_req > usable_torque:
+                st.error(
+                    f"🚨 Torque Alert: {torque_req:.1f} Nm exceeds usable machine limit ({usable_torque:.1f} Nm)"
+                )
         
         if st.button("Calculate Drilling Total"):
             st.success(f"Total Time: {round((actual_travel/f_min)*60*cnt, 2)} seconds")
