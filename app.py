@@ -476,14 +476,15 @@ def select_tool_circular(dia, tools):
 # ==========================================
 st.title("Smart Machining Calculator")
 
+st.markdown("### Select Mode")
 mode = st.radio(
-    "Select Mode",
-    ["Individual Operation", "Combined Operations"],
+    "",
+    ["🔧 Individual Operation", "⚙️ Combined Operations"],
     horizontal=True,
     key="mode_selector"
 )
-
 st.divider()
+
 if mode == "Individual Operation":    
     operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
     
