@@ -1382,32 +1382,43 @@ if mode == "🔧 Individual Operation":
     
         # FINAL CALCULATION
         if st.button("Calculate Milling Time", key="fm_calc_btn"):
-    
+
             time_rough = (cut_length * rough_passes) / vf
-    
+
             time_finish = 0
-            if ra_input >= 0.8 and ra_input < 2.0 and total_stock > 0.5:
-                time_finish = cut_length / finish_vf
-    
+            if total_stock > 0.5:
+                if ra_input < 0.8:
+                    # Special process — calculate finish pass at reduced feed
+                    time_finish = cut_length / finish_vf
+                elif ra_input < 2.0:
+                    # PCD (aluminium) or Wiper (steel)
+                    time_finish = cut_length / finish_vf
+
             total_time_min = time_rough + time_finish
-    
-            st.subheader("Roughing Estimates")
-    
-            col_a, col_b = st.columns(2)
+
+            st.subheader("Milling Estimates")
+
+            col_a, col_b, col_c = st.columns(3)
             col_a.metric("Roughing Passes", f"{rough_passes}")
-            col_b.metric("Roughing Time", f"{total_time_min * 60:.1f} sec")
-    
+            col_b.metric("Rough Time", f"{time_rough * 60:.1f} sec")
+            col_c.metric("Total Time", f"{total_time_min * 60:.1f} sec")
+
             if ra_input < 0.8:
                 if material == "Aluminium":
                     st.warning(
                         "☝️ Roughing and finish milling time included. "
                         "Additional special finishing process required to achieve final Ra."
-                    )    
+                    )
                 else:
                     st.warning(
                         "☝️ Roughing and finish milling time included. "
                         "Grinding or special finishing process required to achieve final Ra."
                     )
+            elif ra_input < 2.0:
+                if material == "Aluminium":
+                    st.info("☝️ PCD finish pass time included in total.")
+                else:
+                    st.info("☝️ Wiper geometry finish pass time included in total.")
 
     elif mode == "⚙️ Combined Operations":
         st.info("⚙️ Combined Operations mode — coming soon!")
