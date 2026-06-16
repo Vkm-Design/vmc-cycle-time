@@ -595,6 +595,9 @@ if operation == "Drilling":
         st.write(f"**Travel:** {round(actual_travel, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
         st.write(f"**Torque Required:** {round(torque_req, 2)} Nm")
+        st.write(
+            f"**Machine Load:** Power {power_load:.0f}% | Torque {torque_load:.0f}%"
+        )
         
         if p_req > usable_power or torque_req > usable_torque:
             if p_req > usable_power:
