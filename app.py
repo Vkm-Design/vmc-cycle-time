@@ -1405,4 +1405,4 @@ if mode == "🔧 Individual Operation":
                     )
 
     elif mode == "⚙️ Combined Operations":
-    st.info("⚙️ Combined Operations mode — coming soon!")
+        st.info("⚙️ Combined Operations mode — coming soon!")
