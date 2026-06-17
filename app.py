@@ -1426,13 +1426,16 @@ if mode == "🔧 Individual Operation":
                     time_finish = cut_length / finish_vf
 
             total_time_min = time_rough + time_finish
+            cut_time = total_time_min * 60
+
+            total_op_time = tool_change_time + cut_time + (1 - 1) * position_time
 
             st.subheader("Milling Estimates")
-
-            col_a, col_b, col_c = st.columns(3)
+            col_a, col_b, col_c, col_d = st.columns(4)
             col_a.metric("Roughing Passes", f"{rough_passes}")
             col_b.metric("Rough Time", f"{time_rough * 60:.1f} sec")
-            col_c.metric("Total Time", f"{total_time_min * 60:.1f} sec")
+            col_c.metric("Cut Time", f"{round(cut_time, 2)} sec")
+            col_d.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
 
             if ra_input < 0.8:
                 if material == "Aluminium":
