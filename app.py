@@ -1131,8 +1131,16 @@ if mode == "🔧 Individual Operation":
     
             if st.button("Calculate Tapping Time", key="tap_calc_btn"):
                 time_per_hole = cut_length / feed_min
-                total_time_sec = time_per_hole * count * 60
-                st.subheader(f"Total Time: {round(total_time_sec, 1)} seconds")
+                cut_time = time_per_hole * count * 60
+
+                total_op_time = tool_change_time + cut_time + (count - 1) * position_time
+
+                st.divider()
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
+                col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
+                col3.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
+                
     
         # 7. Thread Milling Logic
         if use_threadmill and not stop_all:
@@ -1169,8 +1177,15 @@ if mode == "🔧 Individual Operation":
                 st.write(f"**TM RPM:** {round(rpm_tm, 0)} | **TM Feed:** {round(feed_tm, 0)} mm/min")
     
                 if st.button("Calculate Thread Mill Time", key="tm_calc_btn"):
-                    tm_time_sec = (tm_cut_length / feed_tm) * count * 60
-                    st.subheader(f"Total TM Time: {round(tm_time_sec, 1)} seconds")
+                    cut_time = (tm_cut_length / feed_tm) * count * 60
+    
+                    total_op_time = tool_change_time + cut_time + (count - 1) * position_time
+                
+                    st.divider()
+                    col1, col2, col3 = st.columns(3)
+                    col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
+                    col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
+                    col3.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
     
     elif operation == "Face Milling":
         st.title("Face Milling Calculator")
