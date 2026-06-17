@@ -1535,4 +1535,16 @@ for i, op in enumerate(st.session_state.operations):
             t_tdep = st.number_input("Tap Depth (mm)", value=25.0, step=1.0, key=f"t_tdep_{i}")
             t_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"t_ht_{i}")
 
-    st.divider()
+    
+st.divider()
+
+if st.button("🚀 Calculate Combined Cycle Time"):
+
+    total_cut_time = sum(
+        item["cycle_time"]
+        for item in st.session_state.combined_results
+    )
+
+    st.success(
+        f"Total Combined Cycle Time = {total_cut_time:.2f} sec"
+    )    
