@@ -635,10 +635,10 @@ elif operation == "Boring / Hole Milling":
 
     with col2:
 
-         bor_ht = st.radio(
+        bor_ht = st.radio(
             "Hole Type",
             ["Blind Hole", "Through Hole"],
-             horizontal=True,
+            horizontal=True,
             key="bor_ht"
          )
 
