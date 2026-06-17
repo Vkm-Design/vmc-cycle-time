@@ -484,97 +484,54 @@ mode = st.radio(
     key="mode_selector"
 )
 st.divider()
+# ==========================================
+# SIDEBAR - SHARED BY BOTH MODES (zero indentation)
+# ==========================================
+st.sidebar.header("Global Settings")
+material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
+kc = kc_data[material]
+machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
-if mode == "🔧 Individual Operation":    
+if "last_machine" not in st.session_state:
+    st.session_state.last_machine = machine
+if st.session_state.last_machine != machine:
+    st.session_state.global_power = machine_data[machine]["power"]
+    st.session_state.global_torque = machine_data[machine]["torque"]
+    st.session_state.last_machine = machine
+
+default_power = machine_data[machine]["power"]
+default_torque = machine_data[machine]["torque"]
+m_taper = machine_data[machine].get("taper", "BT40")
+
+m_power = st.sidebar.number_input("Available Spindle Power (kW)", min_value=0.1, value=float(default_power), step=0.5, key="global_power")
+m_torque = st.sidebar.number_input("Available Spindle Torque (Nm)", min_value=0.1, value=float(default_torque), step=1.0, key="global_torque")
+st.sidebar.info(f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}")
+st.sidebar.markdown("---")
+
+st.sidebar.header("Cycle Time Settings")
+tool_change_time = st.sidebar.number_input("Tool Change Time (sec)", min_value=0.0, value=8.0, step=0.5, key="tool_change_time")
+position_time = st.sidebar.number_input("Position / Index Time (sec)", min_value=0.0, value=3.0, step=0.5, key="position_time")
+
+usable_power = m_power * 0.85
+usable_torque = m_torque * 0.85
+st.sidebar.caption(f"Calculation uses 85% capacity: {usable_power:.2f} kW | {usable_torque:.1f} Nm")
+
+# ==========================================
+# INDIVIDUAL MODE (4 spaces indentation)
+# ==========================================
+if mode == "🔧 Individual Operation": 
     operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
-    
-    st.sidebar.header("Global Settings")
-    
-    # 1. Material Selection
-    material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
-    kc = kc_data[material]
-    
-    # 2. THE ONLY MACHINE PICKER (Syncs with all logic)
-    machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
-    
-    # Detect machine change
-    if "last_machine" not in st.session_state:
-        st.session_state.last_machine = machine
-    
-    if st.session_state.last_machine != machine:
-    
-        st.session_state.global_power = machine_data[machine]["power"]
-        st.session_state.global_torque = machine_data[machine]["torque"]
-    
-        st.session_state.last_machine = machine
-    
-    # 3. Assign Machine Specs
-    
-    default_power = machine_data[machine]["power"]
-    default_torque = machine_data[machine]["torque"]
-    m_taper = machine_data[machine].get("taper", "BT40")
-    
-    m_power = st.sidebar.number_input(
-        "Available Spindle Power (kW)",
-        min_value=0.1,
-        value=float(default_power),
-        step=0.5,
-        key="global_power"
-    )
-    
-    m_torque = st.sidebar.number_input(
-        "Available Spindle Torque (Nm)",
-        min_value=0.1,
-        value=float(default_torque),
-        step=1.0,
-        key="global_torque"
-    )
-    
-    st.sidebar.info(
-        f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}"
-    )
-    
-    st.sidebar.markdown("---")
 
-    st.sidebar.header("Cycle Time Settings")
-
-    tool_change_time = st.sidebar.number_input(
-        "Tool Change Time (sec)",
-        min_value=0.0,
-        value=8.0,
-        step=0.5,
-        key="tool_change_time"
-    )
-
-    position_time = st.sidebar.number_input(
-        "Position / Index Time (sec)",
-        min_value=0.0,
-        value=3.0,
-        step=0.5,
-        key="position_time"
-    )
-    
-    # Effective machine capability used for calculations
-    usable_power = m_power * 0.85
-    usable_torque = m_torque * 0.85
-    
-    st.sidebar.caption(
-        f"Calculation uses 85% capacity: "
-        f"{usable_power:.2f} kW | {usable_torque:.1f} Nm"
-    )
-    
-    # 4. QUALITY REQUIREMENTS (For L/D, Ra, and Tolerance logic)
     if operation != "Tapping":
         st.sidebar.header("Quality Requirements")
         ra_input = st.sidebar.number_input("Surface Finish (Ra)", value=3.2, step=0.1, key="sidebar_ra")
-        
         if operation in ["Drilling", "Boring / Hole Milling"]:
             tol_input = st.sidebar.number_input("Diameter Tolerance (±)", value=0.100, format="%.3f", key="sidebar_tol")
         else:
             tol_input = 0.1
     else:
         ra_input, tol_input = 3.2, 0.1
-        
+
     # ==========================================
     # 4. OPERATION: DRILLING
     # ==========================================
@@ -1508,36 +1465,7 @@ if mode == "🔧 Individual Operation":
                 else:
                     st.info("☝️ Wiper geometry finish pass time included in total.")
 
-    elif mode == "⚙️ Combined Operations":
-        # ==========================================
-        # SIDEBAR - GLOBAL SETTINGS
-        # ==========================================
-        st.sidebar.header("Global Settings")
-        material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
-        kc = kc_data[material]
-        machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
-    
-        if "last_machine" not in st.session_state:
-            st.session_state.last_machine = machine
-        if st.session_state.last_machine != machine:
-            st.session_state.global_power = machine_data[machine]["power"]
-            st.session_state.global_torque = machine_data[machine]["torque"]
-            st.session_state.last_machine = machine
-    
-        default_power = machine_data[machine]["power"]
-        default_torque = machine_data[machine]["torque"]
-        m_taper = machine_data[machine].get("taper", "BT40")
-    
-        m_power = st.sidebar.number_input("Available Spindle Power (kW)", min_value=0.1, value=float(default_power), step=0.5, key="global_power")
-        m_torque = st.sidebar.number_input("Available Spindle Torque (Nm)", min_value=0.1, value=float(default_torque), step=1.0, key="global_torque")
-    
-        st.sidebar.info(f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}")
-        st.sidebar.markdown("---")
-    
-        usable_power = m_power * 0.85
-        usable_torque = m_torque * 0.85
-    
-        st.sidebar.caption(f"Calculation uses 85% capacity: {usable_power:.2f} kW | {usable_torque:.1f} Nm")
+elif mode == "⚙️ Combined Operations"
     
         # ==========================================
         # INITIALIZE SESSION STATE
