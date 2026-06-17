@@ -535,6 +535,24 @@ if mode == "🔧 Individual Operation":
     )
     
     st.sidebar.markdown("---")
+
+    st.sidebar.header("Cycle Time Settings")
+
+    tool_change_time = st.sidebar.number_input(
+        "Tool Change Time (sec)",
+        min_value=0.0,
+        value=8.0,
+        step=0.5,
+        key="tool_change_time"
+    )
+
+    position_time = st.sidebar.number_input(
+        "Position / Index Time (sec)",
+        min_value=0.0,
+        value=3.0,
+        step=0.5,
+        key="position_time"
+    )
     
     # Effective machine capability used for calculations
     usable_power = m_power * 0.85
@@ -623,7 +641,14 @@ if mode == "🔧 Individual Operation":
                     )
             
             if st.button("Calculate Drilling Total"):
-                st.success(f"Total Time: {round((actual_travel/f_min)*60*cnt, 2)} seconds")
+                cut_time = (actual_travel / f_min) * 60 * cnt
+                total_op_time = tool_change_time + cut_time + (cnt - 1) * position_time
+    
+                st.divider()
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
+                col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
+                col3.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
     
     elif operation == "Boring / Hole Milling":
     
@@ -642,9 +667,9 @@ if mode == "🔧 Individual Operation":
            )
     
         col1, col2 = st.columns(2)
-    
+
         with col1:
-    
+
             f_dia = float(
                 st.number_input(
                     "Finish Bore Diameter (mm)",
@@ -653,7 +678,7 @@ if mode == "🔧 Individual Operation":
                     key="bor_f_dia"
                 )
             )
-    
+
             b_dep = float(
                 st.number_input(
                     "Drawing Depth (mm)",
@@ -662,21 +687,28 @@ if mode == "🔧 Individual Operation":
                     key="bor_depth"
                 )
             )
-    
+
         with col2:
-    
+
             bor_ht = st.radio(
                 "Hole Type",
                 ["Blind Hole", "Through Hole"],
                 horizontal=True,
                 key="bor_ht"
             )
-    
+
             e_mode = st.radio(
                 "Starting Condition",
                 ["Solid", "Core Hole"],
                 horizontal=True,
                 key="bor_mode"
+            )
+
+            bor_cnt = st.number_input(
+                "Number of Positions",
+                value=1,
+                step=1,
+                key="bor_cnt"
             )
     
         # ==========================================
@@ -984,15 +1016,14 @@ if mode == "🔧 Individual Operation":
     
             st.divider()
     
-            st.metric(
-                "Total Combined Cycle Time",
-                f"{round(total_time_sec, 2)} sec"
-            )
-    
-            st.write(
-                f"**Total Time in Minutes:** "
-                f"{round(total_time_sec/60, 2)} min"
-            )
+            cut_time = total_time_sec * bor_cnt
+            total_op_time = tool_change_time + cut_time + (bor_cnt - 1) * position_time
+
+            st.divider()
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
+            col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
+            col3.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
         
     elif operation == "Tapping":
         st.title("Tapping Calculator")
