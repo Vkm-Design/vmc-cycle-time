@@ -1454,6 +1454,7 @@ elif operation == "Face Milling":
                 st.info("☝️ Wiper geometry finish pass time included in total.")
 
 elif mode == "⚙️ Combined Operations":
+    st.error("COMBINED MODE ACTIVE")
     
         # ==========================================
         # INITIALIZE SESSION STATE
