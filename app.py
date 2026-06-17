@@ -1509,4 +1509,56 @@ if mode == "🔧 Individual Operation":
                     st.info("☝️ Wiper geometry finish pass time included in total.")
 
     elif mode == "⚙️ Combined Operations":
-        st.info("⚙️ Combined Operations mode — coming soon!")
+        # ==========================================
+        # SIDEBAR - GLOBAL SETTINGS
+        # ==========================================
+        st.sidebar.header("Global Settings")
+        material = st.sidebar.selectbox("Select Material", list(kc_data.keys()), key="global_mat")
+        kc = kc_data[material]
+        machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
+    
+        if "last_machine" not in st.session_state:
+            st.session_state.last_machine = machine
+        if st.session_state.last_machine != machine:
+            st.session_state.global_power = machine_data[machine]["power"]
+            st.session_state.global_torque = machine_data[machine]["torque"]
+            st.session_state.last_machine = machine
+    
+        default_power = machine_data[machine]["power"]
+        default_torque = machine_data[machine]["torque"]
+        m_taper = machine_data[machine].get("taper", "BT40")
+    
+        m_power = st.sidebar.number_input("Available Spindle Power (kW)", min_value=0.1, value=float(default_power), step=0.5, key="global_power")
+        m_torque = st.sidebar.number_input("Available Spindle Torque (Nm)", min_value=0.1, value=float(default_torque), step=1.0, key="global_torque")
+    
+        st.sidebar.info(f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}")
+        st.sidebar.markdown("---")
+    
+        usable_power = m_power * 0.85
+        usable_torque = m_torque * 0.85
+    
+        st.sidebar.caption(f"Calculation uses 85% capacity: {usable_power:.2f} kW | {usable_torque:.1f} Nm")
+    
+        # ==========================================
+        # INITIALIZE SESSION STATE
+        # ==========================================
+        if "operations" not in st.session_state:
+            st.session_state.operations = []
+    
+        # ==========================================
+        # ADD / CLEAR OPERATIONS BUTTONS
+        # ==========================================
+        st.subheader("Combined Operations Planner")
+    
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            if st.button("➕ Add Operation", key="add_op"):
+                st.session_state.operations.append({
+                    "type": "Hole",
+                    "id": len(st.session_state.operations) + 1
+                })
+        with col2:
+            if st.button("🗑️ Clear All", key="clear_ops"):
+                st.session_state.operations = []
+    
+        st.divider()
