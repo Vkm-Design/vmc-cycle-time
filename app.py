@@ -664,7 +664,7 @@ elif operation == "Boring / Hole Milling":
     
         st.error(
             f"Depth {b_dep}mm exceeds validated boring limit of 150mm."
-         )
+        )
     
         st.warning(
             "Check tool weight, machine spindle capability, "
