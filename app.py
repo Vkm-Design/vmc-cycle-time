@@ -671,7 +671,7 @@ elif operation == "Boring / Hole Milling":
             "fixture rigidity and process feasibility manually."
         )
     
-         st.stop()
+        st.stop()
     
     # ==========================================
     # L/D VALIDATION
