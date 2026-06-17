@@ -1460,6 +1460,9 @@ elif mode == "⚙️ Combined Operations":
         # ==========================================
         if "operations" not in st.session_state:
             st.session_state.operations = []
+
+        if "combined_results" not in st.session_state:
+            st.session_state.combined_results = []
     
         # ==========================================
         # ADD / CLEAR OPERATIONS BUTTONS
