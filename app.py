@@ -530,13 +530,13 @@ if operation == "Drilling":
     with col1:
          dia = st.number_input("Drill Diameter (mm)", value=25.0, step=0.1, key="dr_dia_in")
          dep = st.number_input("Drawing Depth (mm)", value=50.0, step=1.0, key="dr_dep_in")
-     with col2:
+    with col2:
         hole_type = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key="dr_ht")
         cnt = st.number_input("Number of Holes", value=1, step=1, key="dr_cnt_in")
     
     # --- QUALITY & TOLERANCE CHECKS ---
     if dia <= 16 and tol_input < 0.1:
-         st.warning(f"⚠️ Tolerance ±{tol_input} is too tight for Ø{dia} drilling. Use Finish Boring Bar.")
+        st.warning(f"⚠️ Tolerance ±{tol_input} is too tight for Ø{dia} drilling. Use Finish Boring Bar.")
     elif dia > 16 and tol_input < 0.2:
         st.warning(f"⚠️ Tolerance ±{tol_input} is tight for Ø{dia} drilling. Consider Finish Boring.")
         
@@ -550,8 +550,8 @@ if operation == "Drilling":
         st.error(f"❗ Depth {dep}mm exceeds Max Table Depth ({max_d_val}mm) for Ø{dia}.")
         u_vc = st.number_input("Enter Manual Vc (m/min)", value=80.0)
         u_fr = st.number_input("Enter Manual Feed/Rev (mm/rev)", value=0.1)
-         rpm = (u_vc * 1000) / (math.pi * dia)
-         f_min = rpm * u_fr
+        rpm = (u_vc * 1000) / (math.pi * dia)
+        f_min = rpm * u_fr
     else:
         rpm, f_min = rpm_val, f_min_val
     
