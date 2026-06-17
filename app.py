@@ -1148,7 +1148,35 @@ if mode == "🔧 Individual Operation":
             st.subheader("Thread Milling Calculation")
             
             threadmill_table = material_tables[material]["threadmill"]
-            tm_row = next((row for row in threadmill_table if row["tap"] == selected_tap and row["pitch"] == pitch), None)
+            # Requested thread size
+            requested_dia = get_diameter(selected_tap)
+
+            # Approximate thread minor diameter
+            minor_dia = requested_dia - (1.0825 * pitch)
+            
+            # Step 1: Pitch match
+            pitch_matches = [
+                row for row in threadmill_table
+                if row["pitch"] == pitch
+            ]
+            
+            # Step 2: Depth capable
+            depth_matches = [
+                row for row in pitch_matches
+                if row["max_depth"] >= tap_depth
+            ]
+            
+            # Step 3: Tool must fit inside thread minor diameter
+            size_matches = [
+                row for row in depth_matches
+                if row["tool_dia"] < minor_dia
+            ]
+            
+            # Step 4: Select largest available tool diameter
+            if size_matches:
+                tm_row = max(size_matches, key=lambda x: x["tool_dia"])
+            else:
+                tm_row = None
     
             if tm_row is None:
                 st.error("No thread mill data available for this specific size.")
