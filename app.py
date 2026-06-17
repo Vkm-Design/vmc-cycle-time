@@ -1355,7 +1355,18 @@ if mode == "🔧 Individual Operation":
             )
     
         # PROCESS PARAMETERS
-        total_stock = st.number_input("Total Stock to Remove (mm)", value=5.5, key="fm_total_stock")
+        total_stock = st.number_input(
+            "Total Stock to Remove (mm)", 
+            value=5.5, 
+            key="fm_total_stock"
+        )
+
+        fm_cnt = st.number_input(    # ← ADD THIS
+            "Number of Positions",
+            value=1,
+            step=1,
+            key="fm_cnt"
+        )
     
         if ra_input < 0.8:
             rough_stock = max(0.0, total_stock - 0.5)
@@ -1426,9 +1437,9 @@ if mode == "🔧 Individual Operation":
                     time_finish = cut_length / finish_vf
 
             total_time_min = time_rough + time_finish
-            cut_time = total_time_min * 60
+            cut_time = total_time_min * 60 * fm_cnt
 
-            total_op_time = tool_change_time + cut_time + (1 - 1) * position_time
+            total_op_time = tool_change_time + cut_time + (fm_cnt - 1) * position_time
 
             st.subheader("Milling Estimates")
             col_a, col_b, col_c, col_d = st.columns(4)
