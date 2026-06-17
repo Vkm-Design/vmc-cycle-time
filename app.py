@@ -508,7 +508,7 @@ st.sidebar.caption(f"Calculation uses 85% capacity: {usable_power:.2f} kW | {usa
 # ==========================================
 # INDIVIDUAL MODE (4 spaces indentation)
 # ==========================================
-operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
+operation = None
 
 if operation != "Tapping":
     st.sidebar.header("Quality Requirements")
