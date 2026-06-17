@@ -1453,86 +1453,86 @@ elif operation == "Face Milling":
             else:
                 st.info("☝️ Wiper geometry finish pass time included in total.")
 
-if mode == "⚙️ Combined Operations":
-    st.error("COMBINED MODE ACTIVE")
+
+st.error("COMBINED MODE ACTIVE")
     
-    # ==========================================
-    # INITIALIZE SESSION STATE
-    # ==========================================
-    if "operations" not in st.session_state:
+# ==========================================
+# INITIALIZE SESSION STATE
+# ==========================================
+if "operations" not in st.session_state:
+    st.session_state.operations = []
+
+if "combined_results" not in st.session_state:
+    st.session_state.combined_results = []
+    
+# ==========================================
+# ADD / CLEAR OPERATIONS BUTTONS
+# ==========================================
+st.subheader("Combined Operations Planner")
+
+col1, col2 = st.columns([1, 1])
+with col1:
+    if st.button("➕ Add Operation", key="add_op"):
+        st.session_state.operations.append({
+            "type": "Hole",
+            "id": len(st.session_state.operations) + 1
+        })
+with col2:
+    if st.button("🗑️ Clear All", key="clear_ops"):
         st.session_state.operations = []
-
-    if "combined_results" not in st.session_state:
-        st.session_state.combined_results = []
     
-    # ==========================================
-    # ADD / CLEAR OPERATIONS BUTTONS
-    # ==========================================
-    st.subheader("Combined Operations Planner")
+st.divider()
+# ==========================================
+# OPERATION INPUT ROWS
+# ==========================================
+for i, op in enumerate(st.session_state.operations):
 
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("➕ Add Operation", key="add_op"):
-            st.session_state.operations.append({
-                "type": "Hole",
-                "id": len(st.session_state.operations) + 1
-            })
-    with col2:
-        if st.button("🗑️ Clear All", key="clear_ops"):
-            st.session_state.operations = []
-    
+    st.markdown(f"### Operation {i + 1}")
+
+    op_type = st.selectbox(
+        "Operation Type",
+        ["Face Mill", "Hole", "Tap"],
+        key=f"op_type_{i}"
+    )
+    st.session_state.operations[i]["type"] = op_type
+
+    # ---- FACE MILL INPUTS ----
+    if op_type == "Face Mill":
+        col1, col2 = st.columns(2)
+        with col1:
+            shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key=f"fm_shape_{i}")
+            if shape == "Rectangular":
+                fm_L = st.number_input("Length (mm)", value=100.0, key=f"fm_L_{i}")
+                fm_W = st.number_input("Width (mm)", value=40.0, key=f"fm_W_{i}")
+            else:
+                fm_dia = st.number_input("Component Diameter (mm)", value=100.0, key=f"fm_dia_{i}")
+        with col2:
+            fm_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"fm_ra_{i}")
+            fm_stock = st.number_input("Stock to Remove (mm)", value=1.0, step=0.1, key=f"fm_stock_{i}")
+            fm_pos = st.number_input("Number of Positions", value=1, step=1, key=f"fm_pos_{i}")
+
+    # ---- HOLE INPUTS ----
+    elif op_type == "Hole":
+        col1, col2 = st.columns(2)
+        with col1:
+            h_dia = st.number_input("Finish Diameter (mm)", value=25.0, step=0.1, key=f"h_dia_{i}")
+            h_dep = st.number_input("Depth (mm)", value=30.0, step=1.0, key=f"h_dep_{i}")
+            h_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"h_cnt_{i}")
+        with col2:
+            h_tol = st.number_input("Tolerance (±)", value=0.1, format="%.3f", key=f"h_tol_{i}")
+            h_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"h_ra_{i}")
+            h_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"h_ht_{i}")
+
+    # ---- TAP INPUTS ----
+    elif op_type == "Tap":
+        col1, col2 = st.columns(2)
+        with col1:
+            t_size = st.text_input("Tap Size (e.g. M10)", value="M10", key=f"t_size_{i}")
+            t_pitch = st.number_input("Pitch (mm)", value=1.5, step=0.25, key=f"t_pitch_{i}")
+            t_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"t_cnt_{i}")
+        with col2:
+            t_ddep = st.number_input("Drill Depth (mm)", value=30.0, step=1.0, key=f"t_ddep_{i}")
+            t_tdep = st.number_input("Tap Depth (mm)", value=25.0, step=1.0, key=f"t_tdep_{i}")
+            t_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"t_ht_{i}")
+
     st.divider()
-    # ==========================================
-    # OPERATION INPUT ROWS
-    # ==========================================
-    for i, op in enumerate(st.session_state.operations):
-
-        st.markdown(f"### Operation {i + 1}")
-
-        op_type = st.selectbox(
-            "Operation Type",
-            ["Face Mill", "Hole", "Tap"],
-            key=f"op_type_{i}"
-        )
-        st.session_state.operations[i]["type"] = op_type
-
-        # ---- FACE MILL INPUTS ----
-        if op_type == "Face Mill":
-            col1, col2 = st.columns(2)
-            with col1:
-                shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key=f"fm_shape_{i}")
-                if shape == "Rectangular":
-                    fm_L = st.number_input("Length (mm)", value=100.0, key=f"fm_L_{i}")
-                    fm_W = st.number_input("Width (mm)", value=40.0, key=f"fm_W_{i}")
-                else:
-                    fm_dia = st.number_input("Component Diameter (mm)", value=100.0, key=f"fm_dia_{i}")
-            with col2:
-                fm_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"fm_ra_{i}")
-                fm_stock = st.number_input("Stock to Remove (mm)", value=1.0, step=0.1, key=f"fm_stock_{i}")
-                fm_pos = st.number_input("Number of Positions", value=1, step=1, key=f"fm_pos_{i}")
-
-        # ---- HOLE INPUTS ----
-        elif op_type == "Hole":
-            col1, col2 = st.columns(2)
-            with col1:
-                h_dia = st.number_input("Finish Diameter (mm)", value=25.0, step=0.1, key=f"h_dia_{i}")
-                h_dep = st.number_input("Depth (mm)", value=30.0, step=1.0, key=f"h_dep_{i}")
-                h_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"h_cnt_{i}")
-            with col2:
-                h_tol = st.number_input("Tolerance (±)", value=0.1, format="%.3f", key=f"h_tol_{i}")
-                h_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"h_ra_{i}")
-                h_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"h_ht_{i}")
-
-        # ---- TAP INPUTS ----
-        elif op_type == "Tap":
-            col1, col2 = st.columns(2)
-            with col1:
-                t_size = st.text_input("Tap Size (e.g. M10)", value="M10", key=f"t_size_{i}")
-                t_pitch = st.number_input("Pitch (mm)", value=1.5, step=0.25, key=f"t_pitch_{i}")
-                t_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"t_cnt_{i}")
-            with col2:
-                t_ddep = st.number_input("Drill Depth (mm)", value=30.0, step=1.0, key=f"t_ddep_{i}")
-                t_tdep = st.number_input("Tap Depth (mm)", value=25.0, step=1.0, key=f"t_tdep_{i}")
-                t_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"t_ht_{i}")
-
-        st.divider()
