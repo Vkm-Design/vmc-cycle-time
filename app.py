@@ -1465,7 +1465,7 @@ if mode == "🔧 Individual Operation":
                 else:
                     st.info("☝️ Wiper geometry finish pass time included in total.")
 
-elif mode == "⚙️ Combined Operations"
+elif mode == "⚙️ Combined Operations":
     
         # ==========================================
         # INITIALIZE SESSION STATE
