@@ -710,7 +710,8 @@ elif operation == "Boring / Hole Milling":
         tol_band < 0.2 or
            ra_input <= 1.6
     )
-    
+
+    tool_count_bor = 0
     # ==========================================
     # STOCK STRATEGY
     # ==========================================
@@ -815,6 +816,7 @@ elif operation == "Boring / Hole Milling":
                     ):
 
                         safe_drill_dia = actual_dia
+                        tool_count_bor += 1
                         break
 
         if safe_drill_dia > 0:
@@ -863,6 +865,7 @@ elif operation == "Boring / Hole Milling":
     while current_dia < rough_target_dia:
 
         tool = get_boring_params(current_dia, material)
+        tool_count_bor += 1
 
         if not tool:
 
@@ -920,6 +923,7 @@ elif operation == "Boring / Hole Milling":
         f_tool = get_fine_boring_params(f_dia, material)
 
         if f_tool:
+            tool_count_bor += 1
             finish_feed_rev = f_tool["feed_rev"]
     
             finish_rpm = f_tool["rpm"]
@@ -965,6 +969,7 @@ elif operation == "Boring / Hole Milling":
         total_op_time = tool_change_time + cut_time + (bor_cnt - 1) * position_time
 
         st.divider()
+        st.write(f"Tools Used = {tool_count_bor}")
         col1, col2, col3 = st.columns(3)
         col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
         col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
@@ -1615,6 +1620,8 @@ if st.button("🚀 Calculate Combined Cycle Time"):
         for i, op in enumerate(st.session_state.operations):
             st.write(op)
             op_time = 0.0
+            op_positions = 0.0
+            op_tools = 0
             details = ""
 
             # ---- HOLE LOGIC PROCESSING ----
