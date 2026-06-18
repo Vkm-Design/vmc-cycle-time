@@ -546,11 +546,21 @@ def calculate_boring_operation(
     step_details.append(
         f"Fine Boring Required = {fine_boring_required}"
     )
-
+    if fine_boring_required:
+        f_tool_check = get_fine_boring_params(f_dia, material)
+        finish_stock = f_tool_check["ap"] if f_tool_check else 0.5
+        rough_target_dia = f_dia - finish_stock
+    else:
+        finish_stock = 0.0
+        rough_target_dia = f_dia
+    
+    step_details.append(
+        f"Rough Target Dia = {rough_target_dia}"
+    )
     return {
-        "time": total_time_sec,
-        "tools": tool_count_bor,
-        "steps": step_details
+    "time": rough_target_dia,
+    "tools": tool_count_bor,
+    "steps": step_details
     }
 # ==========================================
 # 4. OPERATION: DRILLING
