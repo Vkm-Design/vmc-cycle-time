@@ -1567,11 +1567,7 @@ st.divider()
 
 if st.button("🚀 Calculate Combined Cycle Time"):
 
-    total_cut_time = sum(
-        item["cycle_time"]
-        for item in st.session_state.combined_results
-    )
+    st.write("Stored Operations:")
 
-    st.success(
-        f"Total Combined Cycle Time = {total_cut_time:.2f} sec"
-    )    
+    for op in st.session_state.operations:
+        st.write(op)  
