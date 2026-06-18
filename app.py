@@ -1542,6 +1542,7 @@ for i, op in enumerate(st.session_state.operations):
 
         # Push everything into the session state list slot
         st.session_state.operations[i].update(face_mill_data)
+        st.session_state.operations[i]["tool_count"] = 1
 
     # ---- HOLE INPUTS ----
     elif op_type == "Hole":
@@ -1581,6 +1582,7 @@ for i, op in enumerate(st.session_state.operations):
             "start_mode": h_mode,
             "count": h_cnt
         })
+        st.session_state.operations[i]["tool_count"] = 0
 
     # ---- TAP INPUTS ----
     elif op_type == "Tap":
@@ -1604,6 +1606,7 @@ for i, op in enumerate(st.session_state.operations):
             "t_tdep": t_tdep,
             "t_ht": t_ht
         })
+        st.session_state.operations[i]["tool_count"] = 1
 
     
 st.divider()
