@@ -770,6 +770,7 @@ elif operation == "Boring / Hole Milling":
 
     total_time_sec = 0.0
     current_dia = 0.0
+    step_details = []
     
     # --- 3. STEP 1: DRILLING (Only if Solid) ---
 
@@ -830,7 +831,9 @@ elif operation == "Boring / Hole Milling":
             d_time = (d_travel / d_fmin) * 60
 
             total_time_sec += d_time
-
+            step_details.append(
+                f"Drill Ø{safe_drill_dia}"
+            )
             st.success(
                 f"Step 1: Drilling Ø{safe_drill_dia} | "
                 f"Power: {round(p_check,2)}kW | "
@@ -904,6 +907,9 @@ elif operation == "Boring / Hole Milling":
         p_time = (bor_travel / tool['feed_min']) * 60
 
         total_time_sec += p_time
+        step_details.append(
+            f"Bore Ø{current_dia} ➔ Ø{d2}"
+        )
 
         st.write(
             f"🔹 Boring Ø{current_dia} ➔ Ø{d2} | "
@@ -939,7 +945,9 @@ elif operation == "Boring / Hole Milling":
             )
 
             total_time_sec += finish_time
-
+            step_details.append(
+                f"Fine Bore Ø{current_dia} ➔ Ø{f_dia}"
+            )
             st.success(
                 f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
                 f"RPM: {round(finish_rpm)} | "
@@ -957,7 +965,7 @@ elif operation == "Boring / Hole Milling":
     # ==========================================
     # FINAL CONSOLIDATED CALCULATION
     # ==========================================
-
+    st.write(step_details)
     if st.button(
         "Calculate Total Boring Cycle Time",
         key="bor_calc_final"
