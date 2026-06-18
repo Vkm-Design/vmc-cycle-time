@@ -1454,7 +1454,7 @@ elif operation == "Face Milling":
                 st.info("☝️ Wiper geometry finish pass time included in total.")
 
 
-st.error("COMBINED MODE ACTIVE")
+st.info("Combined Operations Planner")
     
 # ==========================================
 # INITIALIZE SESSION STATE
@@ -1480,6 +1480,7 @@ with col1:
 with col2:
     if st.button("🗑️ Clear All", key="clear_ops"):
         st.session_state.operations = []
+        st.session_state.combined_results = []
     
 st.divider()
 # ==========================================
@@ -1510,6 +1511,25 @@ for i, op in enumerate(st.session_state.operations):
             fm_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"fm_ra_{i}")
             fm_stock = st.number_input("Stock to Remove (mm)", value=1.0, step=0.1, key=f"fm_stock_{i}")
             fm_pos = st.number_input("Number of Positions", value=1, step=1, key=f"fm_pos_{i}")
+
+        # 👇 ADD THIS BLOCK TO SAVE EVERYTHING TO YOUR DYNAMIC LIST
+        face_mill_data = {
+            "type": "Face Mill",
+            "shape": shape,
+            "ra": fm_ra,
+            "stock": fm_stock,
+            "fm_pos": fm_pos
+        }
+        
+        # Save dimensions conditionally so you don't save empty/wrong variables
+        if shape == "Rectangular":
+            face_mill_data["length"] = fm_L
+            face_mill_data["width"] = fm_W
+        else:
+            face_mill_data["dia"] = fm_dia
+
+        # Push everything into the session state list slot
+        st.session_state.operations[i].update(face_mill_data)
 
     # ---- HOLE INPUTS ----
     elif op_type == "Hole":
@@ -1562,12 +1582,88 @@ for i, op in enumerate(st.session_state.operations):
             t_tdep = st.number_input("Tap Depth (mm)", value=25.0, step=1.0, key=f"t_tdep_{i}")
             t_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"t_ht_{i}")
 
+        # 👇 ADD THIS CRITICAL LINE TO SAVE THE DATA
+        st.session_state.operations[i].update({
+            "type": "Tap",
+            "t_size": t_size,
+            "t_pitch": t_pitch,
+            "t_cnt": t_cnt,
+            "t_ddep": t_ddep,
+            "t_tdep": t_tdep,
+            "t_ht": t_ht
+        })
+
     
 st.divider()
 
-if st.button("🚀 Calculate Combined Cycle Time"):
+if st.button("🚀 Calculate Combined Cycle Time"):   
+    # 1. Clear previous results to prevent stacking duplicates
+    st.session_state.combined_results = []
+    
+    # Check if there are actually operations added
+    if not st.session_state.operations:
+        st.warning("⚠️ Please add at least one operation first.")
+    else:
+        # 2. Loop through every stored operation and pass data to your functions
+        for i, op in enumerate(st.session_state.operations):
+            op_time = 0.0
+            details = ""
 
-    st.write("Stored Operations:")
+            # ---- HOLE LOGIC PROCESSING ----
+            if op["type"] == "Hole":
+                # Extract variables stored in your dictionary
+                d = op["dia"]
+                depth = op["depth"]
+                ra = op["ra"]
+                count = op["count"]
+                mode = op["start_mode"]
+                core_d = op.get("core_dia", 0.0)
+                
+                # EXECUTE YOUR STORED LOGIC RULES:
+                # Example: If finishing and dia <= 8, use reamer parameters, else boring
+                if mode == "Core Hole":
+                    # Call your boring/finishing logic function here
+                    # e.g., result = calculate_finishing_cycle(d, ra, depth)
+                    # op_time = result["time"] * count
+                    details = f"Boring/Reaming Ø{d} from Ø{core_d}"
+                else:
+                    # Solid hole drilling logic
+                    # op_time = calculate_drilling_time(d, depth) * count
+                    details = f"Drilling Solid Ø{d}"
+                    
+            # ---- FACE MILL LOGIC PROCESSING ----
+            elif op["type"] == "Face Mill":
+                # Call your existing face mill calculations
+                # op_time = calculate_facemill_time(op) * op["fm_pos"]
+                details = f"Face Milling Ra {op['ra']}μm"
 
-    for op in st.session_state.operations:
-        st.write(op)  
+            # ---- TAP LOGIC PROCESSING ----
+            elif op["type"] == "Tap":
+                # Call your existing tapping calculations
+                # op_time = calculate_tapping_time(op) * op["t_cnt"]
+                details = f"Tapping {op['t_size']}"
+
+            # 3. Append calculated data to your combined results list
+            st.session_state.combined_results.append({
+                "op_num": i + 1,
+                "type": op["type"],
+                "details": details,
+                "cycle_time": op_time
+            })
+
+        # ==========================================
+        # DISPLAY RESULTS TABLE AND TOTAL TIME
+        # ==========================================
+        st.subheader("📊 Combined Cycle Time Report")
+        
+        # Calculate grand total
+        total_cut_time = sum(item["cycle_time"] for item in st.session_state.combined_results)
+        
+        # Display as a neat summary table
+        import pandas as pd
+        report_df = pd.DataFrame(st.session_state.combined_results)
+        report_df.columns = ["Op #", "Operation Type", "Details", "Cycle Time (sec)"]
+        st.table(report_df)
+        
+        # Grand Total Message
+        st.success(f"🏅 Total Combined Cycle Time = {total_cut_time:.2f} sec")  
