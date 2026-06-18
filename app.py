@@ -520,6 +520,26 @@ if operation != "Tapping":
 else:
     ra_input, tol_input = 3.2, 0.1
 
+def calculate_boring_operation(
+    f_dia,
+    b_dep,
+    bor_ht,
+    e_mode,
+    bor_cnt,
+    tol_input,
+    ra_input,
+    material,
+    core_dia=0.0
+):
+    tool_count_bor = 0
+    total_time_sec = 0.0
+    step_details = []
+
+    return {
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
+    }
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
