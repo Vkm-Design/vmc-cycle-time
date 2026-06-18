@@ -531,16 +531,11 @@ def calculate_boring_operation(
     material,
     core_dia=0.0
 ):
-    tool_count_bor = 0
-    total_time_sec = 0.0
-    step_details = []
-    
-    step_details.append("Function Running")
-    
+
     return {
-        "time": total_time_sec,
-        "tools": tool_count_bor,
-        "steps": step_details
+        "time": 123,
+        "tools": 99,
+        "steps": ["FUNCTION IS RUNNING"]
     }
     
 # ==========================================
@@ -1687,14 +1682,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 
                 op["tool_count"] = tool_count_bor
                 
-                core_d = op.get("core_dia", 0.0)
-                
-                # EXECUTE YOUR STORED LOGIC RULES:
-                # Example: If finishing and dia <= 8, use reamer parameters, else boring
-                if mode == "Core Hole":
-                    details = f"Boring/Reaming Ø{d} from Ø{core_d} | Tools={tool_count_bor}"
-                else:
-                    details = f"Drilling + Boring Ø{d} | Tools={tool_count_bor}"   
+                   
                     
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
