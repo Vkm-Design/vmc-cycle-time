@@ -1643,7 +1643,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 hole_tools += 1
             
                 op["tool_count"] = hole_tools
-            
+                st.write(f"DEBUG Hole Tools = {hole_tools}")
                 core_d = op.get("core_dia", 0.0)
                 
                 # EXECUTE YOUR STORED LOGIC RULES:
@@ -1666,6 +1666,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 details = f"Tapping {op['t_size']}"
 
             # 3. Append calculated data to your combined results list
+            st.write(op)
             st.session_state.combined_results.append({
                 "op_num": i + 1,
                 "type": op["type"],
