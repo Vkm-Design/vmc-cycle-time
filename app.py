@@ -532,10 +532,14 @@ def calculate_boring_operation(
     core_dia=0.0
 ):
 
+    tool_count_bor = 0
+    total_time_sec = 0.0
+    step_details = []
+
     return {
-        "time": 123,
-        "tools": 99,
-        "steps": ["FUNCTION IS RUNNING"]
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
     }
     
 # ==========================================
@@ -741,6 +745,13 @@ elif operation == "Boring / Hole Milling":
     else:
         finish_stock = 0.0
         rough_target_dia = f_dia
+
+    step_details.append(
+        f"Fine Boring Required = {fine_boring_required}"
+    )
+    step_details.append(
+        f"Rough Target Dia = {rough_target_dia}"
+    )
     
     if f_dia <= 5:
         drill_stock = 0.5
