@@ -1606,6 +1606,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
     else:
         # 2. Loop through every stored operation and pass data to your functions
         for i, op in enumerate(st.session_state.operations):
+            st.write(op)
             op_time = 0.0
             details = ""
 
