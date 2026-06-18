@@ -1522,7 +1522,20 @@ for i, op in enumerate(st.session_state.operations):
             h_tol = st.number_input("Tolerance (±)", value=0.1, format="%.3f", key=f"h_tol_{i}")
             h_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"h_ra_{i}")
             h_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"h_ht_{i}")
+            h_mode = st.radio(
+                "Starting Condition",
+                ["Solid", "Core Hole"],
+                horizontal=True,
+                key=f"h_mode_{i}"
+            )
+        if h_mode == "Core Hole":
 
+            core_dia = st.number_input(
+                "Core Hole Diameter (mm)",
+                value=max(5.0, h_dia - 3),
+                step=0.1,
+                key=f"core_dia_{i}"
+            )
     # ---- TAP INPUTS ----
     elif op_type == "Tap":
         col1, col2 = st.columns(2)
