@@ -1495,6 +1495,13 @@ for i, op in enumerate(st.session_state.operations):
         ["Face Mill", "Hole", "Tap"],
         key=f"op_type_{i}"
     )
+    current_type = st.session_state.operations[i].get("type")
+
+    if current_type != op_type:
+        st.session_state.operations[i] = {
+            "id": st.session_state.operations[i]["id"],
+            "type": op_type
+        }
     st.session_state.operations[i]["type"] = op_type
 
     # ---- FACE MILL INPUTS ----
