@@ -536,14 +536,22 @@ def calculate_boring_operation(
     total_time_sec = 0.0
     step_details = []
 
-    st.write("FUNCTION DEBUG")
-    st.write(step_details)
+    tol_band = tol_input * 2
+
+    fine_boring_required = (
+        tol_band < 0.2 or
+        ra_input <= 1.6
+    )
+
+    step_details.append(
+        f"Fine Boring Required = {fine_boring_required}"
+    )
+
     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
         "steps": step_details
     }
-    
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
