@@ -964,7 +964,7 @@ elif operation == "Boring / Hole Milling":
     ):
 
         st.divider()
-
+        st.write(f"DEBUG Tool Count = {tool_count_bor}")
         cut_time = total_time_sec * bor_cnt
         total_op_time = tool_change_time + cut_time + (bor_cnt - 1) * position_time
 
