@@ -1635,19 +1635,23 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 ra = op["ra"]
                 count = op["count"]
                 mode = op["start_mode"]
+                hole_tools = 0
+
+                if mode == "Solid":
+                    hole_tools += 1
+            
+                hole_tools += 1
+            
+                op["tool_count"] = hole_tools
+            
                 core_d = op.get("core_dia", 0.0)
                 
                 # EXECUTE YOUR STORED LOGIC RULES:
                 # Example: If finishing and dia <= 8, use reamer parameters, else boring
                 if mode == "Core Hole":
-                    # Call your boring/finishing logic function here
-                    # e.g., result = calculate_finishing_cycle(d, ra, depth)
-                    # op_time = result["time"] * count
-                    details = f"Boring/Reaming Ø{d} from Ø{core_d}"
+                    details = f"Boring/Reaming Ø{d} from Ø{core_d} | Tools={hole_tools}"
                 else:
-                    # Solid hole drilling logic
-                    # op_time = calculate_drilling_time(d, depth) * count
-                    details = f"Drilling Solid Ø{d}"
+                    details = f"Drilling + Boring Ø{d} | Tools={hole_tools}"    
                     
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
