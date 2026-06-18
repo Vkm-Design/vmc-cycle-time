@@ -1536,6 +1536,20 @@ for i, op in enumerate(st.session_state.operations):
                 step=0.1,
                 key=f"core_dia_{i}"
             )
+
+            st.session_state.operations[i]["core_dia"] = core_dia
+
+        st.session_state.operations[i].update({
+            "type": "Hole",
+            "dia": h_dia,
+            "depth": h_dep,
+            "tol": h_tol,
+            "ra": h_ra,
+            "hole_type": h_ht,
+            "start_mode": h_mode,
+            "count": h_cnt
+        })
+
     # ---- TAP INPUTS ----
     elif op_type == "Tap":
         col1, col2 = st.columns(2)
