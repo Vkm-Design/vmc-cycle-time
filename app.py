@@ -534,12 +534,15 @@ def calculate_boring_operation(
     tool_count_bor = 0
     total_time_sec = 0.0
     step_details = []
-
+    
+    step_details.append("Function Running")
+    
     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
         "steps": step_details
     }
+    
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
@@ -1665,12 +1668,22 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 mode = op["start_mode"]
                 st.write("DEBUG HOLE OP:", op)
 
-                tool_count_bor = 0
+                result = calculate_boring_operation(
+                    f_dia=d,
+                    b_dep=depth,
+                    bor_ht=op["hole_type"],
+                    e_mode=mode,
+                    bor_cnt=count,
+                    tol_input=op["tol"],
+                    ra_input=ra,
+                    material=material,
+                    core_dia=op.get("core_dia", 0.0)
+                )
                 
-                if mode == "Solid":
-                    tool_count_bor += 1
+                op_time = result["time"]
+                tool_count_bor = result["tools"]
                 
-                tool_count_bor += 1
+                details = " | ".join(result["steps"])
                 
                 op["tool_count"] = tool_count_bor
                 
