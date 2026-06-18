@@ -536,6 +536,8 @@ def calculate_boring_operation(
     total_time_sec = 0.0
     step_details = []
 
+    st.write("FUNCTION DEBUG")
+    st.write(step_details)
     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
