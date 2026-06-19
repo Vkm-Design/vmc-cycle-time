@@ -557,7 +557,11 @@ def calculate_boring_operation(
     step_details.append(
         f"Rough Target Dia = {rough_target_dia}"
     )
-  
+    return {
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
+    } 
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
@@ -1004,11 +1008,6 @@ elif operation == "Boring / Hole Milling":
                 "Fine boring data not available for this diameter/material."
             )
 
-    return {
-        "time": total_time_sec,
-        "tools": tool_count_bor,
-        "steps": step_details
-    }
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
