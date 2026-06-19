@@ -557,6 +557,8 @@ def calculate_boring_operation(
     step_details.append(
         f"Rough Target Dia = {rough_target_dia}"
     )
+    st.write("BEFORE RETURN")
+    
     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
