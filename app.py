@@ -696,28 +696,27 @@ def calculate_boring_operation(
                 + ((0.18 * safe_drill_dia) if safe_drill_dia <= 20 else 0)
             )
             d_time = (d_travel / d_fmin) * 60
-
-# Add reposition time for each additional hole
-hole_count = op.get('t_cnt', 1)
-if hole_count > 1:
-    d_time += (hole_count - 1) * position_time
-    total_time_sec += d_time
-                step_details.append(
-                    f"Drill Ø{safe_drill_dia}"
-                )
-                st.success(
-                    f"Step 1: Drilling Ø{safe_drill_dia} | "
-                    f"Power: {round(p_check,2)}kW | "
-                    f"Time: {round(d_time, 2)}s"
-                )
-                current_dia = safe_drill_dia
-else:
-    st.error(   
-        f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
-    )
-    st.stop()
-else:
-    current_dia = float(core_dia)
+        # Add reposition time for each additional hole
+        hole_count = bor_cnt  # number of positions/hole count from UI
+        if hole_count > 1:
+            d_time += (hole_count - 1) * position_time
+        total_time_sec += d_time
+        step_details.append(
+            f"Drill Ø{safe_drill_dia}"
+        )
+        st.success(
+            f"Step 1: Drilling Ø{safe_drill_dia} | "
+            f"Power: {round(p_check,2)}kW | "
+            f"Time: {round(d_time, 2)}s"
+        )
+        current_dia = safe_drill_dia
+        else:
+            st.error(   
+                f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
+            )
+            st.stop()
+    else:
+        current_dia = float(core_dia)
 
     # --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
     st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
@@ -810,10 +809,7 @@ else:
     # tool_change_time is applied per tool (including drill)
     extra_tool_change = tool_change_time * tool_count_bor
     # Position time: one per tool usage after the first (drill) plus additional holes for drilling
-    additional_drill_holes = 0
-    if 'hole_count' in locals():
-        # hole_count was set in the drilling step above
-        additional_drill_holes = max(hole_count - 1, 0)
+    additional_drill_holes = max(bor_cnt - 1, 0)  # bor_cnt passed to function
     # Position time for each boring tool (tool_count_bor includes drill, so subtract 1)
     position_time_for_boring = position_time * max(tool_count_bor - 1, 0)
     extra_position = position_time * additional_drill_holes + position_time_for_boring
