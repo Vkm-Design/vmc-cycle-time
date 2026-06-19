@@ -558,7 +558,7 @@ def calculate_boring_operation(
         f"Rough Target Dia = {rough_target_dia}"
     )
     return {
-    "time": rough_target_dia,
+    "time": total_time_sec,
     "tools": tool_count_bor,
     "steps": step_details
     }
@@ -816,10 +816,8 @@ elif operation == "Boring / Hole Milling":
     # ==========================================
     # INITIALIZE VARIABLES
     # ==========================================
-
-    total_time_sec = 0.0
     current_dia = 0.0
-    step_details = []
+    
     
     # --- 3. STEP 1: DRILLING (Only if Solid) ---
 
