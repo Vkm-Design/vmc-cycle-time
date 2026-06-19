@@ -557,11 +557,7 @@ def calculate_boring_operation(
     step_details.append(
         f"Rough Target Dia = {rough_target_dia}"
     )
-    return {
-    "time": total_time_sec,
-    "tools": tool_count_bor,
-    "steps": step_details
-    }
+  
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
@@ -1009,26 +1005,11 @@ elif operation == "Boring / Hole Milling":
             )
 
 
-    # ==========================================
-    # FINAL CONSOLIDATED CALCULATION
-    # ==========================================
-    st.write(step_details)
-    if st.button(
-        "Calculate Total Boring Cycle Time",
-        key="bor_calc_final"
-    ):
-
-        st.divider()
-        st.write(f"DEBUG Tool Count = {tool_count_bor}")
-        cut_time = total_time_sec * bor_cnt
-        total_op_time = tool_change_time + cut_time + (bor_cnt - 1) * position_time
-
-        st.divider()
-        st.write(f"Tools Used = {tool_count_bor}")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
-        col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
-        col3.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
+    return {
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
+    }
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
@@ -1703,7 +1684,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     material=material,
                     core_dia=op.get("core_dia", 0.0)
                 )
-                
+                st.write("DEBUG RESULT:", result)
                 op_time = result["time"]
                 tool_count_bor = result["tools"]
                 
