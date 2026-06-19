@@ -696,25 +696,26 @@ def calculate_boring_operation(
                 + ((0.18 * safe_drill_dia) if safe_drill_dia <= 20 else 0)
             )
             d_time = (d_travel / d_fmin) * 60
+
 # Add reposition time for each additional hole
 hole_count = op.get('t_cnt', 1)
 if hole_count > 1:
     d_time += (hole_count - 1) * position_time
-total_time_sec += d_time
-            step_details.append(
-                f"Drill Ø{safe_drill_dia}"
-            )
-            st.success(
-                f"Step 1: Drilling Ø{safe_drill_dia} | "
-                f"Power: {round(p_check,2)}kW | "
-                f"Time: {round(d_time, 2)}s"
-            )
-            current_dia = safe_drill_dia
-        else:
-            st.error(   
-                f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
-            )
-            st.stop()
+    total_time_sec += d_time
+                step_details.append(
+                    f"Drill Ø{safe_drill_dia}"
+                )
+                st.success(
+                    f"Step 1: Drilling Ø{safe_drill_dia} | "
+                    f"Power: {round(p_check,2)}kW | "
+                    f"Time: {round(d_time, 2)}s"
+                )
+                current_dia = safe_drill_dia
+            else:
+                st.error(   
+                    f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
+                )
+                st.stop()
     else:
         current_dia = float(core_dia)
 
