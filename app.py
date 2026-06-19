@@ -9,6 +9,23 @@ kc_data = {
     "Stainless_Steel": 2400
 }
 
+# ==== Cycle Time Settings (sidebar) ====
+st.sidebar.header("⚙️ Cycle Time Settings")
+if "tool_change_time" not in st.session_state:
+    st.session_state.tool_change_time = 5.0  # seconds (default)
+if "position_time" not in st.session_state:
+    st.session_state.position_time = 1.0  # seconds (default)
+
+st.session_state.tool_change_time = st.sidebar.number_input(
+    "Tool Change Time (seconds)", min_value=0.0, value=st.session_state.tool_change_time, step=0.5)
+
+st.session_state.position_time = st.sidebar.number_input(
+    "Position Time (seconds)", min_value=0.0, value=st.session_state.position_time, step=0.5)
+
+# expose as globals for calculation functions
+tool_change_time = st.session_state.tool_change_time
+position_time = st.session_state.position_time
+
 # ================= MACHINE TABLE (WITH TAPER TAGS) =================
 machine_data = {
     "Ace BT40": {"power": 5.5, "torque": 35, "taper": "BT40"},
@@ -25,6 +42,31 @@ machine_data = {
     "Makino PS65 HSK63": {"power": 18.5, "torque": 95, "taper": "HSK A63"}
 }
 
+def calculate_facemill_time(op):
+    """Estimate face milling cycle time."""
+    fm_pos = op.get("fm_pos", 1)
+    travel_time_per_pos = 5.0
+    total_time = tool_change_time + (travel_time_per_pos * fm_pos)
+    return total_time
+
+def calculate_tapping_time(op):
+    """Calculate tapping cycle time based on selected parameters."""
+    tap_table = material_tables[material]["tap"]
+    filtered = [row for row in tap_table if row["pitch"] == op["t_pitch"]]
+    selected_row = next(row for row in filtered if row["tap"] == op["t_size"])
+    diameter = get_diameter(op["t_size"])
+    pitch = op["t_pitch"]
+    vc = selected_row["vc"]
+    if material == "Steel_Hardness_30_to_40_HRC":
+        vc *= 0.90
+    elif material == "Stainless_Steel":
+        vc *= 0.80
+    rpm = (1000 * vc) / (math.pi * diameter)
+    feed_min = pitch * rpm
+    cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
+    cut_time = (cut_length / feed_min) * op["t_cnt"] * 60
+    total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
+    return total_time
 
 drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
@@ -1739,23 +1781,29 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 op_time = result["time"] * count
                 tool_count_bor = result["tools"]
                 
+                # Add tool change and position overhead for each hole operation
+                op_time += tool_change_time  # single tool change per operation
+                if count > 1:
+                    op_time += (count - 1) * position_time  # move between positions
+
                 details = " | ".join(result["steps"])
                 
                 op["tool_count"] = tool_count_bor
                 
-                   
-                    
+                
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
                 # Call your existing face mill calculations
-                # op_time = calculate_facemill_time(op) * op["fm_pos"]
+                op_time = calculate_facemill_time(op)
                 details = f"Face Milling Ra {op['ra']}μm"
+
 
             # ---- TAP LOGIC PROCESSING ----
             elif op["type"] == "Tap":
                 # Call your existing tapping calculations
-                # op_time = calculate_tapping_time(op) * op["t_cnt"]
+                op_time = calculate_tapping_time(op)
                 details = f"Tapping {op['t_size']}"
+
 
             # 3. Append calculated data to your combined results list
             
