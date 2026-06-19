@@ -1004,12 +1004,11 @@ elif operation == "Boring / Hole Milling":
                 "Fine boring data not available for this diameter/material."
             )
 
-
-return {
-    "time": total_time_sec,
-    "tools": tool_count_bor,
-    "steps": step_details
-}
+    return {
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
+    }
     
 elif operation == "Tapping":
     st.title("Tapping Calculator")
