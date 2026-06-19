@@ -508,7 +508,7 @@ st.sidebar.caption(f"Calculation uses 85% capacity: {usable_power:.2f} kW | {usa
 # ==========================================
 # INDIVIDUAL MODE (4 spaces indentation)
 # ==========================================
-operation = st.selectbox("Select Operation", ["Drilling", "Boring / Hole Milling", "Tapping", "Face Milling"])
+operation = None
 
 if operation != "Tapping":
     st.sidebar.header("Quality Requirements")
@@ -520,6 +520,44 @@ if operation != "Tapping":
 else:
     ra_input, tol_input = 3.2, 0.1
 
+def calculate_boring_operation(
+    f_dia,
+    b_dep,
+    bor_ht,
+    e_mode,
+    bor_cnt,
+    tol_input,
+    ra_input,
+    material,
+    core_dia=0.0
+):
+
+    tool_count_bor = 0
+    total_time_sec = 0.0
+    step_details = []
+
+    tol_band = tol_input * 2
+
+    fine_boring_required = (
+        tol_band < 0.2 or
+        ra_input <= 1.6
+    )
+
+    step_details.append(
+        f"Fine Boring Required = {fine_boring_required}"
+    )
+    if fine_boring_required:
+        f_tool_check = get_fine_boring_params(f_dia, material)
+        finish_stock = f_tool_check["ap"] if f_tool_check else 0.5
+        rough_target_dia = f_dia - finish_stock
+    else:
+        finish_stock = 0.0
+        rough_target_dia = f_dia
+    
+    step_details.append(
+        f"Rough Target Dia = {rough_target_dia}"
+    )
+    
 # ==========================================
 # 4. OPERATION: DRILLING
 # ==========================================
@@ -710,7 +748,8 @@ elif operation == "Boring / Hole Milling":
         tol_band < 0.2 or
            ra_input <= 1.6
     )
-    
+
+    tool_count_bor = 0
     # ==========================================
     # STOCK STRATEGY
     # ==========================================
@@ -722,6 +761,13 @@ elif operation == "Boring / Hole Milling":
     else:
         finish_stock = 0.0
         rough_target_dia = f_dia
+
+    step_details.append(
+        f"Fine Boring Required = {fine_boring_required}"
+    )
+    step_details.append(
+        f"Rough Target Dia = {rough_target_dia}"
+    )
     
     if f_dia <= 5:
         drill_stock = 0.5
@@ -766,9 +812,8 @@ elif operation == "Boring / Hole Milling":
     # ==========================================
     # INITIALIZE VARIABLES
     # ==========================================
-
-    total_time_sec = 0.0
     current_dia = 0.0
+
     
     # --- 3. STEP 1: DRILLING (Only if Solid) ---
 
@@ -815,6 +860,7 @@ elif operation == "Boring / Hole Milling":
                     ):
 
                         safe_drill_dia = actual_dia
+                        tool_count_bor += 1
                         break
 
         if safe_drill_dia > 0:
@@ -828,7 +874,9 @@ elif operation == "Boring / Hole Milling":
             d_time = (d_travel / d_fmin) * 60
 
             total_time_sec += d_time
-
+            step_details.append(
+                f"Drill Ø{safe_drill_dia}"
+            )
             st.success(
                 f"Step 1: Drilling Ø{safe_drill_dia} | "
                 f"Power: {round(p_check,2)}kW | "
@@ -863,6 +911,7 @@ elif operation == "Boring / Hole Milling":
     while current_dia < rough_target_dia:
 
         tool = get_boring_params(current_dia, material)
+        tool_count_bor += 1
 
         if not tool:
 
@@ -901,6 +950,9 @@ elif operation == "Boring / Hole Milling":
         p_time = (bor_travel / tool['feed_min']) * 60
 
         total_time_sec += p_time
+        step_details.append(
+            f"Bore Ø{current_dia} ➔ Ø{d2}"
+        )
 
         st.write(
             f"🔹 Boring Ø{current_dia} ➔ Ø{d2} | "
@@ -920,6 +972,7 @@ elif operation == "Boring / Hole Milling":
         f_tool = get_fine_boring_params(f_dia, material)
 
         if f_tool:
+            tool_count_bor += 1
             finish_feed_rev = f_tool["feed_rev"]
     
             finish_rpm = f_tool["rpm"]
@@ -935,7 +988,9 @@ elif operation == "Boring / Hole Milling":
             )
 
             total_time_sec += finish_time
-
+            step_details.append(
+                f"Fine Bore Ø{current_dia} ➔ Ø{f_dia}"
+            )
             st.success(
                 f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
                 f"RPM: {round(finish_rpm)} | "
@@ -948,28 +1003,14 @@ elif operation == "Boring / Hole Milling":
             st.error(
                 "Fine boring data not available for this diameter/material."
             )
-
-
-    # ==========================================
-    # FINAL CONSOLIDATED CALCULATION
-    # ==========================================
-
-    if st.button(
-        "Calculate Total Boring Cycle Time",
-        key="bor_calc_final"
-    ):
-
-        st.divider()
-
-        cut_time = total_time_sec * bor_cnt
-        total_op_time = tool_change_time + cut_time + (bor_cnt - 1) * position_time
-
-        st.divider()
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Cut Time", f"{round(cut_time, 2)} sec")
-        col2.metric("Tool Change", f"{round(tool_change_time, 2)} sec")
-        col3.metric("Total Cycle Time", f"{round(total_op_time, 2)} sec")
-    
+    return {
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
+    }
+# ==========================================
+# STEP 4 : Tapping operation
+# ==========================================    
 elif operation == "Tapping":
     st.title("Tapping Calculator")
 
@@ -1453,82 +1494,240 @@ elif operation == "Face Milling":
             else:
                 st.info("☝️ Wiper geometry finish pass time included in total.")
 
-elif mode == "⚙️ Combined Operations":
+
+st.info("Combined Operations Planner")
     
-        # ==========================================
-        # INITIALIZE SESSION STATE
-        # ==========================================
-        if "operations" not in st.session_state:
-            st.session_state.operations = []
+# ==========================================
+# INITIALIZE SESSION STATE
+# ==========================================
+if "operations" not in st.session_state:
+    st.session_state.operations = []
+
+if "combined_results" not in st.session_state:
+    st.session_state.combined_results = []
     
-        # ==========================================
-        # ADD / CLEAR OPERATIONS BUTTONS
-        # ==========================================
-        st.subheader("Combined Operations Planner")
+# ==========================================
+# ADD / CLEAR OPERATIONS BUTTONS
+# ==========================================
+st.subheader("Combined Operations Planner")
+
+col1, col2 = st.columns([1, 1])
+with col1:
+    if st.button("➕ Add Operation", key="add_op"):
+        st.session_state.operations.append({
+            "type": "Hole",
+            "id": len(st.session_state.operations) + 1
+        })
+with col2:
+    if st.button("🗑️ Clear All", key="clear_ops"):
+        st.session_state.operations = []
+        st.session_state.combined_results = []
     
-        col1, col2 = st.columns([1, 1])
+st.divider()
+# ==========================================
+# OPERATION INPUT ROWS
+# ==========================================
+for i, op in enumerate(st.session_state.operations):
+
+    st.markdown(f"### Operation {i + 1}")
+
+    op_type = st.selectbox(
+        "Operation Type",
+        ["Face Mill", "Hole", "Tap"],
+        key=f"op_type_{i}"
+    )
+    current_type = st.session_state.operations[i].get("type")
+
+    if current_type != op_type:
+        st.session_state.operations[i] = {
+            "id": st.session_state.operations[i]["id"],
+            "type": op_type
+        }
+    st.session_state.operations[i]["type"] = op_type
+
+    # ---- FACE MILL INPUTS ----
+    if op_type == "Face Mill":
+        col1, col2 = st.columns(2)
         with col1:
-            if st.button("➕ Add Operation", key="add_op"):
-                st.session_state.operations.append({
-                    "type": "Hole",
-                    "id": len(st.session_state.operations) + 1
-                })
+            shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key=f"fm_shape_{i}")
+            if shape == "Rectangular":
+                fm_L = st.number_input("Length (mm)", value=100.0, key=f"fm_L_{i}")
+                fm_W = st.number_input("Width (mm)", value=40.0, key=f"fm_W_{i}")
+            else:
+                fm_dia = st.number_input("Component Diameter (mm)", value=100.0, key=f"fm_dia_{i}")
         with col2:
-            if st.button("🗑️ Clear All", key="clear_ops"):
-                st.session_state.operations = []
-    
-        st.divider()
-        # ==========================================
-        # OPERATION INPUT ROWS
-        # ==========================================
-        for i, op in enumerate(st.session_state.operations):
-    
-            st.markdown(f"### Operation {i + 1}")
-    
-            op_type = st.selectbox(
-                "Operation Type",
-                ["Face Mill", "Hole", "Tap"],
-                key=f"op_type_{i}"
+            fm_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"fm_ra_{i}")
+            fm_stock = st.number_input("Stock to Remove (mm)", value=1.0, step=0.1, key=f"fm_stock_{i}")
+            fm_pos = st.number_input("Number of Positions", value=1, step=1, key=f"fm_pos_{i}")
+
+        # 👇 ADD THIS BLOCK TO SAVE EVERYTHING TO YOUR DYNAMIC LIST
+        face_mill_data = {
+            "type": "Face Mill",
+            "shape": shape,
+            "ra": fm_ra,
+            "stock": fm_stock,
+            "fm_pos": fm_pos
+        }
+        
+        # Save dimensions conditionally so you don't save empty/wrong variables
+        if shape == "Rectangular":
+            face_mill_data["length"] = fm_L
+            face_mill_data["width"] = fm_W
+        else:
+            face_mill_data["dia"] = fm_dia
+
+        # Push everything into the session state list slot
+        st.session_state.operations[i].update(face_mill_data)
+        st.session_state.operations[i]["tool_count"] = 1
+
+    # ---- HOLE INPUTS ----
+    elif op_type == "Hole":
+        col1, col2 = st.columns(2)
+        with col1:
+            h_dia = st.number_input("Finish Diameter (mm)", value=25.0, step=0.1, key=f"h_dia_{i}")
+            h_dep = st.number_input("Depth (mm)", value=30.0, step=1.0, key=f"h_dep_{i}")
+            h_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"h_cnt_{i}")
+        with col2:
+            h_tol = st.number_input("Tolerance (±)", value=0.1, format="%.3f", key=f"h_tol_{i}")
+            h_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"h_ra_{i}")
+            h_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"h_ht_{i}")
+            h_mode = st.radio(
+                "Starting Condition",
+                ["Solid", "Core Hole"],
+                horizontal=True,
+                key=f"h_mode_{i}"
             )
-            st.session_state.operations[i]["type"] = op_type
+        if h_mode == "Core Hole":
+
+            core_dia = st.number_input(
+                "Core Hole Diameter (mm)",
+                value=max(5.0, h_dia - 3),
+                step=0.1,
+                key=f"core_dia_{i}"
+            )
+
+            st.session_state.operations[i]["core_dia"] = core_dia
+
+        st.session_state.operations[i].update({
+            "type": "Hole",
+            "dia": h_dia,
+            "depth": h_dep,
+            "tol": h_tol,
+            "ra": h_ra,
+            "hole_type": h_ht,
+            "start_mode": h_mode,
+            "count": h_cnt
+        })
+        st.session_state.operations[i]["tool_count"] = 0
+
+    # ---- TAP INPUTS ----
+    elif op_type == "Tap":
+        col1, col2 = st.columns(2)
+        with col1:
+            t_size = st.text_input("Tap Size (e.g. M10)", value="M10", key=f"t_size_{i}")
+            t_pitch = st.number_input("Pitch (mm)", value=1.5, step=0.25, key=f"t_pitch_{i}")
+            t_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"t_cnt_{i}")
+        with col2:
+            t_ddep = st.number_input("Drill Depth (mm)", value=30.0, step=1.0, key=f"t_ddep_{i}")
+            t_tdep = st.number_input("Tap Depth (mm)", value=25.0, step=1.0, key=f"t_tdep_{i}")
+            t_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"t_ht_{i}")
+
+        # 👇 ADD THIS CRITICAL LINE TO SAVE THE DATA
+        st.session_state.operations[i].update({
+            "type": "Tap",
+            "t_size": t_size,
+            "t_pitch": t_pitch,
+            "t_cnt": t_cnt,
+            "t_ddep": t_ddep,
+            "t_tdep": t_tdep,
+            "t_ht": t_ht
+        })
+        st.session_state.operations[i]["tool_count"] = 1
+
     
-            # ---- FACE MILL INPUTS ----
-            if op_type == "Face Mill":
-                col1, col2 = st.columns(2)
-                with col1:
-                    shape = st.selectbox("Component Shape", ["Rectangular", "Circular"], key=f"fm_shape_{i}")
-                    if shape == "Rectangular":
-                        fm_L = st.number_input("Length (mm)", value=100.0, key=f"fm_L_{i}")
-                        fm_W = st.number_input("Width (mm)", value=40.0, key=f"fm_W_{i}")
-                    else:
-                        fm_dia = st.number_input("Component Diameter (mm)", value=100.0, key=f"fm_dia_{i}")
-                with col2:
-                    fm_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"fm_ra_{i}")
-                    fm_stock = st.number_input("Stock to Remove (mm)", value=1.0, step=0.1, key=f"fm_stock_{i}")
-                    fm_pos = st.number_input("Number of Positions", value=1, step=1, key=f"fm_pos_{i}")
+st.divider()
+st.write(st.session_state.operations)
+if st.button("🚀 Calculate Combined Cycle Time"):   
+    # 1. Clear previous results to prevent stacking duplicates
+    st.session_state.combined_results = []
     
-            # ---- HOLE INPUTS ----
-            elif op_type == "Hole":
-                col1, col2 = st.columns(2)
-                with col1:
-                    h_dia = st.number_input("Finish Diameter (mm)", value=25.0, step=0.1, key=f"h_dia_{i}")
-                    h_dep = st.number_input("Depth (mm)", value=30.0, step=1.0, key=f"h_dep_{i}")
-                    h_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"h_cnt_{i}")
-                with col2:
-                    h_tol = st.number_input("Tolerance (±)", value=0.1, format="%.3f", key=f"h_tol_{i}")
-                    h_ra = st.number_input("Surface Finish Ra (μm)", value=3.2, step=0.1, key=f"h_ra_{i}")
-                    h_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"h_ht_{i}")
-    
-            # ---- TAP INPUTS ----
-            elif op_type == "Tap":
-                col1, col2 = st.columns(2)
-                with col1:
-                    t_size = st.text_input("Tap Size (e.g. M10)", value="M10", key=f"t_size_{i}")
-                    t_pitch = st.number_input("Pitch (mm)", value=1.5, step=0.25, key=f"t_pitch_{i}")
-                    t_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"t_cnt_{i}")
-                with col2:
-                    t_ddep = st.number_input("Drill Depth (mm)", value=30.0, step=1.0, key=f"t_ddep_{i}")
-                    t_tdep = st.number_input("Tap Depth (mm)", value=25.0, step=1.0, key=f"t_tdep_{i}")
-                    t_ht = st.radio("Hole Type", ["Blind Hole", "Through Hole"], horizontal=True, key=f"t_ht_{i}")
-    
-            st.divider()
+    # Check if there are actually operations added
+    if not st.session_state.operations:
+        st.warning("⚠️ Please add at least one operation first.")
+    else:
+        # 2. Loop through every stored operation and pass data to your functions
+        for i, op in enumerate(st.session_state.operations):
+           
+            op_time = 0.0
+            op_positions = 0.0
+            op_tools = 0
+            details = ""
+
+            # ---- HOLE LOGIC PROCESSING ----
+            if op["type"] == "Hole":
+                # Extract variables stored in your dictionary
+                d = op["dia"]
+                depth = op["depth"]
+                ra = op["ra"]
+                count = op["count"]
+                mode = op["start_mode"]
+                st.write("DEBUG HOLE OP:", op)
+
+                result = calculate_boring_operation(
+                    f_dia=d,
+                    b_dep=depth,
+                    bor_ht=op["hole_type"],
+                    e_mode=mode,
+                    bor_cnt=count,
+                    tol_input=op["tol"],
+                    ra_input=ra,
+                    material=material,
+                    core_dia=op.get("core_dia", 0.0)
+                )
+                st.write("DEBUG RESULT:", result)
+                op_time = result["time"] * count
+                tool_count_bor = result["tools"]
+                
+                details = " | ".join(result["steps"])
+                
+                op["tool_count"] = tool_count_bor
+                
+                   
+                    
+            # ---- FACE MILL LOGIC PROCESSING ----
+            elif op["type"] == "Face Mill":
+                # Call your existing face mill calculations
+                # op_time = calculate_facemill_time(op) * op["fm_pos"]
+                details = f"Face Milling Ra {op['ra']}μm"
+
+            # ---- TAP LOGIC PROCESSING ----
+            elif op["type"] == "Tap":
+                # Call your existing tapping calculations
+                # op_time = calculate_tapping_time(op) * op["t_cnt"]
+                details = f"Tapping {op['t_size']}"
+
+            # 3. Append calculated data to your combined results list
+            
+            st.session_state.combined_results.append({
+                "op_num": i + 1,
+                "type": op["type"],
+                "details": details,
+                "cycle_time": op_time
+            })
+
+        # ==========================================
+        # DISPLAY RESULTS TABLE AND TOTAL TIME
+        # ==========================================
+        st.subheader("📊 Combined Cycle Time Report")
+        
+        # Calculate grand total
+        total_cut_time = sum(item["cycle_time"] for item in st.session_state.combined_results)
+        
+        # Display as a neat summary table
+        import pandas as pd
+        report_df = pd.DataFrame(st.session_state.combined_results)
+        report_df.columns = ["Op #", "Operation Type", "Details", "Cycle Time (sec)"]
+        st.table(report_df)
+        
+        # Grand Total Message
+        st.success(f"🏅 Total Combined Cycle Time = {total_cut_time:.2f} sec")
