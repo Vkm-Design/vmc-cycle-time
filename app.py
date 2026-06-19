@@ -9,10 +9,6 @@ kc_data = {
     "Stainless_Steel": 2400
 }
 
-time
-
-
-
 # ================= MACHINE TABLE (WITH TAPER TAGS) =================
 machine_data = {
     "Ace BT40": {"power": 5.5, "torque": 35, "taper": "BT40"},
