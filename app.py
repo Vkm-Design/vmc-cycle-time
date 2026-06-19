@@ -4,8 +4,9 @@ import math
 # ================= MATERIAL TABLE =================
 kc_data = {
     "Aluminium": 700,
-    "Steel_Hardness_upto_30_HRC": 1950,
-    "Steel_Hardness_30_to_40_HRC": 2250,
+    "Steel_C22": 1700,
+    "Steel_C45": 1950,
+    "Steel_C60": 2250,
     "Stainless_Steel": 2400
 }
 
@@ -52,34 +53,6 @@ drill_data_aluminium = [
             {"min_d": 27, "max_d": 28, "rpm": 2315, "feed_min": 232, "max_depth": 84},
             {"min_d": 28, "max_d": 29, "rpm": 2233, "feed_min": 223, "max_depth": 87},
             {"min_d": 29, "max_d": 30, "rpm": 2158, "feed_min": 216, "max_depth": 90},
-            {"min_d": 30, "max_d": 35, "vc": 150, "feed_min": 159, "max_depth": 105},
-            {"min_d": 35, "max_d": 45, "vc": 170, "feed_min": 155, "max_depth": 125},
-            {"min_d": 45, "max_d": 55, "vc": 180, "feed_min": 127, "max_depth": 125},
-            {"min_d": 55, "max_d": 65, "vc": 180, "feed_min": 115, "max_depth": 150},
-]
-
-drill_data_Steel_Hardness_upto_30_HRC = [
-            {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
-            {"min_d": 1, "max_d": 2, "rpm": 6365, "feed_min": 95, "max_depth": 5},
-            {"min_d": 2, "max_d": 3, "rpm": 5570, "feed_min": 167, "max_depth": 10},
-
-            {"min_d": 3, "max_d": 4, "vc": 40, "feed_min": 297, "max_depth": 15},
-            {"min_d": 4, "max_d": 6, "vc": 45, "feed_min": 301, "max_depth": 20},
-            {"min_d": 6, "max_d": 8, "vc": 50, "feed_min": 301, "max_depth": 30},
-            {"min_d": 8, "max_d": 10, "vc": 60, "feed_min": 334, "max_depth": 50},
-            {"min_d": 10, "max_d": 12, "vc": 60, "feed_min": 306, "max_depth": 50},
-            {"min_d": 12, "max_d": 14, "vc": 60, "feed_min": 255, "max_depth": 60},
-
-            {"min_d": 14, "max_d": 16, "rpm": 1478, "feed_min": 259, "max_depth": 70},
-            {"min_d": 16, "max_d": 18, "rpm": 1293, "feed_min": 233, "max_depth": 80},
-            {"min_d": 18, "max_d": 21, "rpm": 1238, "feed_min": 248, "max_depth": 90},
-            {"min_d": 21, "max_d": 27, "rpm": 1364, "feed_min": 205, "max_depth": 105},
-            {"min_d": 27, "max_d": 32, "rpm": 1061, "feed_min": 127, "max_depth": 135},
-
-            {"min_d": 32, "max_d": 45, "vc": 90, "feed_min": 107, "max_depth": 105},
-            {"min_d": 45, "max_d": 51, "vc": 100, "feed_min": 106, "max_depth": 125},
-            {"min_d": 51, "max_d": 65, "vc": 100, "feed_min": 94, "max_depth": 150},
-           
 ]
 
 tap_data_aluminium  = [
@@ -115,38 +88,6 @@ tap_data_aluminium  = [
     {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
 ]
 
-tap_data_Steel_Hardness_upto_30_HRC = [
-    {"tap": "M3", "pitch": 0.5, "vc": 5, "max_depth": 9},
-    {"tap": "M3.5", "pitch": 0.6, "vc": 5, "max_depth": 10.5},
-    {"tap": "M4", "pitch": 0.7, "vc": 5, "max_depth": 12},
-    {"tap": "M5", "pitch": 0.8, "vc": 6, "max_depth": 15},
-    {"tap": "M6", "pitch": 1, "vc": 8, "max_depth": 18},
-    {"tap": "M7", "pitch": 1, "vc": 8, "max_depth": 21},
-    {"tap": "M8", "pitch": 1.25, "vc": 8, "max_depth": 24},
-    {"tap": "M10", "pitch": 1.5, "vc": 10, "max_depth": 30},
-    {"tap": "M12", "pitch": 1.75, "vc": 12, "max_depth": 36},
-    {"tap": "M14", "pitch": 2, "vc": 15, "max_depth": 42},
-    {"tap": "M16", "pitch": 2, "vc": 15, "max_depth": 48},
-    {"tap": "M16", "pitch": 1, "vc": 15, "max_depth": 48},
-    {"tap": "M16", "pitch": 1.5, "vc": 15, "max_depth": 48},
-    {"tap": "M6", "pitch": 0.5, "vc": 8, "max_depth": 18},
-    {"tap": "M6", "pitch": 0.75, "vc": 8, "max_depth": 18},
-    {"tap": "M8", "pitch": 0.5, "vc": 8, "max_depth": 24},
-    {"tap": "M8", "pitch": 0.75, "vc": 8, "max_depth": 24},
-    {"tap": "M8", "pitch": 1, "vc": 8, "max_depth": 24},
-    {"tap": "M9", "pitch": 1, "vc": 8, "max_depth": 27},
-    {"tap": "M10", "pitch": 0.75, "vc": 10, "max_depth": 30},
-    {"tap": "M10", "pitch": 1.25, "vc": 10, "max_depth": 30},
-    {"tap": "M10", "pitch": 1, "vc": 10, "max_depth": 30},
-    {"tap": "M12", "pitch": 1, "vc": 12, "max_depth": 36},
-    {"tap": "M12", "pitch": 1.25, "vc": 12, "max_depth": 36},
-    {"tap": "M12", "pitch": 1.5, "vc": 12, "max_depth": 36},
-    {"tap": "M14", "pitch": 1, "vc": 15, "max_depth": 42},
-    {"tap": "M14", "pitch": 1.25, "vc": 15, "max_depth": 42},
-    {"tap": "M14", "pitch": 1.5, "vc": 15, "max_depth": 42},
-    {"tap": "M18", "pitch": 2.5, "vc": 20, "max_depth": 54},
-    {"tap": "M20", "pitch": 2.5, "vc": 20, "max_depth": 60},
-]
 threadmill_data_aluminium = [
     {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 30, "feed_rev": 0.06, "max_depth": 7.5},
     {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 30, "feed_rev": 0.09, "max_depth": 10},
@@ -166,25 +107,7 @@ threadmill_data_aluminium = [
     {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
     {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 120, "feed_rev": 0.20, "max_depth": 50},
 ]
-threadmill_data_Steel_Hardness_upto_30_HRC = [
-    {"tap": "M3", "tool_dia": 2.3, "pitch": 0.5, "vc": 15, "feed_rev": 0.06, "max_depth": 7.5},
-    {"tap": "M4", "tool_dia": 3, "pitch": 0.7, "vc": 15, "feed_rev": 0.09, "max_depth": 10},
-    {"tap": "M5", "tool_dia": 4, "pitch": 0.8, "vc": 20, "feed_rev": 0.12, "max_depth": 12.5},
-    {"tap": "M6", "tool_dia": 4.8, "pitch": 1, "vc": 25, "feed_rev": 0.14, "max_depth": 15},
-    {"tap": "M8", "tool_dia": 6.4, "pitch": 1.25, "vc": 30, "feed_rev": 0.15, "max_depth": 20},
-    {"tap": "M8", "tool_dia": 6.4, "pitch": 1, "vc": 30, "feed_rev": 0.15, "max_depth": 20},
-    {"tap": "M10", "tool_dia": 7.95, "pitch": 1.5, "vc": 30, "feed_rev": 0.15, "max_depth": 25},
-    {"tap": "M10", "tool_dia": 7.95, "pitch": 1, "vc": 30, "feed_rev": 0.15, "max_depth": 25},
-    {"tap": "M10", "tool_dia": 7.95, "pitch": 1.25, "vc": 30, "feed_rev": 0.15, "max_depth": 25},
-    {"tap": "M12", "tool_dia": 9.95, "pitch": 1.75, "vc": 45, "feed_rev": 0.15, "max_depth": 30},
-    {"tap": "M12", "tool_dia": 9.95, "pitch": 1.5, "vc": 45, "feed_rev": 0.15, "max_depth": 30},
-    {"tap": "M14", "tool_dia": 11.2, "pitch": 2, "vc": 45, "feed_rev": 0.20, "max_depth": 35},
-    {"tap": "M14", "tool_dia": 11.2, "pitch": 1.5, "vc": 45, "feed_rev": 0.20, "max_depth": 35},
-    {"tap": "M16", "tool_dia": 12.8, "pitch": 2, "vc": 60, "feed_rev": 0.20, "max_depth": 40},
-    {"tap": "M16", "tool_dia": 12.8, "pitch": 1.5, "vc": 60, "feed_rev": 0.20, "max_depth": 40},
-    {"tap": "M20", "tool_dia": 14.95, "pitch": 2.5, "vc": 70, "feed_rev": 0.21, "max_depth": 50},
-    {"tap": "M20", "tool_dia": 14.95, "pitch": 1.5, "vc": 70, "feed_rev": 0.21, "max_depth": 50},
-]
+
 face_mill_data_aluminium = [
     {"dia": 3, "stock": 1, "vc": 50, "rpm": 5304, "feed": 477.4, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
     {"dia": 6, "stock": 1.5, "vc": 70, "rpm": 3713, "feed": 445.6, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
@@ -203,23 +126,6 @@ face_mill_data_aluminium = [
     {"dia": 100, "stock": 2, "vc": 500, "rpm": 1591, "feed": 1273.1, "max_width": 70, "spindles": ["HSK A100","BT50"]},
 ]
 
-face_mill_data_Steel_Hardness_upto_30_HRC = [
-    {"dia": 3, "stock": 0.7, "vc": 40, "rpm": 4244, "feed": 213.9, "max_width": 2.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 6, "stock": 1.4, "vc": 60, "rpm": 3183, "feed": 244.4, "max_width": 4.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 8, "stock": 1.8, "vc": 80, "rpm": 3183, "feed": 320.8, "max_width": 6.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 10, "stock": 2.1, "vc": 80, "rpm": 2546, "feed": 336.9, "max_width": 8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 12, "stock": 2.2, "vc": 100, "rpm": 2652, "feed": 417.7, "max_width": 9.6, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 14, "stock": 2.5, "vc": 120, "rpm": 2728, "feed": 491, "max_width": 11.2, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 16, "stock": 2.9, "vc": 120, "rpm": 2387, "feed": 458.3, "max_width": 12.8, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 20, "stock": 3.2, "vc": 140, "rpm": 2228, "feed": 467.9, "max_width": 16, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 25, "stock": 2, "vc": 100, "rpm": 1273, "feed": 305.5, "max_width": 17.5, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 32, "stock": 2, "vc": 100, "rpm": 995, "feed": 305.5, "max_width": 22.4, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 40, "stock": 2, "vc": 120, "rpm": 995, "feed": 381.9, "max_width": 28, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 50, "stock": 2, "vc": 140, "rpm": 891, "feed": 445.6, "max_width": 35, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 63, "stock": 2, "vc": 140, "rpm": 707, "feed": 381.9, "max_width": 44.1, "spindles": ["BT30","BBT30","HSK A50","HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 80, "stock": 2, "vc": 140, "rpm": 557, "feed": 356.5, "max_width": 56, "spindles": ["HSK A63","HSK A100","BT40","BT50"]},
-    {"dia": 100, "stock": 2, "vc": 140, "rpm": 446, "feed": 356.5, "max_width": 70, "spindles": ["HSK A100","BT50"]},
-]
 boring_data_aluminium = [
     {"min": 0, "max": 1, "rpm": 7957, "feed_min": 159.1, "ap": 0.1},
     {"min": 1, "max": 2, "rpm": 7161, "feed_min": 143.2, "ap": 0.2},
@@ -253,46 +159,9 @@ boring_data_aluminium = [
     {"min": 65, "max": 70, "rpm": 1714, "feed_min": 377.0, "ap": 10.0},
 ]
 
-boring_data_Steel_Hardness_upto_30_HRC = [
-    {"min": 2, "max": 3, "rpm": 4244, "feed_min": 127.3, "ap": 0.2},
-    {"min": 3, "max": 4, "rpm": 3183, "feed_min": 191, "ap": 0.3},
-    {"min": 4, "max": 5, "rpm": 2864, "feed_min": 171.9, "ap": 0.5},
-    {"min": 5, "max": 6, "rpm": 2652, "feed_min": 185.7, "ap": 1},
-    {"min": 6, "max": 7, "rpm": 2273, "feed_min": 204.6, "ap": 1.5},
-    {"min": 7, "max": 8, "rpm": 2387, "feed_min": 214.8, "ap": 1.5},
-    {"min": 8, "max": 9, "rpm": 2358, "feed_min": 235.8, "ap": 2},
-    {"min": 9, "max": 10, "rpm": 1910, "feed_min": 191, "ap": 2},
-    {"min": 10, "max": 11, "rpm": 1736, "feed_min": 208.3, "ap": 2},
-    {"min": 11, "max": 12, "rpm": 1591, "feed_min": 191, "ap": 2.5},
-    {"min": 12, "max": 13, "rpm": 1469, "feed_min": 176.3, "ap": 2.5},
-    {"min": 13, "max": 14, "rpm": 1364, "feed_min": 204.6, "ap": 2.5},
-    {"min": 14, "max": 15, "rpm": 1379, "feed_min": 206.9, "ap": 2.5},
-    {"min": 15, "max": 16, "rpm": 1293, "feed_min": 193.9, "ap": 2.5},
-    {"min": 16, "max": 17, "rpm": 1217, "feed_min": 182.5, "ap": 3},
-    {"min": 17, "max": 18, "rpm": 1238, "feed_min": 185.7, "ap": 3},
-    {"min": 18, "max": 19, "rpm": 1173, "feed_min": 175.9, "ap": 3},
-    {"min": 19, "max": 20, "rpm": 1432, "feed_min": 214.8, "ap": 3},
-    {"min": 20, "max": 25, "rpm": 1910, "feed_min": 306, "ap": 3.0},
-    {"min": 25, "max": 30, "rpm": 1528, "feed_min": 244, "ap": 3.0},
-    {"min": 30, "max": 35, "rpm": 1485, "feed_min": 297, "ap": 3.0},
-    {"min": 35, "max": 40, "rpm": 1455, "feed_min": 291, "ap": 4.0},
-    {"min": 40, "max": 45, "rpm": 1432, "feed_min": 286, "ap": 4.0},
-    {"min": 45, "max": 50, "rpm": 1132, "feed_min": 249, "ap": 4.0},
-    {"min": 50, "max": 55, "rpm": 1018, "feed_min": 224, "ap": 5.0},
-    {"min": 55, "max": 60, "rpm": 810, "feed_min": 178, "ap": 5.0},
-    {"min": 60, "max": 65, "rpm": 743, "feed_min": 163, "ap": 6.0},
-    {"min": 65, "max": 70, "rpm": 545, "feed_min": 129.0, "ap": 6.0},
-    {"min": 70, "max": 85, "rpm": 500, "feed_min": 100.0, "ap": 6.0},
-]
-
 # ================= FINE BORING DATA =================
 
 fine_boring_data_aluminium = [
-    {"min": 3, "max": 5, "rpm": 6365, "feed_rev": 0.08, "ap": 0.5},
-    {"min": 5, "max": 8, "rpm": 5729, "feed_rev": 0.08, "ap": 0.5},
-    {"min": 8, "max": 12, "rpm": 5570, "feed_rev": 0.08, "ap": 0.5},
-    {"min": 12, "max": 16, "rpm": 4244, "feed_rev": 0.08, "ap": 0.5},
-    {"min": 16, "max": 20, "rpm": 3581, "feed_rev": 0.08, "ap": 0.5},
     {"min": 20, "max": 25, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
     {"min": 25, "max": 30, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
     {"min": 30, "max": 35, "vc": 175, "feed_rev": 0.08, "ap": 0.5},
@@ -303,26 +172,6 @@ fine_boring_data_aluminium = [
     {"min": 55, "max": 60, "vc": 200, "feed_rev": 0.10, "ap": 0.5},
     {"min": 60, "max": 65, "vc": 200, "feed_rev": 0.10, "ap": 0.5},
     {"min": 65, "max": 70, "vc": 200, "feed_rev": 0.12, "ap": 0.5},
-]
-
-fine_boring__data_Steel_Hardness_upto_30_HRC = [
-
-    {"min": 3, "max": 5, "rpm": 4244, "feed_rev": 0.06, "ap": 0.5},
-    {"min": 5, "max": 8, "rpm": 3183, "feed_rev": 0.12, "ap": 0.5},
-    {"min": 8, "max": 12, "rpm": 2785, "feed_rev": 0.06, "ap": 0.5},
-    {"min": 12, "max": 16, "rpm": 2652, "feed_rev": 0.07, "ap": 0.5},
-    {"min": 16, "max": 20, "rpm": 2387, "feed_rev": 0.08, "ap": 0.5},
-    {"min": 20, "max": 25, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
-    {"min": 25, "max": 30, "vc": 140, "feed_rev": 0.08, "ap": 0.3},
-    {"min": 30, "max": 35, "vc": 155, "feed_rev": 0.08, "ap": 0.4},
-    {"min": 35, "max": 40, "vc": 160, "feed_rev": 0.08, "ap": 0.4},
-    {"min": 40, "max": 45, "vc": 170, "feed_rev": 0.08, "ap": 0.4},
-    {"min": 45, "max": 50, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 50, "max": 55, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 55, "max": 60, "vc": 180, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 60, "max": 65, "vc": 160, "feed_rev": 0.10, "ap": 0.5},
-    {"min": 65, "max": 70, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
-    {"min": 70, "max": 80, "vc": 140, "feed_rev": 0.1, "ap": 0.5},
 ]
 
 # ==========================================
@@ -337,33 +186,10 @@ material_tables = {
         "threadmill": threadmill_data_aluminium,
         "face_mill": face_mill_data_aluminium
     },
-
-    "Steel_Hardness_upto_30_HRC": {
-        "drill": drill_data_Steel_Hardness_upto_30_HRC,
-        "boring": boring_data_Steel_Hardness_upto_30_HRC,
-        "fine_boring": fine_boring__data_Steel_Hardness_upto_30_HRC,
-        "tap": tap_data_Steel_Hardness_upto_30_HRC,
-        "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
-        "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
-    },
-
-    "Steel_Hardness_30_to_40_HRC": {
-        "drill": drill_data_Steel_Hardness_upto_30_HRC,
-        "boring": boring_data_Steel_Hardness_upto_30_HRC,
-        "fine_boring": fine_boring__data_Steel_Hardness_upto_30_HRC,
-        "tap": tap_data_Steel_Hardness_upto_30_HRC,
-        "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
-        "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
-    },
-
-    "Stainless_Steel": {
-        "drill": drill_data_Steel_Hardness_upto_30_HRC,
-        "boring": boring_data_Steel_Hardness_upto_30_HRC,
-        "fine_boring": fine_boring__data_Steel_Hardness_upto_30_HRC,
-        "tap": tap_data_Steel_Hardness_upto_30_HRC,
-        "threadmill": threadmill_data_Steel_Hardness_upto_30_HRC,
-        "face_mill": face_mill_data_Steel_Hardness_upto_30_HRC
-    }
+    "Steel_C22": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_C45": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Steel_C60": {"drill": [], "boring": [], "tap": [], "threadmill": []},
+    "Stainless_Steel": {"drill": [], "boring": [], "tap": [], "threadmill": []}
 }
 
 # ==========================================
@@ -371,53 +197,23 @@ material_tables = {
 # ==========================================
 def get_parameters(diameter, material):
     table = material_tables[material]["drill"]
-
     for row in table:
-        if row["min_d"] <= diameter < row["max_d"]:  # changed <= to < for max_d
-
+        if row["min_d"] <= diameter < row["max_d"]:
             if "rpm" in row:
                 rpm = row["rpm"]
             else:
                 rpm = (1000 * row["vc"]) / (math.pi * diameter)
-
-            feed = row["feed_min"]
-            max_depth = row["max_depth"]
-
-            # Harder steel correction
-            if material == "Steel_Hardness_30_to_40_HRC":
-                rpm *= 0.90      # 10% lower speed
-                feed *= 0.95     # 5% lower feed
-
-            elif material == "Stainless_Steel":
-                rpm *= 0.75
-                feed *= 0.80
-
-            return rpm, feed, max_depth
-
+            return rpm, row["feed_min"], row["max_depth"]
     return None, None, None
 
 def get_boring_params(dia, material):
-
     if "boring" in material_tables[material] and len(material_tables[material]["boring"]) > 0:
         table = material_tables[material]["boring"]
     else:
         table = material_tables["Aluminium"]["boring"]
-
     for row in table:
         if row["min"] <= dia < row["max"]:
-
-            result = row.copy()
-
-            if material == "Steel_Hardness_30_to_40_HRC":
-                result["rpm"] *= 0.90
-                result["feed_min"] *= 0.95
-
-            elif material == "Stainless_Steel":
-                result["rpm"] *= 0.80
-                result["feed_min"] *= 0.90
-
-            return result
-
+            return row
     return None
 
 def get_fine_boring_params(dia, material):
@@ -426,28 +222,15 @@ def get_fine_boring_params(dia, material):
         "fine_boring" in material_tables[material]
         and len(material_tables[material]["fine_boring"]) > 0
     ):
+
         table = material_tables[material]["fine_boring"]
+
     else:
         return None
 
     for row in table:
         if row["min"] <= dia < row["max"]:
-
-            result = row.copy()
-
-            # Handle both rpm-direct and vc-based rows
-            if "rpm" not in result:
-                result["rpm"] = (1000 * result["vc"]) / (math.pi * dia)
-
-            if material == "Steel_Hardness_30_to_40_HRC":
-                result["vc"] *= 0.90
-                result["feed_rev"] *= 0.95
-
-            elif material == "Stainless_Steel":
-                result["vc"] *= 0.80
-                result["feed_rev"] *= 0.90
-
-            return result
+            return row
 
     return None
 
@@ -489,53 +272,13 @@ kc = kc_data[material]
 # 2. THE ONLY MACHINE PICKER (Syncs with all logic)
 machine = st.sidebar.selectbox("Select Machine", list(machine_data.keys()), key="global_mach")
 
-# Detect machine change
-if "last_machine" not in st.session_state:
-    st.session_state.last_machine = machine
-
-if st.session_state.last_machine != machine:
-
-    st.session_state.global_power = machine_data[machine]["power"]
-    st.session_state.global_torque = machine_data[machine]["torque"]
-
-    st.session_state.last_machine = machine
-
 # 3. Assign Machine Specs
+m_power = machine_data[machine]["power"]
+m_torque = machine_data[machine]["torque"]
+m_taper = machine_data[machine].get("taper", "BT40") 
 
-default_power = machine_data[machine]["power"]
-default_torque = machine_data[machine]["torque"]
-m_taper = machine_data[machine].get("taper", "BT40")
-
-m_power = st.sidebar.number_input(
-    "Available Spindle Power (kW)",
-    min_value=0.1,
-    value=float(default_power),
-    step=0.5,
-    key="global_power"
-)
-
-m_torque = st.sidebar.number_input(
-    "Available Spindle Torque (Nm)",
-    min_value=0.1,
-    value=float(default_torque),
-    step=1.0,
-    key="global_torque"
-)
-
-st.sidebar.info(
-    f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}"
-)
-
+st.sidebar.info(f"Machine Cap: {m_power}kW | {m_torque}Nm | {m_taper}")
 st.sidebar.markdown("---")
-
-# Effective machine capability used for calculations
-usable_power = m_power * 0.85
-usable_torque = m_torque * 0.85
-
-st.sidebar.caption(
-    f"Calculation uses 85% capacity: "
-    f"{usable_power:.2f} kW | {usable_torque:.1f} Nm"
-)
 
 # 4. QUALITY REQUIREMENTS (For L/D, Ra, and Tolerance logic)
 if operation != "Tapping":
@@ -590,29 +333,12 @@ if operation == "Drilling":
         
         v_c = (math.pi * dia * rpm) / 1000
         p_req = ((f_min / rpm) * v_c * dia * kc) / (240000 * 0.8)
-        torque_req = (p_req * 9550) / rpm
-        
-
-        power_load = (p_req / usable_power) * 100
-        torque_load = (torque_req / usable_torque) * 100
         
         st.write(f"**Travel:** {round(actual_travel, 2)} mm | **RPM:** {int(rpm)} | **Feed:** {f_min} mm/min")
         st.write(f"**Power Required:** {round(p_req, 2)} kW")
-        st.write(f"**Torque Required:** {round(torque_req, 2)} Nm")
-        st.write(
-            f"**Machine Load:** Power {power_load:.0f}% | Torque {torque_load:.0f}%"
-        )
-        
-        if p_req > usable_power or torque_req > usable_torque:
-            if p_req > usable_power:
-                st.error(
-                    f"🚨 Power Alert: {p_req:.2f} kW exceeds usable machine limit ({usable_power:.2f} kW)"
-                )
 
-            if torque_req > usable_torque:
-                st.error(
-                    f"🚨 Torque Alert: {torque_req:.1f} Nm exceeds usable machine limit ({usable_torque:.1f} Nm)"
-                )
+        if p_req > m_power:
+            st.error(f"🚨 Power Alert: {round(p_req,2)}kW exceeds {machine} limit.")
         
         if st.button("Calculate Drilling Total"):
             st.success(f"Total Time: {round((actual_travel/f_min)*60*cnt, 2)} seconds")
@@ -625,13 +351,11 @@ elif operation == "Boring / Hole Milling":
     # FINE BORING MATERIAL VALIDATION
     # ==========================================
 
-    if (
-        "fine_boring" not in material_tables[material]
-        or len(material_tables[material]["fine_boring"]) == 0
-       ):
+    if material != "Aluminium":
+
         st.warning(
-            f"Fine boring parameters currently not defined for {material}."
-       )
+            "Fine boring parameters currently defined only for Aluminium."
+        )
 
     col1, col2 = st.columns(2)
 
@@ -731,19 +455,16 @@ elif operation == "Boring / Hole Milling":
     # ==========================================
 
     if fine_boring_required:
-        f_tool_check = get_fine_boring_params(f_dia, material)
-        finish_stock = f_tool_check["ap"] if f_tool_check else 0.5  # fallback 0.5
+
+        # Leave stock for final fine boring
+        finish_stock = 0.5
         rough_target_dia = f_dia - finish_stock
+
     else:
+
+        # Rough boring finishes directly to size
         finish_stock = 0.0
         rough_target_dia = f_dia
-
-    if f_dia <= 5:
-        drill_stock = 0.5
-    elif f_dia <= 10:
-        drill_stock = 0.7
-    else:
-        drill_stock = 1.0
 
     # ==========================================
     # SPECIAL PROCESS VALIDATION
@@ -791,8 +512,9 @@ elif operation == "Boring / Hole Milling":
 
         drill_data = material_tables[material]["drill"]
 
+        # Sort to find the largest drill that is still <= 30mm
         sorted_drills = sorted(
-            drill_data,
+            [d for d in drill_data if d['max_d'] <= 30],
             key=lambda x: x['max_d'],
             reverse=True
         )
@@ -800,36 +522,27 @@ elif operation == "Boring / Hole Milling":
         safe_drill_dia = 0.0
 
         for drill in sorted_drills:
-                actual_dia = min(drill['max_d'] - 0.01, rough_target_dia - drill_stock)
-                actual_dia = round(actual_dia, 2)
 
-                # actual_dia must fall within this row's own range
-                if actual_dia < drill['min_d'] or actual_dia >= drill['max_d']:
-                    continue
+            if drill['max_d'] < rough_target_dia:
 
-                # Safety check — drill must always be smaller than bore target
-                if actual_dia >= rough_target_dia:
-                    continue
-                d_params = get_parameters(actual_dia, material)
+                d_params = get_parameters(drill['max_d'], material)
+
                 if d_params[0] is not None and d_params[1] is not None:
+
                     d_rpm, d_fmin = d_params[0], d_params[1]
+
                     p_check = (
                         (
                             (d_fmin / d_rpm)
-                            * (math.pi * actual_dia  * d_rpm / 1000)
-                            * actual_dia
+                            * (math.pi * drill['max_d'] * d_rpm / 1000)
+                            * drill['max_d']
                             * kc
                         ) / 192000
                     )
 
-                    torque_req = (p_check * 9550) / d_rpm
-                    
-                    if (
-                        p_check <= usable_power
-                        and torque_req <= usable_torque
-                    ):
+                    if p_check <= m_power:
 
-                        safe_drill_dia = actual_dia
+                        safe_drill_dia = drill['max_d']
                         break
 
         if safe_drill_dia > 0:
@@ -854,9 +567,7 @@ elif operation == "Boring / Hole Milling":
 
         else:
 
-            st.error(   
-                f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
-            )
+            st.error("❌ No safe drill found (Max Ø30 limit).")
             st.stop()
 
     else:
@@ -887,10 +598,10 @@ elif operation == "Boring / Hole Milling":
         # Max stock increment from table
         max_dia_increment = tool['ap']
 
-        d2 = round(min(
+        d2 = min(
             rough_target_dia,
             current_dia + max_dia_increment
-        ),3)
+        )
 
         # Feed per revolution
         f_rev_b = tool['feed_min'] / tool['rpm']
@@ -924,7 +635,7 @@ elif operation == "Boring / Hole Milling":
             f"Time: {round(p_time, 1)}s"
         )
 
-        current_dia = round(d2, 3)
+        current_dia = d2
 
     # ==========================================
     # STEP 3 : FINAL BORING PASS
@@ -935,10 +646,15 @@ elif operation == "Boring / Hole Milling":
         f_tool = get_fine_boring_params(f_dia, material)
 
         if f_tool:
+
+            finish_vc = f_tool["vc"]
             finish_feed_rev = f_tool["feed_rev"]
 
-            finish_rpm = f_tool["rpm"]
-                
+            finish_rpm = (
+                (1000 * finish_vc)
+                / (math.pi * f_dia)
+            )
+
             finish_feed = (
                 finish_feed_rev
                 * finish_rpm
@@ -990,15 +706,11 @@ elif operation == "Tapping":
     st.title("Tapping Calculator")
 
     # 1. Material Guardrail
-
-    if (
-        "tap" not in material_tables[material]
-        or len(material_tables[material]["tap"]) == 0
-    ):
-        st.error(
-            f"⚠️ Tap data not available for {material}."
-        )
+    if material != "Aluminium":
+        st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
         st.stop()
+
+    st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
     # 2. Tap Data Selection
     if material in material_tables:
@@ -1020,13 +732,6 @@ elif operation == "Tapping":
     diameter = get_diameter(selected_tap)
     pitch = selected_row["pitch"]
     vc = selected_row["vc"]
-
-    if material == "Steel_Hardness_30_to_40_HRC":
-        vc *= 0.90
-
-    elif material == "Stainless_Steel":
-        vc *= 0.80
-
     max_depth = selected_row["max_depth"]
 
     # 3. Input Parameters
@@ -1108,14 +813,6 @@ elif operation == "Tapping":
         else:
             vc_tm = tm_row["vc"]
             feed_rev = tm_row["feed_rev"]
-
-            if material == "Steel_Hardness_30_to_40_HRC":
-                vc_tm *= 0.90
-                feed_rev *= 0.95
-
-            elif material == "Stainless_Steel":
-                 vc_tm *= 0.80
-                 feed_rev *= 0.90
             tool_dia = tm_row["tool_dia"]
             max_depth_tm = tm_row["max_depth"]
 
@@ -1136,11 +833,12 @@ elif operation == "Tapping":
 elif operation == "Face Milling":
     st.title("Face Milling Calculator")
 
-    st.info(
-     f"Machine: {machine} | Spindle: {m_taper} | Material: {material}"
-     )
+    # 1. Material Guardrail
+    if material != "Aluminium":
+        st.error(f"⚠️ Data bank missing for {material}. Currently, this calculator only supports Aluminium.")
+        st.stop()
 
-    
+    st.info(f"Machine: {machine} | Spindle: {m_taper} | Material: {material}")
 
     # 2. Surface Finish & PCD Warning
     is_pcd_required = ra_input < 1.2
@@ -1153,10 +851,8 @@ elif operation == "Face Milling":
         )
 
     # 3. Filtering Logic
-    face_table = material_tables[material]["face_mill"]
-
     suitable_tools = [
-        tool for tool in face_table
+        tool for tool in face_mill_data_aluminium
         if m_taper in tool["spindles"]
     ]
 
@@ -1228,18 +924,8 @@ elif operation == "Face Milling":
     # TOOL PARAMETERS
     tool_dia = selected_tool["dia"]
     ae = selected_tool["max_width"]
-
     rpm = selected_tool["rpm"]
     vf = selected_tool["feed"]
-
-    if material == "Steel_Hardness_30_to_40_HRC":
-        rpm *= 0.90
-        vf *= 0.95
-
-    elif material == "Stainless_Steel":
-        rpm *= 0.80
-        vf *= 0.90
-
     ap_limit = selected_tool["stock"]
 
     # --- POWER VALIDATION ---
