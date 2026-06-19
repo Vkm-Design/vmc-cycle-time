@@ -1003,11 +1003,11 @@ def calculate_boring_operation(
                 st.error(
                     "Fine boring data not available for this diameter/material."
                 )
-        return {
-            "time": total_time_sec,
-            "tools": tool_count_bor,
-            "steps": step_details
-        }
+    return {
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details
+    }
 # ==========================================
 # STEP 4 : Tapping operation
 # ==========================================    
