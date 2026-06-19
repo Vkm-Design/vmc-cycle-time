@@ -1003,7 +1003,7 @@ elif operation == "Boring / Hole Milling":
             st.error(
                 "Fine boring data not available for this diameter/material."
             )
-     return {
+    return {
         "time": total_time_sec,
         "tools": tool_count_bor,
         "steps": step_details
@@ -1685,7 +1685,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     core_dia=op.get("core_dia", 0.0)
                 )
                 st.write("DEBUG RESULT:", result)
-                op_time = result["time"]
+                op_time = result["time"] * count
                 tool_count_bor = result["tools"]
                 
                 details = " | ".join(result["steps"])
@@ -1730,4 +1730,4 @@ if st.button("🚀 Calculate Combined Cycle Time"):
         st.table(report_df)
         
         # Grand Total Message
-        st.success(f"🏅 Total Combined Cycle Time = {total_cut_time:.2f} sec")  
+        st.success(f"🏅 Total Combined Cycle Time = {total_cut_time:.2f} sec")
