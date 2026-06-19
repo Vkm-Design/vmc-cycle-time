@@ -696,7 +696,11 @@ def calculate_boring_operation(
                 + ((0.18 * safe_drill_dia) if safe_drill_dia <= 20 else 0)
             )
             d_time = (d_travel / d_fmin) * 60
-            total_time_sec += d_time
+# Add reposition time for each additional hole
+hole_count = op.get('t_cnt', 1)
+if hole_count > 1:
+    d_time += (hole_count - 1) * position_time
+total_time_sec += d_time
             step_details.append(
                 f"Drill Ø{safe_drill_dia}"
             )
@@ -793,7 +797,7 @@ def calculate_boring_operation(
             st.success(
                 f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
                 f"RPM: {round(finish_rpm)} | "
-                f"Feed: {round(finish_feed,1)} mm/min | "
+            f"Feed: {round(finish_feed,1)} mm/min | "
                 f"Time: {round(finish_time,1)}s"
             )
         else:
@@ -801,6 +805,18 @@ def calculate_boring_operation(
                 "Fine boring data not available for this diameter/material."
             )
 
+    # Add tool change and position time for each tool usage
+    # tool_change_time is applied per tool (including drill)
+    extra_tool_change = tool_change_time * tool_count_bor
+    # Position time: one per tool usage after the first (drill) plus additional holes for drilling
+    additional_drill_holes = 0
+    if 'hole_count' in locals():
+        # hole_count was set in the drilling step above
+        additional_drill_holes = max(hole_count - 1, 0)
+    # Position time for each boring tool (tool_count_bor includes drill, so subtract 1)
+    position_time_for_boring = position_time * max(tool_count_bor - 1, 0)
+    extra_position = position_time * additional_drill_holes + position_time_for_boring
+    total_time_sec += extra_tool_change + extra_position
     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
