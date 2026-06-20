@@ -167,16 +167,60 @@ def calculate_facemill_time(op):
     return total_time
 
 def calculate_tapping_time(op):
-    """Calculate tapping cycle time (pre-drill + tapping) based on selected parameters."""
+    """Calculate tapping cycle time (Tap or Threadmill) based on selected parameters."""
     global tool_change_time, position_time, material
     op_material = op.get("material", material)
-    tap_table = material_tables[op_material]["tap"]
     
-    # 1. Tapping Calculations
+    # 1. Base tap parameters
+    tap_table = material_tables[op_material]["tap"]
     filtered = [row for row in tap_table if row["pitch"] == op["t_pitch"]]
     selected_row = next(row for row in filtered if row["tap"] == op["t_size"])
     diameter = get_diameter(op["t_size"])
     pitch = op["t_pitch"]
+    
+    # 2. Check for Threadmilling recommendation (Blind hole & Clearance <= 2 * pitch)
+    use_threadmill = False
+    if op.get("t_ht", "Blind Hole") == "Blind Hole":
+        t_ddep = op.get("t_ddep", 0.0)
+        t_tdep = op.get("t_tdep", 0.0)
+        clearance = t_ddep - t_tdep
+        if clearance <= (2 * pitch):
+            use_threadmill = True
+
+    # 3. Calculate time based on strategy
+    if use_threadmill:
+        threadmill_table = material_tables[op_material]["threadmill"]
+        minor_dia = diameter - (1.0825 * pitch)
+        
+        pitch_matches = [row for row in threadmill_table if row["pitch"] == pitch]
+        depth_matches = [row for row in pitch_matches if row["max_depth"] >= op["t_tdep"]]
+        size_matches = [row for row in depth_matches if row["tool_dia"] < minor_dia]
+        
+        tm_row = None
+        if size_matches:
+            tm_row = max(size_matches, key=lambda x: x["tool_dia"])
+        elif pitch_matches:
+            tm_row = pitch_matches[0]
+            
+        if tm_row:
+            vc_tm = tm_row["vc"]
+            feed_rev = tm_row["feed_rev"]
+            if op_material == "Steel_Hardness_30_to_40_HRC":
+                vc_tm *= 0.90
+                feed_rev *= 0.95
+            elif op_material == "Stainless_Steel":
+                vc_tm *= 0.80
+                feed_rev *= 0.90
+            tool_dia = tm_row["tool_dia"]
+            
+            rpm_tm = (1000 * vc_tm) / (math.pi * tool_dia)
+            feed_tm = feed_rev * rpm_tm
+            tm_cut_length = ((diameter - tool_dia) * math.pi * 3) + op["t_tdep"] + 4
+            cut_time = (tm_cut_length / feed_tm) * op["t_cnt"] * 60
+            total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
+            return total_time
+
+    # Standard Tapping
     vc = selected_row["vc"]
     if op_material == "Steel_Hardness_30_to_40_HRC":
         vc *= 0.90
@@ -186,22 +230,8 @@ def calculate_tapping_time(op):
     feed_min = pitch * rpm
     cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
     cut_time = (cut_length / feed_min) * op["t_cnt"] * 60
-    total_tap_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
-    
-    # 2. Pre-drilling Calculations (if t_ddep is provided and > 0)
-    drill_depth = op.get("t_ddep", 0.0)
-    if drill_depth > 0:
-        drill_dia = diameter - pitch
-        d_rpm, d_feed, _ = get_parameters(drill_dia, op_material)
-        if d_rpm and d_feed:
-            point_len = (0.18 * drill_dia) if drill_dia <= 20 else 0
-            is_through = op.get("t_ht", "Through Hole") == "Through Hole"
-            d_travel = drill_depth + (6 if is_through else 3) + point_len
-            d_time = ((d_travel / d_feed) * 60) * op["t_cnt"]
-            total_drill_time = tool_change_time + d_time + (op["t_cnt"] - 1) * position_time
-            return total_drill_time + total_tap_time
-            
-    return total_tap_time
+    total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
+    return total_time
 
 drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
@@ -1889,7 +1919,7 @@ for i, op in enumerate(st.session_state.operations):
             "t_tdep": t_tdep,
             "t_ht": t_ht
         })
-        st.session_state.operations[i]["tool_count"] = 2 if t_ddep > 0 else 1
+        st.session_state.operations[i]["tool_count"] = 1
 
     
 st.divider()
