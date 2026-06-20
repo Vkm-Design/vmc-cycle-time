@@ -27,10 +27,14 @@ machine_data = {
 
 def calculate_facemill_time(op):
     """Estimate face milling cycle time."""
-    fm_pos = op.get("fm_pos", 1)
-    travel_time_per_pos = 5.0
-    total_time = tool_change_time + (travel_time_per_pos * fm_pos)
-    return total_time
+    fm_cnt = op.get("fm_pos", 1)
+    ra_input = op.get("ra", 3.2)
+    total_stock = op.get("stock", 1.0)
+    total_time_min = time_rough + time_finish
+    cut_time_sec = total_time_min * 60 * fm_cnt
+    total_op_time = tool_change_time + cut_time_sec + ((fm_cnt - 1) * position_time)
+    
+    return total_op_time
 
 def calculate_tapping_time(op):
     """Calculate tapping cycle time based on selected parameters."""
@@ -1791,7 +1795,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
                 # Call your existing face mill calculations
-                op_time = calculate_facemill_time(op) * op["fm_pos"]
+                op_time = calculate_facemill_time(op)
                 details = f"Face Milling Ra {op['ra']}μm"
 
 
