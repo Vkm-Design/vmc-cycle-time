@@ -712,11 +712,11 @@ def calculate_boring_operation(
         current_dia = safe_drill_dia
         else:
             st.error(   
-                f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity."
+                f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity "
             )
             st.stop()
-        else:
-        current_dia = float(core_dia)
+    else:
+    current_dia = float(core_dia)
 
     # --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
     st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
