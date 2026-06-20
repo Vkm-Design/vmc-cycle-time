@@ -167,10 +167,12 @@ def calculate_facemill_time(op):
     return total_time
 
 def calculate_tapping_time(op):
-    """Calculate tapping cycle time based on selected parameters."""
+    """Calculate tapping cycle time (pre-drill + tapping) based on selected parameters."""
     global tool_change_time, position_time, material
     op_material = op.get("material", material)
     tap_table = material_tables[op_material]["tap"]
+    
+    # 1. Tapping Calculations
     filtered = [row for row in tap_table if row["pitch"] == op["t_pitch"]]
     selected_row = next(row for row in filtered if row["tap"] == op["t_size"])
     diameter = get_diameter(op["t_size"])
@@ -184,8 +186,22 @@ def calculate_tapping_time(op):
     feed_min = pitch * rpm
     cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
     cut_time = (cut_length / feed_min) * op["t_cnt"] * 60
-    total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
-    return total_time
+    total_tap_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
+    
+    # 2. Pre-drilling Calculations (if t_ddep is provided and > 0)
+    drill_depth = op.get("t_ddep", 0.0)
+    if drill_depth > 0:
+        drill_dia = diameter - pitch
+        d_rpm, d_feed, _ = get_parameters(drill_dia, op_material)
+        if d_rpm and d_feed:
+            point_len = (0.18 * drill_dia) if drill_dia <= 20 else 0
+            is_through = op.get("t_ht", "Through Hole") == "Through Hole"
+            d_travel = drill_depth + (6 if is_through else 3) + point_len
+            d_time = ((d_travel / d_feed) * 60) * op["t_cnt"]
+            total_drill_time = tool_change_time + d_time + (op["t_cnt"] - 1) * position_time
+            return total_drill_time + total_tap_time
+            
+    return total_tap_time
 
 drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
@@ -1849,8 +1865,14 @@ for i, op in enumerate(st.session_state.operations):
     elif op_type == "Tap":
         col1, col2 = st.columns(2)
         with col1:
-            t_size = st.text_input("Tap Size (e.g. M10)", value="M10", key=f"t_size_{i}")
-            t_pitch = st.number_input("Pitch (mm)", value=1.5, step=0.25, key=f"t_pitch_{i}")
+            tap_table = material_tables[material]["tap"]
+            pitch_list = sorted(list(set(row["pitch"] for row in tap_table)))
+            t_pitch = st.selectbox("Pitch (mm)", pitch_list, key=f"t_pitch_{i}")
+            
+            filtered = [row for row in tap_table if row["pitch"] == t_pitch]
+            tap_options = sorted(list(set(row["tap"] for row in filtered)))
+            t_size = st.selectbox("Tap Size", tap_options, key=f"t_size_{i}")
+            
             t_cnt = st.number_input("Number of Positions", value=1, step=1, key=f"t_cnt_{i}")
         with col2:
             t_ddep = st.number_input("Drill Depth (mm)", value=30.0, step=1.0, key=f"t_ddep_{i}")
@@ -1867,7 +1889,7 @@ for i, op in enumerate(st.session_state.operations):
             "t_tdep": t_tdep,
             "t_ht": t_ht
         })
-        st.session_state.operations[i]["tool_count"] = 1
+        st.session_state.operations[i]["tool_count"] = 2 if t_ddep > 0 else 1
 
     
 st.divider()
