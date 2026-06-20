@@ -184,8 +184,16 @@ def calculate_tapping_time(op):
         t_ddep = op.get("t_ddep", 0.0)
         t_tdep = op.get("t_tdep", 0.0)
         clearance = t_ddep - t_tdep
-        if clearance <= (2 * pitch):
-            use_threadmill = True
+        if clearance >= (2 * pitch):
+            use_threadmill = False  # enough clearance, standard tap
+        elif clearance >= (1 * pitch):
+            use_threadmill = True   # tight clearance, try threadmill
+        else:
+            st.warning(
+                f"⚠️ Clearance {round(clearance,2)}mm is less than 1 pitch ({pitch}mm). "
+                f"Tapping not feasible. Check drill and tap depth."
+            )
+            return 0.0
 
     # 3. Calculate time based on strategy
     if use_threadmill:
@@ -199,8 +207,13 @@ def calculate_tapping_time(op):
         tm_row = None
         if size_matches:
             tm_row = max(size_matches, key=lambda x: x["tool_dia"])
-        elif pitch_matches:
-            tm_row = pitch_matches[0]
+        if not tm_row:
+            st.warning(
+                f"⚠️ No standard threadmill available for {op['t_size']} "
+                f"pitch {op['t_pitch']} at depth {op['t_tdep']}mm. "
+                f"Special threadmill required — calculate separately."
+            )
+            return 0.0
             
         if tm_row:
             vc_tm = tm_row["vc"]
