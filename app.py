@@ -26,11 +26,57 @@ machine_data = {
 }
 
 def calculate_facemill_time(op):
-    """Estimate face milling cycle time, including positioning time."""
+    # Retrieve global parameters
+    global tool_change_time, position_time, m_taper, m_power, kc, material
+    # Ensure material is taken from operation if provided
+    op_material = op.get("material", material)
     fm_pos = op.get("fm_pos", 1)
-    travel_time_per_pos = 5.0  # base cut time per position (seconds)
-    # Add positioning time for each extra position
-    total_time = tool_change_time + (travel_time_per_pos * fm_pos) + max(fm_pos - 1, 0) * position_time
+    # Retrieve face‑mill tool table for the selected material
+    face_table = material_tables[op_material]["face_mill"]
+    # Filter tools that fit the spindle taper
+    suitable_tools = [tool for tool in face_table if m_taper in tool["spindles"]]
+    if not suitable_tools:
+        st.error(f"No suitable Face Mills found for {m_taper} spindle.")
+        st.stop()
+    # Auto‑select the smallest tool that satisfies power limit
+    selected_tool = None
+    for t in sorted(suitable_tools, key=lambda x: x["dia"]):
+        ae_check = t["max_width"]
+        ap_check = t["stock"]
+        vf_check = t["feed"]
+        efficiency = 0.8
+        req_power = (ae_check * ap_check * vf_check * kc) / (60e6 * efficiency)
+        if req_power <= m_power:
+            selected_tool = t
+            break
+    if selected_tool is None:
+        selected_tool = max(suitable_tools, key=lambda x: x["dia"])
+    # Determine cut length and cut time
+    if "shape" in op:
+        # Use geometry supplied by UI (Rectangular or Circular)
+        shape = op.get("shape", "Rectangular")
+        if shape == "Rectangular":
+            L = op.get("length", 100.0)
+            W = op.get("width", 40.0)
+            # Approximate number of passes across width
+            passes = max(int(W // selected_tool["max_width"]), 1)
+            cut_length = (L + selected_tool["dia"] + 4) * passes
+        else:
+            dia = op.get("dia", 100.0)
+            cut_length = dia + selected_tool["dia"] + 4
+        feed = selected_tool["feed"]
+        cut_time = (cut_length * fm_pos) / feed
+    else:
+        dia = op.get("dia", 100.0)
+        cut_length = (dia + selected_tool["dia"] + 4)
+    # Fallback if material tables missing or no face_mill entry
+    if op_material not in material_tables or "face_mill" not in material_tables[op_material]:
+        # Original simple calculation (constant travel time per position)
+        travel_time_per_pos = 5.0
+        total_time = tool_change_time + (travel_time_per_pos * fm_pos) + max(fm_pos - 1, 0) * position_time
+        return total_time
+    # Otherwise, we have cut_length and feed from the geometry logic above
+    total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
     return total_time
 
 def calculate_tapping_time(op):
