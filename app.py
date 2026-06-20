@@ -709,7 +709,7 @@ def calculate_boring_operation(
                 f"Power: {round(p_check,2)}kW | "
                 f"Time: {round(d_time, 2)}s"
             )
-            current_dia = safe_drill_dia
+            current_dia = safe_drill_dia  # 👈 LINE 712: Line up 'current_dia' exactly with 'st.success'
         else:
             st.error(   
                 f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity "
