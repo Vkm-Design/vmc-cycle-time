@@ -812,7 +812,7 @@ def calculate_boring_operation(
     # Position time: one per tool usage after the first (drill) plus additional holes for drilling
     additional_drill_holes = max(bor_cnt - 1, 0)  # bor_cnt passed to function
     # Position time for each boring tool (excluding first drill) per extra position
-    position_time_for_boring = position_time * max(tool_count_bor - 1, 0) * max(bor_cnt - 1, 0)
+    position_time_for_boring = position_time * max(tool_count_bor - 1, 0)
     extra_position = position_time * additional_drill_holes + position_time_for_boring
     total_time_sec += extra_tool_change + extra_position
     return {
@@ -1778,10 +1778,8 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 op_time = result["time"] * count
                 tool_count_bor = result["tools"]
                 
-                # Add tool change and position overhead for each hole operation
-                op_time += tool_change_time  # single tool change per operation
-                if count > 1:
-                    op_time += (count - 1) * position_time  # move between positions
+                # Tool change and position overhead are already accounted for in calculate_boring_operation.
+                # No additional time added here.
 
                 details = " | ".join(result["steps"])
                 
@@ -1791,7 +1789,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
                 # Call your existing face mill calculations
-                op_time = calculate_facemill_time(op) * op["fm_pos"]
+                op_time = calculate_facemill_time(op)
                 details = f"Face Milling Ra {op['ra']}μm"
 
 
