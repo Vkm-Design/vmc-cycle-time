@@ -29,7 +29,7 @@ def calculate_facemill_time(op):
     """Estimate face milling cycle time."""
     fm_pos = op.get("fm_pos", 1)
     travel_time_per_pos = 5.0
-    total_time = tool_change_time + (travel_time_per_pos * fm_pos)
+    total_time = tool_change_time + (travel_time_per_pos * (fm_pos-1))
     return total_time
 
 def calculate_tapping_time(op):
