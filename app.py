@@ -1791,7 +1791,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
                 # Call your existing face mill calculations
-                op_time = calculate_facemill_time(op)
+                op_time = calculate_facemill_time(op) * op["fm_pos"]
                 details = f"Face Milling Ra {op['ra']}μm"
 
 
