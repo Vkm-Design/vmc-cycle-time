@@ -218,7 +218,14 @@ def calculate_tapping_time(op):
                 f"⚠️ Clearance {round(clearance,2)}mm is less than 1 pitch ({pitch}mm). "
                 f"Tapping not feasible. Check drill and tap depth."
             )
-            return 0.0
+            return {
+                "time": 0.0,
+                "process": "Error — Insufficient Clearance",
+                "tool_dia": 0,
+                "rpm": 0,
+                "feed": 0,
+                "cut_time": 0
+            }
 
     # 3. Calculate time based on strategy
     if use_threadmill:
