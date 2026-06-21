@@ -168,7 +168,7 @@ def calculate_facemill_time(op):
             time_finish = cut_length / finish_vf
     cut_time = total_time_min * 60 * fm_pos
     total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
-   
+    finish_passes = 1 if (total_stock > 0.5 and (ra_input < 0.8 or ra_input < 2.0)) else 0
     if ra_input < 0.8:
         finish_type = "Special Process"
     elif is_pcd_required:
@@ -177,12 +177,15 @@ def calculate_facemill_time(op):
         finish_type = "Wiper Finish"
     else:
         finish_type = "None"
+        finish_passes = 0
+    
     return {
         "time": total_time,
         "tool_dia": tool_dia,
         "rpm": round(rpm),
         "feed": round(vf),
         "rough_passes": rough_passes,
+        "finish_passes": finish_passes,
         "time_rough_sec": round(time_rough * 60, 1),
         "time_finish_sec": round(time_finish * 60, 1),
         "finish_type": finish_type
