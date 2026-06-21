@@ -1936,7 +1936,6 @@ for i, op in enumerate(st.session_state.operations):
 
     
 st.divider()
-st.write(st.session_state.operations)
 if st.button("🚀 Calculate Combined Cycle Time"):   
     # 1. Clear previous results to prevent stacking duplicates
     st.session_state.combined_results = []
