@@ -207,8 +207,10 @@ def calculate_tapping_time(op):
     use_threadmill = False
     if op.get("t_ht", "Blind Hole") == "Blind Hole":
         t_ddep = op.get("t_ddep", 0.0)
-        t_tdep = op.get("t_tdep", 0.0)
+        t_tdep = op.get("t_tdep", 0.0)\
+        
         clearance = t_ddep - t_tdep
+        st.write(f"DEBUG: clearance={clearance}, pitch={pitch}, use_threadmill will be set next")
         if clearance <= (2 * pitch):
             use_threadmill = True
 
