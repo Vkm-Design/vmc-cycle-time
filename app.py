@@ -256,7 +256,14 @@ def calculate_tapping_time(op):
             tm_cut_length = ((diameter - tool_dia) * math.pi * 3) + op["t_tdep"] + 4
             cut_time = (tm_cut_length / feed_tm) * op["t_cnt"] * 60
             total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
-            return total_time
+            return {
+                "time": total_time,
+                "process": "Threadmill",
+                "tool_dia": tool_dia,
+                "rpm": round(rpm_tm),
+                "feed": round(feed_tm, 1),
+                "cut_time": round(cut_time, 2)
+            }
 
     # Standard Tapping
     vc = selected_row["vc"]
@@ -269,7 +276,14 @@ def calculate_tapping_time(op):
     cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
     cut_time = (cut_length / feed_min) * op["t_cnt"] * 60
     total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
-    return total_time
+    return {
+            "time": total_time,
+            "process": "Tapping",
+            "tool_dia": diameter,
+            "rpm": round(rpm),
+            "feed": round(feed_min, 1),
+            "cut_time": round(cut_time, 2)
+        }
 
 drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
@@ -2028,8 +2042,15 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ---- TAP LOGIC PROCESSING ----
             elif op["type"] == "Tap":
                 # Call your existing tapping calculations
-                op_time = calculate_tapping_time(op)
-                details = f"Tapping {op['t_size']}"
+                tap_result = calculate_tapping_time(op)
+                op_time = tap_result["time"]
+                details = (
+                    f"{tap_result['process']} {op['t_size']} | "
+                    f"Tool Ø{tap_result['tool_dia']}mm | "
+                    f"RPM: {tap_result['rpm']} | "
+                    f"Feed: {tap_result['feed']} mm/min | "
+                    f"Cut Time: {tap_result['cut_time']}s"
+                )
 
 
             # 3. Append calculated data to your combined results list
