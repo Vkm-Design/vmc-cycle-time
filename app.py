@@ -32,6 +32,11 @@ def calculate_facemill_time(op):
     op_material = op.get("material", material)
     kc_val = kc_data.get(op_material, kc)
     fm_pos = op.get("fm_pos", 1)
+    cut_length = 0.0
+    rough_passes = 0
+    time_rough = 0.0
+    time_finish = 0.0
+    total_time_min = 0.0
     
     # Fallback if material tables missing or no face_mill entry
     if op_material not in material_tables or "face_mill" not in material_tables[op_material]:
@@ -163,12 +168,7 @@ def calculate_facemill_time(op):
             time_finish = cut_length / finish_vf
     cut_time = total_time_min * 60 * fm_pos
     total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
-    # Safety defaults
-    rough_passes = 1
-    rough_stock = total_stock
-    time_rough = 0.0
-    time_finish = 0.0
-    cut_length = 0.0
+   
     if ra_input < 0.8:
         finish_type = "Special Process"
     elif is_pcd_required:
