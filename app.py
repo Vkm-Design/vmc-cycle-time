@@ -162,6 +162,12 @@ def calculate_facemill_time(op):
             time_finish = cut_length / finish_vf
     cut_time = total_time_min * 60 * fm_pos
     total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
+    # Safety defaults
+    rough_passes = 1
+    rough_stock = total_stock
+    time_rough = 0.0
+    time_finish = 0.0
+    cut_length = 0.0
     if ra_input < 0.8:
         finish_type = "Special Process"
     elif is_pcd_required:
