@@ -160,12 +160,12 @@ def calculate_facemill_time(op):
             cut_length = total_circ_dist + tool_dia
 
     # Time calculations (in minutes first, then converted to seconds)
-    time_rough = (cut_length * rough_passes) / vf
-    total_time_min = time_rough + time_finish  
+    time_rough = (cut_length * rough_passes) / vf  
     time_finish = 0.0
     if total_stock > 0.5:
         if ra_input < 0.8 or ra_input < 2.0:
             time_finish = cut_length / finish_vf
+    total_time_min = time_rough + time_finish        
     cut_time = total_time_min * 60 * fm_pos
     total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
     finish_passes = 1 if (total_stock > 0.5 and (ra_input < 0.8 or ra_input < 2.0)) else 0
