@@ -156,6 +156,7 @@ def calculate_facemill_time(op):
 
     # Time calculations (in minutes first, then converted to seconds)
     time_rough = (cut_length * rough_passes) / vf
+    total_time_min = time_rough + time_finish  
     time_finish = 0.0
     if total_stock > 0.5:
         if ra_input < 0.8 or ra_input < 2.0:
