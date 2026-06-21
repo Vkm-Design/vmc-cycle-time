@@ -162,6 +162,14 @@ def calculate_facemill_time(op):
             time_finish = cut_length / finish_vf
     cut_time = total_time_min * 60 * fm_pos
     total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
+    if ra_input < 0.8:
+        finish_type = "Special Process"
+    elif is_pcd_required:
+        finish_type = "PCD Finish"
+    elif op_material != "Aluminium" and 0.8 <= ra_input < 2.0:
+        finish_type = "Wiper Finish"
+    else:
+        finish_type = "None"
     return {
         "time": total_time,
         "tool_dia": tool_dia,
@@ -170,7 +178,7 @@ def calculate_facemill_time(op):
         "rough_passes": rough_passes,
         "time_rough_sec": round(time_rough * 60, 1),
         "time_finish_sec": round(time_finish * 60, 1),
-        "is_pcd": is_pcd_required
+        "finish_type": finish_type
     }
 
 def calculate_tapping_time(op):
@@ -2002,8 +2010,8 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     f"Feed: {fm_result['feed']} mm/min | "
                     f"{fm_result['rough_passes']} rough pass(es) | "
                     f"Rough: {fm_result['time_rough_sec']}s | "
-                    f"Finish: {fm_result['time_finish_sec']}s"
-                    + (" | PCD finish" if fm_result['is_pcd'] else "")
+                    f"Finish: {fm_result['time_finish_sec']}s | "
+                    f"{fm_result['finish_type']}"
                 )
 
 
