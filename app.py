@@ -32,6 +32,11 @@ def calculate_facemill_time(op):
     op_material = op.get("material", material)
     kc_val = kc_data.get(op_material, kc)
     fm_pos = op.get("fm_pos", 1)
+    cut_length = 0.0
+    rough_passes = 0
+    time_rough = 0.0
+    time_finish = 0.0
+    total_time_min = 0.0
     
     # Fallback if material tables missing or no face_mill entry
     if op_material not in material_tables or "face_mill" not in material_tables[op_material]:
@@ -155,16 +160,36 @@ def calculate_facemill_time(op):
             cut_length = total_circ_dist + tool_dia
 
     # Time calculations (in minutes first, then converted to seconds)
-    time_rough = (cut_length * rough_passes) / vf
+    time_rough = (cut_length * rough_passes) / vf  
     time_finish = 0.0
     if total_stock > 0.5:
         if ra_input < 0.8 or ra_input < 2.0:
             time_finish = cut_length / finish_vf
-
-    total_time_min = time_rough + time_finish
+    total_time_min = time_rough + time_finish        
     cut_time = total_time_min * 60 * fm_pos
     total_time = tool_change_time + cut_time + max(fm_pos - 1, 0) * position_time
-    return total_time
+    finish_passes = 1 if (total_stock > 0.5 and (ra_input < 0.8 or ra_input < 2.0)) else 0
+    if ra_input < 0.8:
+        finish_type = "Special Process"
+    elif is_pcd_required:
+        finish_type = "PCD Finish"
+    elif op_material != "Aluminium" and 0.8 <= ra_input < 2.0:
+        finish_type = "Wiper Finish"
+    else:
+        finish_type = "None"
+        finish_passes = 0
+    
+    return {
+        "time": total_time,
+        "tool_dia": tool_dia,
+        "rpm": round(rpm),
+        "feed": round(vf),
+        "rough_passes": rough_passes,
+        "finish_passes": finish_passes,
+        "time_rough_sec": round(time_rough * 60, 1),
+        "time_finish_sec": round(time_finish * 60, 1),
+        "finish_type": finish_type
+    }
 
 def calculate_tapping_time(op):
     """Calculate tapping cycle time (Tap or Threadmill) based on selected parameters."""
@@ -177,23 +202,48 @@ def calculate_tapping_time(op):
     selected_row = next(row for row in filtered if row["tap"] == op["t_size"])
     diameter = get_diameter(op["t_size"])
     pitch = op["t_pitch"]
+    # DRILL TIME CALCULATION
+    drill_dia = diameter - pitch  # tap dia minus pitch = drill dia
+    d_rpm, d_fmin, d_max_depth = get_parameters(drill_dia, op_material)
+    
+    if d_rpm and d_fmin:
+        drill_travel = op["t_ddep"] + 3 + ((0.18 * drill_dia) if drill_dia <= 20 else 0)
+        drill_cut_time = (drill_travel / d_fmin) * op["t_cnt"] * 60
+        drill_total_time = tool_change_time + drill_cut_time + (op["t_cnt"] - 1) * position_time
+    else:
+        drill_cut_time = 0.0
+        drill_total_time = 0.0
+        drill_dia = 0.0
+        d_rpm = 0
+        d_fmin = 0
     
     # 2. Check for Threadmilling recommendation (Blind hole & Clearance <= 2 * pitch)
     use_threadmill = False
     if op.get("t_ht", "Blind Hole") == "Blind Hole":
-        t_ddep = op.get("t_ddep", 0.0)
-        t_tdep = op.get("t_tdep", 0.0)
+        
+        t_ddep = op.get("t_ddep", 30.0)
+        t_tdep = op.get("t_tdep", 25.0)
+        
         clearance = t_ddep - t_tdep
-        if clearance >= (2 * pitch):
-            use_threadmill = False  # enough clearance, standard tap
-        elif clearance >= (1 * pitch):
-            use_threadmill = True   # tight clearance, try threadmill
-        else:
+        if clearance < (1 * pitch):
             st.warning(
-                f"⚠️ Clearance {round(clearance,2)}mm is less than 1 pitch ({pitch}mm). "
-                f"Tapping not feasible. Check drill and tap depth."
+                f"⚠️ Drill depth ({t_ddep}mm) must be at least tap depth + 1 pitch ({t_tdep + pitch}mm). "
+                f"Please check drill depth."
             )
-            return 0.0
+            return {
+                "time": 0.0,
+                "process": "Error — Check Drill Depth",
+                "tool_dia": 0,
+                "rpm": 0,
+                "feed": 0,
+                "cut_time": 0,
+                "drill_dia": 0,
+                "drill_rpm": 0,
+                "drill_feed": 0,
+                "drill_cut_time": 0
+            }
+        elif clearance <= (2 * pitch):
+            use_threadmill = True
 
     # 3. Calculate time based on strategy
     if use_threadmill:
@@ -213,7 +263,14 @@ def calculate_tapping_time(op):
                 f"pitch {op['t_pitch']} at depth {op['t_tdep']}mm. "
                 f"Special threadmill required — calculate separately."
             )
-            return 0.0
+            return {
+                "time": 0.0,
+                "process": "Special Threadmill Required",
+                "tool_dia": 0,
+                "rpm": 0,
+                "feed": 0,
+                "cut_time": 0
+            }
             
         if tm_row:
             vc_tm = tm_row["vc"]
@@ -231,7 +288,18 @@ def calculate_tapping_time(op):
             tm_cut_length = ((diameter - tool_dia) * math.pi * 3) + op["t_tdep"] + 4
             cut_time = (tm_cut_length / feed_tm) * op["t_cnt"] * 60
             total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
-            return total_time
+            return {
+                "time": total_time + drill_total_time,
+                "process": "Threadmill",
+                "tool_dia": tool_dia,
+                "rpm": round(rpm_tm),
+                "feed": round(feed_tm, 1),
+                "cut_time": round(cut_time, 2),
+                "drill_dia": round(drill_dia, 2),
+                "drill_rpm": round(d_rpm) if d_rpm else 0,
+                "drill_feed": round(d_fmin) if d_fmin else 0,
+                "drill_cut_time": round(drill_cut_time, 2)
+            }
 
     # Standard Tapping
     vc = selected_row["vc"]
@@ -244,7 +312,18 @@ def calculate_tapping_time(op):
     cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
     cut_time = (cut_length / feed_min) * op["t_cnt"] * 60
     total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
-    return total_time
+    return {
+        "time": total_time + drill_total_time,
+        "process": "Tapping",
+        "tool_dia": diameter,
+        "rpm": round(rpm),
+        "feed": round(feed_min, 1),
+        "cut_time": round(cut_time, 2),
+        "drill_dia": round(drill_dia, 2),
+        "drill_rpm": round(d_rpm) if d_rpm else 0,
+        "drill_feed": round(d_fmin) if d_fmin else 0,
+        "drill_cut_time": round(drill_cut_time, 2)
+    }
 
 drill_data_aluminium = [
             {"min_d": 0.5, "max_d": 1, "rpm": 8500, "feed_min": 60, "max_depth": 2.5},
@@ -1936,7 +2015,6 @@ for i, op in enumerate(st.session_state.operations):
 
     
 st.divider()
-st.write(st.session_state.operations)
 if st.button("🚀 Calculate Combined Cycle Time"):   
     # 1. Clear previous results to prevent stacking duplicates
     st.session_state.combined_results = []
@@ -1988,16 +2066,34 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 
             # ---- FACE MILL LOGIC PROCESSING ----
             elif op["type"] == "Face Mill":
-                # Call your existing face mill calculations
-                op_time = calculate_facemill_time(op)
-                details = f"Face Milling Ra {op['ra']}μm"
+                fm_result = calculate_facemill_time(op)
+                op_time = fm_result["time"]
+                details = (
+                    f"Ø{fm_result['tool_dia']}mm cutter | "
+                    f"RPM: {fm_result['rpm']} | "
+                    f"Feed: {fm_result['feed']} mm/min | "
+                    f"{fm_result['rough_passes']} rough pass(es) | "
+                    f"Rough: {fm_result['time_rough_sec']}s | "
+                    f"Finish: {fm_result['time_finish_sec']}s | "
+                    f"{fm_result['finish_type']}"
+                )
 
 
             # ---- TAP LOGIC PROCESSING ----
             elif op["type"] == "Tap":
                 # Call your existing tapping calculations
-                op_time = calculate_tapping_time(op)
-                details = f"Tapping {op['t_size']}"
+                tap_result = calculate_tapping_time(op)
+                op_time = tap_result["time"]
+                details = (
+                    f"Drill Ø{tap_result['drill_dia']}mm | "
+                    f"Drill RPM: {tap_result['drill_rpm']} | "
+                    f"Drill Feed: {tap_result['drill_feed']} mm/min | "
+                    f"Drill Time: {tap_result['drill_cut_time']}s\n"
+                    f"{tap_result['process']} Ø{tap_result['tool_dia']}mm | "
+                    f"RPM: {tap_result['rpm']} | "
+                    f"Feed: {tap_result['feed']} mm/min | "
+                    f"Cut Time: {tap_result['cut_time']}s"
+                )
 
 
             # 3. Append calculated data to your combined results list
