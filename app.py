@@ -1015,9 +1015,9 @@ def calculate_boring_operation(
         while current_dia < rough_target_dia:
             
             tool = get_boring_params(current_dia, material)
-        if not tool:
-            st.warning(f"No boring data found for Ø{current_dia}.")
-            break
+            if not tool:
+                st.warning(f"No boring data found for Ø{current_dia}.")
+                break
         tool_count_bor += 1
 
         # Max stock increment from table
