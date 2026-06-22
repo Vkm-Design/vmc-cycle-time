@@ -845,14 +845,29 @@ def calculate_boring_operation(
     step_details.append(
         f"Fine Boring Required = {fine_boring_required}"
     )
-    if fine_boring_required:
-        f_tool_check = get_fine_boring_params(f_dia, material)
-        finish_stock = f_tool_check["ap"] if f_tool_check else 0.5
-        rough_target_dia = f_dia - finish_stock
-    else:
-        finish_stock = 0.0
-        rough_target_dia = f_dia
+    # Check if drill only is sufficient
+    drill_only = (
+        tol_band >= 0.4 and      # tolerance ±0.2 or above
+        ra_input > 3.2            # surface finish above Ra 3.2
+    )
     
+    if drill_only:
+        fine_boring_required = False
+        finish_stock = 0.0
+        rough_target_dia = f_dia  # drill directly to size
+    else:
+        fine_boring_required = (
+            tol_band < 0.2 or
+            ra_input <= 1.6
+        )
+        if fine_boring_required:
+            f_tool_check = get_fine_boring_params(f_dia, material)
+            finish_stock = f_tool_check["ap"] if f_tool_check else 0.5
+            rough_target_dia = f_dia - finish_stock
+        else:
+            finish_stock = 0.0
+            rough_target_dia = f_dia
+            
     step_details.append(
         f"Rough Target Dia = {rough_target_dia}"
     )
@@ -993,10 +1008,12 @@ def calculate_boring_operation(
         current_dia = float(core_dia)  # 👈 Properly indented inside the else block
 
     # --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
-    st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
-    bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
+    if not drill_only:
+        st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
+        bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
 
-    while current_dia < rough_target_dia:
+        while current_dia < rough_target_dia:
+            
         tool = get_boring_params(current_dia, material)
         if not tool:
             st.warning(f"No boring data found for Ø{current_dia}.")
@@ -1048,7 +1065,7 @@ def calculate_boring_operation(
     # ==========================================
     # STEP 3 : FINAL BORING PASS
     # ==========================================
-    if fine_boring_required:
+    if not drill_only and fine_boring_required:
         f_tool = get_fine_boring_params(f_dia, material)
 
         if f_tool:
