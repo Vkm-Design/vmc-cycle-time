@@ -237,6 +237,10 @@ def calculate_tapping_time(op):
                 "rpm": 0,
                 "feed": 0,
                 "cut_time": 0
+                "drill_dia": 0,
+                "drill_rpm": 0,
+                "drill_feed": 0,
+                "drill_cut_time": 0
             }
         elif clearance <= (2 * pitch):
             use_threadmill = True
