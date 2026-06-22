@@ -206,12 +206,11 @@ def calculate_tapping_time(op):
     # 2. Check for Threadmilling recommendation (Blind hole & Clearance <= 2 * pitch)
     use_threadmill = False
     if op.get("t_ht", "Blind Hole") == "Blind Hole":
-        st.write(f"DEBUG OP contents: {op}")
+        
         t_ddep = op.get("t_ddep", 30.0)
         t_tdep = op.get("t_tdep", 25.0)
         
         clearance = t_ddep - t_tdep
-        st.write(f"DEBUG: clearance={clearance}, pitch={pitch}, use_threadmill will be set next")
         if clearance < (1 * pitch):
             st.warning(
                 f"⚠️ Drill depth ({t_ddep}mm) must be at least tap depth + 1 pitch ({t_tdep + pitch}mm). "
