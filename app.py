@@ -836,29 +836,25 @@ def calculate_boring_operation(
     step_details = []
 
     tol_band = tol_input * 2
+    tol_band = tol_input * 2
 
-    fine_boring_required = (
-        tol_band < 0.2 or
-        ra_input <= 1.6
-    )
-
-    step_details.append(
-        f"Fine Boring Required = {fine_boring_required}"
-    )
-    # Check if drill only is sufficient
+    # ==========================================
+    # STRATEGY DECISION
+    # ==========================================
     drill_only = (
-        tol_band >= 0.4 and      # tolerance ±0.2 or above
-        ra_input > 3.2            # surface finish above Ra 3.2
+        tol_band >= 0.4 and    # tolerance ±0.2 or above
+        ra_input > 3.2          # surface finish above Ra 3.2
     )
     
     if drill_only:
         fine_boring_required = False
         finish_stock = 0.0
-        rough_target_dia = f_dia  # drill directly to size
+        rough_target_dia = f_dia
+    
     else:
         fine_boring_required = (
-            tol_band < 0.2 or
-            ra_input <= 1.6
+            tol_band < 0.2 or    # tighter than ±0.1
+            ra_input < 2.0        # Ra better than 2.0
         )
         if fine_boring_required:
             f_tool_check = get_fine_boring_params(f_dia, material)
@@ -867,22 +863,16 @@ def calculate_boring_operation(
         else:
             finish_stock = 0.0
             rough_target_dia = f_dia
-            
-    step_details.append(
-        f"Rough Target Dia = {rough_target_dia}"
-    )
-
+    
+    step_details.append(f"Strategy: {'Drill Only' if drill_only else ('Drill + Fine Bore' if fine_boring_required else 'Drill + Rough Bore')}")
+    step_details.append(f"Rough Target Dia = {rough_target_dia}")
+    
     # ==========================================
     # DEPTH VALIDATION
     # ==========================================
     if b_dep > 150:
-        st.error(
-            f"Depth {b_dep}mm exceeds validated boring limit of 150mm."
-        )
-        st.warning(
-            "Check tool weight, machine spindle capability, "
-            "fixture rigidity and process feasibility manually."
-        )
+        st.error(f"Depth {b_dep}mm exceeds validated boring limit of 150mm.")
+        st.warning("Check tool weight, machine spindle capability, fixture rigidity and process feasibility manually.")
         st.stop()
     
     # ==========================================
@@ -890,41 +880,28 @@ def calculate_boring_operation(
     # ==========================================
     ld_ratio = b_dep / f_dia
     if ld_ratio > 3:
-        st.error(
-            f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 3."
-        )
-        st.warning(
-            "Check boring bar rigidity, machine capability "
-             "and fixture stability."
-         )
+        st.error(f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 3.")
+        st.warning("Check boring bar rigidity, machine capability and fixture stability.")
         st.stop()
-
+    
     # ==========================================
     # SPECIAL PROCESS VALIDATION
     # ==========================================
     if ra_input < 0.8:
-        st.warning(
-            "Required surface finish is beyond standard fine boring capability. "
-            "Consider burnishing, honing or special finishing process."
-        )
-
-    if tol_band < 0.015:
-        st.warning(
-            "Required tolerance is beyond standard fine boring capability. "
-            "Consider honing, reaming or special precision process."
-        )
-
+        st.warning("Required surface finish is beyond standard fine boring capability. Consider burnishing, honing or special finishing process.")
+    
+    if tol_band < 0.016:
+        st.warning("Required tolerance is beyond standard fine boring capability. Consider honing, reaming or special precision process.")
+    
     # ==========================================
     # STRATEGY DISPLAY
     # ==========================================
-    if fine_boring_required:
-        st.warning(
-            "Fine boring activated due to tolerance/surface finish requirement."
-        )
+    if drill_only:
+        st.info("✅ Drill only — tolerance and surface finish allow direct drilling to size.")
+    elif fine_boring_required:
+        st.warning("Fine boring activated due to tolerance/surface finish requirement.")
     else:
-        st.info(
-            "Standard rough boring will finish directly to final size."
-        )
+        st.info("Standard rough boring will finish directly to final size.")
 
     if f_dia <= 5:
         drill_stock = 0.5
