@@ -149,13 +149,21 @@ def calculate_facemill_time(op):
             while True:
                 total_circ_dist += math.pi * current_path_dia
                 pass_count += 1
+                
                 inner_edge_pos = (current_path_dia / 2) - (tool_dia / 2)
                 if inner_edge_pos <= -2:
                     break
+                    
+                # 1. Check if we have hit the center BEFORE subtracting
+                if current_path_dia <= 0:
+                    break
+                    
                 current_path_dia -= (ae * 2)
                 if current_path_dia < 0:
                     current_path_dia = 0
-                if pass_count > 15:
+                    
+                # 2. Hard emergency breaker 
+                if pass_count > 50:
                     break
             cut_length = total_circ_dist + tool_dia
 
