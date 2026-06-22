@@ -985,25 +985,36 @@ def calculate_boring_operation(
                 
             total_time_sec += d_time
             
-            step_details.append(f"Drill Ø{safe_drill_dia}")
-            
             st.success(
                 f"Step 1: Drilling Ø{safe_drill_dia} | "
                 f"Power: {round(p_check,2)}kW | "
                 f"Time: {round(d_time, 2)}s"
             )
-            current_dia = safe_drill_dia  # 👈 Line 712: Must have exactly 12 spaces before it
-            
+            current_dia = safe_drill_dia  
+
+            # =====================================================================
+            # ⭐ CHOOSE TO SKIP BORING COMPLETELY IF DRILL FINISHES TARGET SIZING ⭐
+            # =====================================================================
+            if abs(current_dia - f_dia) < 0.01 and tol_input >= 0.2 and ra_input >= 3.2:
+                # Include the tool change overhead for the single drill tool used
+                total_time_sec += (tool_change_time * tool_count_bor)
+                
+                return {
+                    "time": total_time_sec,
+                    "tools": tool_count_bor,
+                    "steps": step_details
+                }
+            # =====================================================================
         else:
             st.error(f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity.")
             st.stop()            
-    else:  # 👈 This else matches your original "if e_mode == 'Solid':" block
-        current_dia = float(core_dia)  # 👈 Properly indented inside the else block
+            
+    else:  # This else matches your original "if e_mode == 'Solid':" block
+        current_dia = float(core_dia)
 
     # --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
     st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
     bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
-
     while current_dia < rough_target_dia:
         tool = get_boring_params(current_dia, material)
         if not tool:
