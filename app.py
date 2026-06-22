@@ -212,7 +212,20 @@ def calculate_tapping_time(op):
         
         clearance = t_ddep - t_tdep
         st.write(f"DEBUG: clearance={clearance}, pitch={pitch}, use_threadmill will be set next")
-        if clearance <= (2 * pitch):
+        if clearance < (1 * pitch):
+            st.warning(
+                f"⚠️ Drill depth ({t_ddep}mm) must be at least tap depth + 1 pitch ({t_tdep + pitch}mm). "
+                f"Please check drill depth."
+            )
+            return {
+                "time": 0.0,
+                "process": "Error — Check Drill Depth",
+                "tool_dia": 0,
+                "rpm": 0,
+                "feed": 0,
+                "cut_time": 0
+            }
+        elif clearance <= (2 * pitch):
             use_threadmill = True
 
     # 3. Calculate time based on strategy
