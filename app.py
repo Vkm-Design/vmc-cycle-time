@@ -236,7 +236,7 @@ def calculate_tapping_time(op):
                 "tool_dia": 0,
                 "rpm": 0,
                 "feed": 0,
-                "cut_time": 0
+                "cut_time": 0,
                 "drill_dia": 0,
                 "drill_rpm": 0,
                 "drill_feed": 0,
