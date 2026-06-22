@@ -995,23 +995,23 @@ def calculate_boring_operation(
             if not tool:
                 st.warning(f"No boring data found for Ø{current_dia}.")
                 break
-        tool_count_bor += 1
-
-        # Max stock increment from table
-        max_dia_increment = tool['ap']
-        d2 = round(min(
-            rough_target_dia,
-            current_dia + max_dia_increment
-        ), 3)
-
-        # Feed per revolution
-        f_rev_b = tool['feed_min'] / tool['rpm']
-        # Boring Power Formula
-        # --- MATERIAL REMOVAL RATE (cm3/min) ---
-        mrr_bor = (
-            ((math.pi * ((d2**2) - (current_dia**2))) / 4)
-            * (tool['feed_min'] / 1000)
-        )
+            tool_count_bor += 1
+    
+            # Max stock increment from table
+            max_dia_increment = tool['ap']
+            d2 = round(min(
+                rough_target_dia,
+                current_dia + max_dia_increment
+            ), 3)
+    
+            # Feed per revolution
+            f_rev_b = tool['feed_min'] / tool['rpm']
+            # Boring Power Formula
+            # --- MATERIAL REMOVAL RATE (cm3/min) ---
+            mrr_bor = (
+                ((math.pi * ((d2**2) - (current_dia**2))) / 4)
+                * (tool['feed_min'] / 1000)
+            )
 
         # --- POWER CALCULATION (kW) ---
         efficiency = 0.85
