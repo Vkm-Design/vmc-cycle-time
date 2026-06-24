@@ -873,11 +873,34 @@ def calculate_drilling_feature(
     material,
     hole_type
 ):
-    cut_time = 10.0   # temporary test
-    # your existing drilling calculation will come here
+
+    rpm_val, f_min_val, max_d_val = get_parameters(
+        dia,
+        material
+    )
+
+    rpm = rpm_val
+    f_min = f_min_val
+
+
+    actual_travel = (
+        depth + 3
+        if hole_type == "Blind Hole"
+        else depth + 6
+    )
+
+
+    cut_time = (
+        actual_travel / f_min
+    ) * 60 * count
+
+
     return {
+
         "time": cut_time,
+
         "tools": 1,
+
         "steps": [
             f"Drill Ø{dia}"
         ]
