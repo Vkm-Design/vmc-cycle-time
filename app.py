@@ -209,7 +209,7 @@ def calculate_tapping_time(op):
     if d_rpm and d_fmin:
         drill_travel = op["t_ddep"] + 3 + ((0.18 * drill_dia) if drill_dia <= 20 else 0)
         drill_cut_time = (drill_travel / d_fmin) * op["t_cnt"] * 60
-        drill_total_time = tool_change_time + drill_cut_time + (op["t_cnt"] - 1) * position_time
+        drill_total_time = drill_cut_time
     else:
         drill_cut_time = 0.0
         drill_total_time = 0.0
@@ -1198,8 +1198,10 @@ def calculate_boring_operation(
             d_time = ((d_travel / d_fmin) * 60) 
 
             # Add reposition time for each additional hole
-            if bor_cnt > 1:
-                d_time += (bor_cnt - 1) * position_time
+            d_time = (
+                (d_travel / d_fmin)
+                * 60
+            )
                 
             total_time_sec += d_time
             
@@ -1379,7 +1381,7 @@ if operation == "Drilling":
             
         if st.button("Calculate Drilling Total"):
             cut_time = (actual_travel / f_min) * 60 
-            total_op_time = tool_change_time + cut_time + (cnt - 1) * position_time
+            total_op_time = cut_time
     
             st.divider()
             col1, col2, col3 = st.columns(3)
