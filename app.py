@@ -1026,7 +1026,7 @@ def calculate_drilling_feature(
 
     cut_time = (
         travel / f_min
-    ) * 60 * count
+    ) * 60 
 
 
 
@@ -1305,15 +1305,7 @@ def calculate_boring_operation(
                 "Fine boring data not available for this diameter/material."
             )
 
-    # Add tool change and position time for each tool usage
-    # tool_change_time is applied per tool (including drill)
-    extra_tool_change = tool_change_time * tool_count_bor
-    # Position time: one per tool usage after the first (drill) plus additional holes for drilling
-    additional_drill_holes = max(bor_cnt - 1, 0)  # bor_cnt passed to function
-    # Position time for each boring tool (excluding first drill) per extra position
-    position_time_for_boring = position_time * max(tool_count_bor - 1, 0)
-    extra_position = position_time * additional_drill_holes + position_time_for_boring
-    total_time_sec += extra_tool_change + extra_position
+   
     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
@@ -2241,7 +2233,9 @@ for i, op in enumerate(st.session_state.operations):
 
     
 st.divider()
-if st.button("🚀 Calculate Combined Cycle Time"):   
+st.write(st.session_state.operations)
+if st.button("🚀 Calculate Combined Cycle Time"):  
+    total_combined_time = 0.0
     # 1. Clear previous results to prevent stacking duplicates
     st.session_state.combined_results = []
     
