@@ -836,7 +836,7 @@ def calculate_hole_feature(op, material):
     mode == "Solid"
     and tol >= 0.2
     and ra >= 3.2
-    ):
+    )
 
     drill_result = calculate_drilling_feature(
         dia,
