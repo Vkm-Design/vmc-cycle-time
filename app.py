@@ -819,6 +819,71 @@ if operation != "Tapping":
 else:
     ra_input, tol_input = 3.2, 0.1
 
+def calculate_hole_feature(op, material):
+
+    dia = op["dia"]
+    depth = op["depth"]
+    tol = op["tol"]
+    ra = op["ra"]
+    mode = op["start_mode"]
+    count = op["count"]
+
+    # --------------------------------
+    # CASE 1 : SOLID + LOOSE TOL + ROUGH FINISH
+    # DRILL ONLY
+    # --------------------------------
+
+    if (
+        mode == "Solid"
+        and tol >= 0.2
+        and ra >= 3.2
+    ):
+
+        drill_result = calculate_drilling_feature(
+            dia,
+            depth,
+            count,
+            material,
+            op["hole_type"]
+        )
+
+        return drill_result
+    # --------------------------------
+    # CASE 2 : ALL OTHER HOLES
+    # USE BORING LOGIC
+    # --------------------------------
+
+    else:
+
+        return calculate_boring_operation(
+            f_dia=dia,
+            b_dep=depth,
+            bor_ht=op["hole_type"],
+            e_mode=mode,
+            bor_cnt=count,
+            tol_input=tol,
+            ra_input=ra,
+            material=material,
+            core_dia=op.get("core_dia",0)
+        )
+def calculate_drilling_feature(
+    dia,
+    depth,
+    count,
+    material,
+    hole_type
+):
+    cut_time = 10.0   # temporary test
+    # your existing drilling calculation will come here
+    return {
+        "time": cut_time,
+        "tools": 1,
+        "steps": [
+            f"Drill Ø{dia}"
+        ]
+    }
+
+
 def calculate_boring_operation(
     f_dia,
     b_dep,
@@ -830,10 +895,10 @@ def calculate_boring_operation(
     material,
     core_dia=0.0
 ):
-
     tool_count_bor = 0
     total_time_sec = 0.0
     step_details = []
+
 
     tol_band = tol_input * 2
 
@@ -841,7 +906,6 @@ def calculate_boring_operation(
         tol_band < 0.2 or
         ra_input <= 1.6
     )
-
     step_details.append(
         f"Fine Boring Required = {fine_boring_required}"
     )
@@ -2031,36 +2095,24 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             op_tools = 0
             details = ""
 
-            # ---- HOLE LOGIC PROCESSING ----
+            # ---- HOLE LOGIC PROCESSING ----                  
             if op["type"] == "Hole":
-                # Extract variables stored in your dictionary
-                d = op["dia"]
-                depth = op["depth"]
-                ra = op["ra"]
-                count = op["count"]
-                mode = op["start_mode"]
+            
                 st.write("DEBUG HOLE OP:", op)
-
-                result = calculate_boring_operation(
-                    f_dia=d,
-                    b_dep=depth,
-                    bor_ht=op["hole_type"],
-                    e_mode=mode,
-                    bor_cnt=count,
-                    tol_input=op["tol"],
-                    ra_input=ra,
-                    material=material,
-                    core_dia=op.get("core_dia", 0.0)
+            
+                result = calculate_hole_feature(
+                    op,
+                    material
                 )
+            
                 st.write("DEBUG RESULT:", result)
+            
                 op_time = result["time"]
+            
                 tool_count_bor = result["tools"]
-                
-                # Tool change and position overhead are already accounted for in calculate_boring_operation.
-                # No additional time added here.
-
+            
                 details = " | ".join(result["steps"])
-                
+            
                 op["tool_count"] = tool_count_bor
                 
                 
