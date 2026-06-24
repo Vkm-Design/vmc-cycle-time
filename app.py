@@ -2296,14 +2296,37 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 )
             
             
+                # CUTTING TIME FOR ALL POSITIONS
+                cut_time_total = (
+                    op_time * op["count"]
+                )
+                
+                
+                # TOOL CHANGE FOR EACH TOOL
+                tool_change_total = (
+                    tools_used * tool_change_time
+                )
+                
+                
+                # POSITION MOVEMENT BETWEEN POSITIONS
+                position_total = (
+                    (op["count"] - 1)
+                    *
+                    position_time
+                    *
+                    tools_used
+                )
+                
+                
                 op_time = (
-                    op_time
+                    cut_time_total
                     +
                     tool_change_total
                     +
                     position_total
                 )
-
+                
+                
                 st.write("BEFORE ADDING TOTAL")
                 st.write("Result time =", result["time"])
                 st.write("Count =", op["count"])
