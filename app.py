@@ -2271,11 +2271,33 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             
                 op_time = result["time"]
             
-                tool_count_bor = result["tools"]
+                # ==============================
+                # TOOL CHANGE + POSITION TIME
+                # ==============================
             
-                details = " | ".join(result["steps"])
+                tools_used = result["tools"]
             
-                op["tool_count"] = tool_count_bor
+                tool_change_total = (
+                    tools_used * tool_change_time
+                )
+            
+            
+                position_total = (
+                    (op["count"] - 1)
+                    *
+                    position_time
+                    *
+                    tools_used
+                )
+            
+            
+                op_time = (
+                    op_time
+                    +
+                    tool_change_total
+                    +
+                    position_total
+                )
                 
                 
             # ---- FACE MILL LOGIC PROCESSING ----
