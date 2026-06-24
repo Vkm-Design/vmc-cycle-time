@@ -855,12 +855,12 @@ def calculate_hole_feature(op, material):
     
     
         if drilled_dia >= dia:
-    
+      
             return drill_result
-    
-    
-        else:
-    
+        
+        
+        elif drilled_dia > 0:
+        
             bore_result = calculate_boring_operation(
                 f_dia=dia,
                 b_dep=depth,
@@ -872,25 +872,29 @@ def calculate_hole_feature(op, material):
                 material=material,
                 core_dia=drilled_dia
             )
-    
-    
+        
+        
             return {
+        
                 "time":
                     drill_result["time"]
                     +
                     bore_result["time"],
-    
+        
+        
                 "tools":
                     drill_result["tools"]
                     +
                     bore_result["tools"],
-    
+        
+        
                 "steps":
                     drill_result["steps"]
                     +
                     bore_result["steps"]
+        
             }
-    
+            
     
     # --------------------------------
     # CASE 2 : ALL OTHER HOLES
