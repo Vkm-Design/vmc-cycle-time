@@ -833,18 +833,18 @@ def calculate_hole_feature(op, material):
     # DRILL ONLY
     # --------------------------------
     if (
-    mode == "Solid"
-    and tol >= 0.2
-    and ra >= 3.2
-    )
+        mode == "Solid"
+        and tol >= 0.2
+        and ra >= 3.2
+    ):
 
-    drill_result = calculate_drilling_feature(
-        dia,
-        depth,
-        count,
-        material,
-        op["hole_type"]
-    )
+        drill_result = calculate_drilling_feature(
+            dia,
+            depth,
+            count,
+            material,
+            op["hole_type"]
+        )
 
 
     # Check if drill reached final diameter
