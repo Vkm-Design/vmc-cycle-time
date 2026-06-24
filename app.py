@@ -874,36 +874,127 @@ def calculate_drilling_feature(
     hole_type
 ):
 
-    rpm_val, f_min_val, max_d_val = get_parameters(
-        dia,
-        material
+    drill_data = material_tables[material]["drill"]
+
+    sorted_drills = sorted(
+        drill_data,
+        key=lambda x: x["max_d"],
+        reverse=True
     )
 
-    rpm = rpm_val
-    f_min = f_min_val
+
+    safe_drill_dia = 0
 
 
-    actual_travel = (
+    for drill in sorted_drills:
+
+
+        actual_dia = min(
+            drill["max_d"] - 0.01,
+            dia
+        )
+
+        actual_dia = round(actual_dia,2)
+
+
+        if (
+            actual_dia < drill["min_d"]
+            or actual_dia >= drill["max_d"]
+        ):
+            continue
+
+
+        d_params = get_parameters(
+            actual_dia,
+            material
+        )
+
+
+        if (
+            d_params[0] is None
+            or d_params[1] is None
+        ):
+            continue
+
+
+        rpm = d_params[0]
+        f_min = d_params[1]
+
+
+        # power calculation
+        p_req = (
+            (
+            (f_min/rpm)
+            *
+            (math.pi*actual_dia*rpm/1000)
+            *
+            actual_dia
+            *
+            kc
+            )
+            /192000
+        )
+
+
+        torque_req = (
+            p_req * 9550
+        ) / rpm
+
+
+
+        if (
+            p_req <= usable_power
+            and torque_req <= usable_torque
+        ):
+
+            safe_drill_dia = actual_dia
+            break
+
+
+
+    if safe_drill_dia == 0:
+
+        return {
+
+            "time":0,
+
+            "tools":0,
+
+            "steps":[
+                "No suitable drill found"
+            ]
+        }
+
+
+
+    travel = (
         depth + 3
-        if hole_type == "Blind Hole"
+        if hole_type=="Blind Hole"
         else depth + 6
     )
 
 
     cut_time = (
-        actual_travel / f_min
+        travel / f_min
     ) * 60 * count
+
 
 
     return {
 
-        "time": cut_time,
 
-        "tools": 1,
+        "time":cut_time,
 
-        "steps": [
-            f"Drill Ø{dia}"
+
+        "tools":1,
+
+
+        "steps":[
+            f"Drill Ø{safe_drill_dia} | "
+            f"Power {round(p_req,2)}kW | "
+            f"Torque {round(torque_req,1)}Nm"
         ]
+
     }
 
 
