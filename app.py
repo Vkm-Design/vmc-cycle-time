@@ -1032,7 +1032,11 @@ def calculate_drilling_feature(
 
     return {
         "time":cut_time,
+        
         "tools":1,
+        
+        "drill_dia":safe_drill_dia,
+        
         "steps":[
             f"Drill Ø{safe_drill_dia} | "
             f"Power {round(p_req,2)}kW | "
