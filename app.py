@@ -910,6 +910,8 @@ def calculate_hole_feature(op, material):
             material=material,
             core_dia=op.get("core_dia",0)
         )
+
+
 def calculate_drilling_feature(
     dia,
     depth,
