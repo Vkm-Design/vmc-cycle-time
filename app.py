@@ -149,21 +149,13 @@ def calculate_facemill_time(op):
             while True:
                 total_circ_dist += math.pi * current_path_dia
                 pass_count += 1
-                
                 inner_edge_pos = (current_path_dia / 2) - (tool_dia / 2)
                 if inner_edge_pos <= -2:
                     break
-                    
-                # 1. Check if we have hit the center BEFORE subtracting
-                if current_path_dia <= 0:
-                    break
-                    
                 current_path_dia -= (ae * 2)
                 if current_path_dia < 0:
                     current_path_dia = 0
-                    
-                # 2. Hard emergency breaker 
-                if pass_count > 50:
+                if pass_count > 15:
                     break
             cut_length = total_circ_dist + tool_dia
 
@@ -985,36 +977,25 @@ def calculate_boring_operation(
                 
             total_time_sec += d_time
             
+            step_details.append(f"Drill Ø{safe_drill_dia}")
+            
             st.success(
                 f"Step 1: Drilling Ø{safe_drill_dia} | "
                 f"Power: {round(p_check,2)}kW | "
                 f"Time: {round(d_time, 2)}s"
             )
-            current_dia = safe_drill_dia  
-
-            # =====================================================================
-            # ⭐ CHOOSE TO SKIP BORING COMPLETELY IF DRILL FINISHES TARGET SIZING ⭐
-            # =====================================================================
-            if abs(current_dia - f_dia) < 0.01 and tol_input >= 0.2 and ra_input >= 3.2:
-                # Include the tool change overhead for the single drill tool used
-                total_time_sec += (tool_change_time * tool_count_bor)
-                
-                return {
-                    "time": total_time_sec,
-                    "tools": tool_count_bor,
-                    "steps": step_details
-                }
-            # =====================================================================
+            current_dia = safe_drill_dia  # 👈 Line 712: Must have exactly 12 spaces before it
+            
         else:
             st.error(f"❌ No suitable drill found for Ø{rough_target_dia:.1f} based on available machine capacity.")
             st.stop()            
-            
-    else:  # This else matches your original "if e_mode == 'Solid':" block
-        current_dia = float(core_dia)
+    else:  # 👈 This else matches your original "if e_mode == 'Solid':" block
+        current_dia = float(core_dia)  # 👈 Properly indented inside the else block
 
     # --- 4. STEP 2: ROUGH BORING (Stock-Aware Multi-Pass) ---
     st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
     bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
+
     while current_dia < rough_target_dia:
         tool = get_boring_params(current_dia, material)
         if not tool:
@@ -1227,50 +1208,28 @@ elif operation == "Boring / Hole Milling":
         )
 
     with col2:
-        # 1. Place your input widgets FIRST so the variables are created
+
         bor_ht = st.radio(
             "Hole Type",
             ["Blind Hole", "Through Hole"],
             horizontal=True,
-            key=f"bor_ht_{i}"
-        )
+            key="bor_ht"
+         )
 
         e_mode = st.radio(
             "Starting Condition",
             ["Solid", "Core Hole"],
             horizontal=True,
-            key=f"bor_mode_{i}"
+            key="bor_mode"
         )
-
-        # Only show core diameter input if "Core Hole" is picked
-        if e_mode == "Core Hole":
-            pre_bored_dia = st.number_input(
-                "Pre-Bored Core Diameter (mm)", 
-                value=0.0, 
-                step=1.0,
-                key=f"bor_core_dia_{i}"  # Unique dynamic key for core dia field
-            )
-        else:
-            pre_bored_dia = 0.0
 
         bor_cnt = st.number_input(
             "Number of Positions",
             value=1,
             step=1,
-            key=f"bor_cnt_{i}"  # Unique dynamic key for positions count
+            key="bor_cnt"
         )
-
-        # 2. Pack everything cleanly into your dynamic operation session state
-        st.session_state.operations[i].update({
-            "type": "Hole",
-            "dia": bor_dia,
-            "tolerance": bor_tol,
-            "ra": bor_ra,
-            "depth": bor_dep,
-            "mode": e_mode,
-            "core_dia": pre_bored_dia,
-            "count": bor_cnt
-        })
+    
     # ==========================================
     # DEPTH VALIDATION
     # ==========================================
@@ -2055,85 +2014,22 @@ for i, op in enumerate(st.session_state.operations):
         st.session_state.operations[i]["tool_count"] = 1
 
     
-st.divider() 
-if st.button("🚀 Calculate Combined Cycle Time"):
-        if not st.session_state.operations:
-            st.warning("No operations added yet! Please add operations first.")
-        else:
-            # Clear previous records before restarting calculations
-            st.session_state.combined_results = []
-            
-            # ONE SINGLE LOOP to process everything cleanly
-            for i, op in enumerate(st.session_state.operations):
-                op_time = 0.0
-                details = ""
-
-                # ==========================================
-                # 1. ROUTE TO FACE MILLING
-                # ==========================================
-                if op["type"] == "Face Mill":
-                    res = calculate_facemill_time(op)
-                    op_time = res["time"]
-                    details = f"Face Mill Ø{res['tool_dia']}mm | Passes: R:{res['rough_passes']} F:{res['finish_passes']}"
-
-                # ==========================================
-                # 2. ROUTE TO HOLE / BORING OPERATIONS
-                # ==========================================
-                elif op["type"] == "Hole":
-                    # Extract variables matching saved keys exactly
-                    d = op["dia"]
-                    depth = op["depth"]
-                    ra = op["ra"]
-                    count = op["count"]
-                    mode = op["mode"]        # 👈 Fixed key mismatch
-                    tolerance = op["tolerance"]  # 👈 Fixed key mismatch
-                    hole_type = op.get("bor_ht", "Through Hole") # 👈 Safe fallback default
-                    c_dia = op.get("core_dia", 0.0)
-
-                    # Debug statement
-                    st.write(f"⚙️ Processing Hole Op {i+1}:", op)
-
-                    # Run your complex hole logic calculation function
-                    result = calculate_boring_operation(
-                        f_dia=d,
-                        b_dep=depth,
-                        bor_ht=hole_type,
-                        e_mode=mode,
-                        bor_cnt=count,
-                        tol_input=tolerance,
-                        ra_input=ra,
-                        material=material,  # Ensure global material variable is accessible
-                        core_dia=c_dia
-                    )
-                    
-                    st.write(f"✅ Op {i+1} Result:", result)
-                    
-                    op_time = result["time"]
-                    details = " | ".join(result["steps"])
-                    st.session_state.operations[i]["tool_count"] = result["tools"]
-
-                # ==========================================
-                # 3. ROUTE TO TAPPING
-                # ==========================================
-                elif op["type"] == "Tap":
-                    res = calculate_tapping_time(op)
-                    op_time = res["time"]
-                    details = f"Tap {op.get('t_size')} x {op.get('t_pitch')} | Cut Time: {res['cut_time']}s"
-
-                # ==========================================
-                # 4. FALLBACK ROUTE
-                # ==========================================
-                else:
-                    details = f"Operation {op['type']} recognized."
-                    op_time = 0.0
-
-                # Append clean calculated row data back into report array
-                st.session_state.combined_results.append({
-                    "op_num": i + 1,
-                    "type": op["type"],
-                    "details": details,
-                    "cycle_time": op_time
-                })
+st.divider()
+if st.button("🚀 Calculate Combined Cycle Time"):   
+    # 1. Clear previous results to prevent stacking duplicates
+    st.session_state.combined_results = []
+    
+    # Check if there are actually operations added
+    if not st.session_state.operations:
+        st.warning("⚠️ Please add at least one operation first.")
+    else:
+        # 2. Loop through every stored operation and pass data to your functions
+        for i, op in enumerate(st.session_state.operations):
+           
+            op_time = 0.0
+            op_positions = 0.0
+            op_tools = 0
+            details = ""
 
             # ---- HOLE LOGIC PROCESSING ----
             if op["type"] == "Hole":
