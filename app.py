@@ -1195,7 +1195,7 @@ def calculate_boring_operation(
                 + (6 if bor_ht == "Through Hole" else 3)
                 + ((0.18 * safe_drill_dia) if safe_drill_dia <= 20 else 0)
             )
-            d_time = ((d_travel / d_fmin) * 60) * bor_cnt
+            d_time = ((d_travel / d_fmin) * 60) 
 
             # Add reposition time for each additional hole
             if bor_cnt > 1:
@@ -1256,7 +1256,7 @@ def calculate_boring_operation(
         machine_load = (p_bor / m_power) * 100
 
         # --- TIME ---
-        p_time = (bor_travel / tool['feed_min']) * 60 * bor_cnt
+        p_time = (bor_travel / tool['feed_min']) * 60 
 
         total_time_sec += p_time
         step_details.append(
@@ -1287,7 +1287,7 @@ def calculate_boring_operation(
             )
             finish_time = (
                 (bor_travel / finish_feed)
-                * 60 * bor_cnt
+                * 60 
             )
 
             total_time_sec += finish_time
@@ -1386,7 +1386,7 @@ if operation == "Drilling":
                 )
             
         if st.button("Calculate Drilling Total"):
-            cut_time = (actual_travel / f_min) * 60 * cnt
+            cut_time = (actual_travel / f_min) * 60 
             total_op_time = tool_change_time + cut_time + (cnt - 1) * position_time
     
             st.divider()
