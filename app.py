@@ -832,22 +832,66 @@ def calculate_hole_feature(op, material):
     # CASE 1 : SOLID + LOOSE TOL + ROUGH FINISH
     # DRILL ONLY
     # --------------------------------
-
     if (
-        mode == "Solid"
-        and tol >= 0.2
-        and ra >= 3.2
-    ):
+    mode == "Solid"
+    and tol >= 0.2
+    and ra >= 3.2
+):
 
-        drill_result = calculate_drilling_feature(
-            dia,
-            depth,
-            count,
-            material,
-            op["hole_type"]
-        )
+    drill_result = calculate_drilling_feature(
+        dia,
+        depth,
+        count,
+        material,
+        op["hole_type"]
+    )
+
+
+    # Check if drill reached final diameter
+
+    drilled_dia = drill_result.get("drill_dia",0)
+
+
+    if drilled_dia >= dia:
 
         return drill_result
+
+
+    else:
+
+        # Drill + remaining boring
+
+        bore_result = calculate_boring_operation(
+            f_dia=dia,
+            b_dep=depth,
+            bor_ht=op["hole_type"],
+            e_mode="Core Hole",
+            bor_cnt=count,
+            tol_input=tol,
+            ra_input=ra,
+            material=material,
+            core_dia=drilled_dia
+        )
+
+
+        return {
+            "time":
+                drill_result["time"]
+                +
+                bore_result["time"],
+
+
+            "tools":
+                drill_result["tools"]
+                +
+                bore_result["tools"],
+
+
+            "steps":
+                drill_result["steps"]
+                +
+                bore_result["steps"]
+        }
     # --------------------------------
     # CASE 2 : ALL OTHER HOLES
     # USE BORING LOGIC
@@ -981,14 +1025,8 @@ def calculate_drilling_feature(
 
 
     return {
-
-
         "time":cut_time,
-
-
         "tools":1,
-
-
         "steps":[
             f"Drill Ø{safe_drill_dia} | "
             f"Power {round(p_req,2)}kW | "
