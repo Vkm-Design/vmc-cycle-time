@@ -2362,6 +2362,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 # Call your existing tapping calculations
                 tap_result = calculate_tapping_time(op)
                 op_time = tap_result["time"]
+                tools_used = 2     # Drill + Tap
                 details = (
                     f"Drill Ø{tap_result['drill_dia']}mm | "
                     f"Drill RPM: {tap_result['drill_rpm']} | "
