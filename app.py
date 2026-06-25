@@ -2249,7 +2249,7 @@ for i, op in enumerate(st.session_state.operations):
 
     
 st.divider()
-st.write(st.session_state.operations)
+
 if st.button("🚀 Calculate Combined Cycle Time"):  
     total_combined_time = 0.0
     # 1. Clear previous results to prevent stacking duplicates
