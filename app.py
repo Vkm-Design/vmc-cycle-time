@@ -2270,15 +2270,13 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ---- HOLE LOGIC PROCESSING ----                  
             if op["type"] == "Hole":
             
-                st.write("DEBUG HOLE OP:", op)
-            
+                            
                 result = calculate_hole_feature(
                     op,
                     material
                 )
             
-                st.write("DEBUG RESULT:", result)
-            
+                            
                 op_time = result["time"]
                 tool_count_bor = result["tools"]
 
