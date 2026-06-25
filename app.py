@@ -1083,15 +1083,17 @@ def calculate_boring_operation(
         # Remaining stock available from current hole
         available_stock = f_dia - current_dia
     
-    
+
+        # If stock is only finish allowance
         if available_stock <= finish_stock:
-    
-            # No rough boring required
+        
+            # direct single tool finish
             rough_target_dia = current_dia
-    
+        
+        
         else:
-    
-            # Rough boring should leave stock for finish
+        
+            # leave finish stock for fine boring
             rough_target_dia = f_dia - finish_stock
     
     
@@ -1122,6 +1124,10 @@ def calculate_boring_operation(
     step_details.append(
         f"Rough Target Dia = {rough_target_dia}"
     )
+    if fine_boring_required and rough_target_dia == current_dia:
+        step_details.append(
+            "Direct Fine Boring (No Rough Pass)"
+        )
 
     # ==========================================
     # DEPTH VALIDATION
