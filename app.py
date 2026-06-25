@@ -1072,17 +1072,32 @@ def calculate_boring_operation(
         f"Fine Boring Required = {fine_boring_required}"
     )
     if fine_boring_required:
+    if fine_boring_required:
 
         f_tool_check = get_fine_boring_params(f_dia, material)
     
         finish_stock = f_tool_check["ap"] if f_tool_check else 0.5
     
-        rough_target_dia = f_dia - finish_stock
+        # Remaining stock available from current hole
+        available_stock = f_dia - current_dia
+    
+    
+        if available_stock <= finish_stock:
+    
+            # No rough boring required
+            rough_target_dia = current_dia
+    
+        else:
+    
+            # Rough boring should leave stock for finish
+            rough_target_dia = f_dia - finish_stock
+    
     
     else:
     
         finish_stock = 0.0
         rough_target_dia = f_dia
+        
 
 
     # ==========================================
@@ -1090,9 +1105,16 @@ def calculate_boring_operation(
     # ==========================================
     
     if (f_dia - rough_target_dia) <= 0.5:
+
+        if fine_boring_required:
     
-        finish_stock = 0.0
-        rough_target_dia = f_dia
+            # direct fine boring only
+            rough_target_dia = current_dia
+    
+        else:
+    
+            # direct rough boring only
+            rough_target_dia = f_dia
        
     
     step_details.append(
@@ -1161,6 +1183,8 @@ def calculate_boring_operation(
         drill_stock = 1.0
 
     current_dia = 0.0
+    if e_mode == "Core Hole":
+        current_dia = core_dia
 
     # --- 3. STEP 1: DRILLING (Only if Solid) ---
     if e_mode == "Solid":
