@@ -2359,10 +2359,39 @@ if st.button("🚀 Calculate Combined Cycle Time"):
 
             # ---- TAP LOGIC PROCESSING ----
             elif op["type"] == "Tap":
-                # Call your existing tapping calculations
+            
                 tap_result = calculate_tapping_time(op)
+            
+                # Drill + Tap cutting time already included
                 op_time = tap_result["time"]
-                tools_used = 2     # Drill + Tap
+            
+                # Two tools used:
+                # 1. Drill
+                # 2. Tap
+            
+                tap_tools_used = 2
+            
+                tap_tool_change = (
+                    tap_tools_used * tool_change_time
+                )
+            
+                tap_position_time = (
+                    (op["t_cnt"] - 1)
+                    *
+                    position_time
+                    *
+                    tap_tools_used
+                )
+            
+                op_time = (
+                    op_time
+                    +
+                    tap_tool_change
+                    +
+                    tap_position_time
+                )
+            
+            
                 details = (
                     f"Drill Ø{tap_result['drill_dia']}mm | "
                     f"Drill RPM: {tap_result['drill_rpm']} | "
