@@ -1093,7 +1093,7 @@ def calculate_boring_operation(
     
         finish_stock = 0.0
         rough_target_dia = f_dia
-        fine_boring_required = False
+       
     
     step_details.append(
         f"Rough Target Dia = {rough_target_dia}"
