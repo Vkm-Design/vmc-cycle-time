@@ -1097,7 +1097,10 @@ def calculate_boring_operation(
         finish_stock = 0.0
         rough_target_dia = f_dia
         
+    current_dia = 0.0
 
+    if e_mode == "Core Hole":
+        current_dia = core_dia
 
     # ==========================================
     # STOCK CHECK - SINGLE TOOL FINISH
@@ -1180,10 +1183,6 @@ def calculate_boring_operation(
         drill_stock = 0.7
     else:
         drill_stock = 1.0
-
-    current_dia = 0.0
-    if e_mode == "Core Hole":
-        current_dia = core_dia
 
     # --- 3. STEP 1: DRILLING (Only if Solid) ---
     if e_mode == "Solid":
