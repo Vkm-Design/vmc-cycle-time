@@ -1072,8 +1072,7 @@ def calculate_boring_operation(
         f"Fine Boring Required = {fine_boring_required}"
     )
     if fine_boring_required:
-    if fine_boring_required:
-
+   
         f_tool_check = get_fine_boring_params(f_dia, material)
     
         finish_stock = f_tool_check["ap"] if f_tool_check else 0.5
