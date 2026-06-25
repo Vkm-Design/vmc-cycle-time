@@ -1060,7 +1060,10 @@ def calculate_boring_operation(
     tool_count_bor = 0
     total_time_sec = 0.0
     step_details = []
+    current_dia = 0.0
 
+    if e_mode == "Core Hole":
+        current_dia = core_dia
 
     tol_band = tol_input * 2
 
@@ -1097,10 +1100,7 @@ def calculate_boring_operation(
         finish_stock = 0.0
         rough_target_dia = f_dia
         
-    current_dia = 0.0
-
-    if e_mode == "Core Hole":
-        current_dia = core_dia
+    
 
     # ==========================================
     # STOCK CHECK - SINGLE TOOL FINISH
