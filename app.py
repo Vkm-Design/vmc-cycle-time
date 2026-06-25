@@ -287,7 +287,7 @@ def calculate_tapping_time(op):
             feed_tm = feed_rev * rpm_tm
             tm_cut_length = ((diameter - tool_dia) * math.pi * 3) + op["t_tdep"] + 4
             cut_time = (tm_cut_length / feed_tm) * op["t_cnt"] * 60
-            total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
+            total_time = cut_time 
             return {
                 "time": total_time + drill_total_time,
                 "process": "Threadmill",
@@ -311,7 +311,7 @@ def calculate_tapping_time(op):
     feed_min = pitch * rpm
     cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
     cut_time = (cut_length / feed_min) * op["t_cnt"] * 60
-    total_time = tool_change_time + cut_time + (op["t_cnt"] - 1) * position_time
+    total_time = cut_time 
     return {
         "time": total_time + drill_total_time,
         "process": "Tapping",
