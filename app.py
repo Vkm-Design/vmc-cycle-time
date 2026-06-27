@@ -871,28 +871,40 @@ def calculate_hole_feature(op, material):
                 ra_input=ra,
                 material=material,
                 core_dia=drilled_dia
-            )
-        
+            )   
         
             return {
-        
+
                 "time":
                     drill_result["time"]
                     +
                     bore_result["time"],
-        
-        
+            
+            
                 "tools":
                     drill_result["tools"]
                     +
                     bore_result["tools"],
-        
-        
+            
+            
                 "steps":
                     drill_result["steps"]
                     +
-                    bore_result["steps"]
-        
+                    bore_result["steps"],
+            
+            
+                "tool_summary":
+                    [
+                        {
+                            "tool": drill_result["steps"][0],
+                            "time": drill_result["time"]
+                        },
+                        {
+                            "tool": bore_result["steps"][-1],
+                            "time": bore_result["time"]
+                        }
+                    ]
+            
             }
             
     
@@ -2301,19 +2313,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 tool_count_bor = result["tools"]
 
                 details = " | ".join(result["steps"])
-                op["tool_count"] = tool_count_bor
-                
-                # ==============================
-                # TOOL SUMMARY - HOLE
-                # ==============================
-                
-                for step in result["steps"]:
-                
-                    tool_name = step
-                
-                    tool_no = get_tool_no(tool_name)
-                 
-               
+                op["tool_count"] = tool_count_bor   
             
                 # ==============================
                 # TOOL CHANGE + POSITION TIME
@@ -2465,18 +2465,21 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             
             if op["type"] == "Hole":
 
-                for step in result["steps"]:
+                for tool in result["tool_summary"]:
             
-                    if "Drill" in step or "Bore" in step:
+                    tool_no = st.session_state.summary_tool_counter
+                    st.session_state.summary_tool_counter += 1
             
-                        
-                        tool_no = st.session_state.summary_tool_counter
-                        st.session_state.summary_tool_counter += 1
+                    st.session_state.summary_data.append({
+                        "Tool No": tool_no,
+                        "Tool Details": tool["tool"],
+                        "Cut Time (sec)": round(tool["time"],2)
+                    })
             
                         st.session_state.summary_data.append({
                             "Tool No": tool_no,
                             "Tool Details": step,
-                            "Cycle Time (sec)": ""
+                            "Cut Time (sec)": round(tool["time"],2)
                         })
 
         # ==========================================
