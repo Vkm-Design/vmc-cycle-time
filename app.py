@@ -2300,8 +2300,26 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 tool_count_bor = result["tools"]
 
                 details = " | ".join(result["steps"])
-                
                 op["tool_count"] = tool_count_bor
+                
+                # ==============================
+                # TOOL SUMMARY - HOLE
+                # ==============================
+                
+                for step in result["steps"]:
+                
+                    tool_name = step
+                
+                    tool_no = get_tool_no(tool_name)
+                
+                    st.session_state.summary_data.append({
+                        "Tool No": tool_no,
+                        "Operation": "Hole",
+                        "Tool Details": tool_name,
+                        "Cut Time (sec)": ""
+                    })
+                
+                
             
                 # ==============================
                 # TOOL CHANGE + POSITION TIME
