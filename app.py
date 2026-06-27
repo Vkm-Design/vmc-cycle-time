@@ -2466,7 +2466,12 @@ if st.button("🚀 Calculate Combined Cycle Time"):
         # Display as a neat summary table
         import pandas as pd
         report_df = pd.DataFrame(st.session_state.combined_results)
-        report_df.columns = ["Op #", "Operation Type", "Details", "Cycle Time (sec)"]
+        report_df = report_df.rename(columns={
+            "op_num": "Op #",
+            "type": "Operation Type",
+            "details": "Details",
+            "cycle_time": "Cycle Time (sec)"
+        })
         st.table(report_df)
         
         # Grand Total Message
