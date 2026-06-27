@@ -2311,15 +2311,8 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     tool_name = step
                 
                     tool_no = get_tool_no(tool_name)
-                
-                    st.session_state.summary_data.append({
-                        "Tool No": tool_no,
-                        "Operation": "Hole",
-                        "Tool Details": tool_name,
-                        "Cut Time (sec)": ""
-                    })
-                
-                
+                 
+               
             
                 # ==============================
                 # TOOL CHANGE + POSITION TIME
@@ -2452,13 +2445,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             
             if op["type"] == "Hole":
             
-                for step in result["steps"]:
-                    st.session_state.summary_data.append({
-                        "Tool No": "",
-                        "Operation": "Hole",
-                        "Tool Details": step,
-                        "Cut Time (sec)": ""
-                    })
+                for step in result["steps"]:   
 
             # 3. Append calculated data to your combined results list
 
@@ -2482,15 +2469,19 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # SUMMARY SHEET DATA COLLECTION
             # ==============================
             
-            tool_name = details.split("|")[0].strip()
+            if op["type"] == "Hole":
+
+                for step in result["steps"]:
             
-            tool_no = get_tool_no(tool_name)
+                    if "Drill" in step or "Bore" in step:
             
-            st.session_state.summary_data.append({
-                "Tool No": tool_no,
-                "Tool Details": tool_name,
-                "Cycle Time (sec)": round(op_time,2)
-            })
+                        tool_no = get_tool_no(step)
+            
+                        st.session_state.summary_data.append({
+                            "Tool No": tool_no,
+                            "Tool Details": step,
+                            "Cycle Time (sec)": ""
+                        })
 
         # ==========================================
         # DISPLAY RESULTS TABLE AND TOTAL TIME
