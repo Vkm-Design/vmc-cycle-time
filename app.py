@@ -1238,7 +1238,7 @@ def calculate_boring_operation(
                 "feed_rev": round(d_fmin / d_rpm, 3),
                 "table_feed": round(d_fmin),
                 "safety_length": 6 if bor_ht == "Through Hole" else 3,
-                "cut_length": round(d_travel, 1),
+                "cut_length": round(b_dep, 1),
                 "cut_time": round(d_time, 2)
             })                          
             current_dia = safe_drill_dia  # 👈 Line 712: Must have exactly 12 spaces before it
@@ -1309,7 +1309,7 @@ def calculate_boring_operation(
             "feed_rev": round(tool['feed_min'] / tool['rpm'], 3),
             "table_feed": round(tool['feed_min']),
             "safety_length": 6 if bor_ht == "Through Hole" else 3,
-            "cut_length": round(bor_travel, 1),
+            "cut_length": round(b_dep, 1),
             "cut_time": round(p_time, 2)
         })
         current_dia = round(d2, 3)
@@ -1333,13 +1333,18 @@ def calculate_boring_operation(
                 * 60
             )
             total_time_sec += finish_time
-            tool_rows.append({                          # ← ADD FROM HERE
+            tool_rows.append({
                 "operation": f"Fine Bore Ø{current_dia}→Ø{f_dia}",
                 "tool_detail": f"Fine Boring Bar Ø{f_dia}mm",
+                "machining_stock": round(finish_stock, 3),
+                "vc": round((math.pi * f_dia * finish_rpm) / 1000, 1),
                 "rpm": round(finish_rpm),
-                "feed": round(finish_feed, 1),
+                "feed_rev": round(finish_feed_rev, 3),
+                "table_feed": round(finish_feed, 1),
+                "safety_length": 6 if bor_ht == "Through Hole" else 3,
+                "cut_length": round(b_dep, 1),
                 "cut_time": round(finish_time, 2)
-            }) 
+            })
             step_details.append(
                 f"Fine Bore Ø{current_dia} ➔ Ø{f_dia}"
             )
