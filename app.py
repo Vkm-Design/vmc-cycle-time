@@ -2489,52 +2489,66 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             
 
             elif op["type"] == "Tap":
-
+                # Drill row
+                drill_dia_tap = tap_result['drill_dia']
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
                     "Operation": "Tap Drill",
-                    "Tool Details": f"Drill Ø{tap_result['drill_dia']}mm",
-                    "Parameters": (
-                        f"RPM: {tap_result['drill_rpm']} | "
-                        f"Feed: {tap_result['drill_feed']} mm/min | "
-                        f"Cut Time: {tap_result['drill_cut_time']} sec"
-                    ),
-                    "Cut Time (sec)": round(tap_result['drill_cut_time'],2)
+                    "Tool Details": f"Drill Ø{drill_dia_tap}mm",
+                    "Machining Stock": "Solid",
+                    "Vc (m/min)": round((math.pi * drill_dia_tap * tap_result['drill_rpm']) / 1000, 1),
+                    "RPM": tap_result['drill_rpm'],
+                    "Feed/rev (mm)": round(tap_result['drill_feed'] / tap_result['drill_rpm'], 3) if tap_result['drill_rpm'] > 0 else "-",
+                    "Table Feed (mm/min)": tap_result['drill_feed'],
+                    "Safety Length (mm)": 6 if op.get("t_ht") == "Through Hole" else 3,
+                    "Cut Length (mm)": round(op.get("t_ddep", 0), 1),
+                    "Cut Time (sec)": round(tap_result['drill_cut_time'], 2)
                 })
-            
-            
+                # Tap/Threadmill row
+                tap_dia = tap_result['tool_dia']
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
-                    "Operation": "Tapping",
-                    "Tool Details": f"Tap Ø{tap_result['tool_dia']}mm",
-                    "Parameters": (
-                        f"RPM: {tap_result['rpm']} | "
-                        f"Feed: {tap_result['feed']} mm/min | "
-                        f"Cut Time: {tap_result['cut_time']} sec"
-                    ),
-                    "Cut Time (sec)": round(tap_result['cut_time'],2)
+                    "Operation": tap_result['process'],
+                    "Tool Details": f"{tap_result['process']} Ø{tap_dia}mm",
+                    "Machining Stock": round(op.get("t_pitch", 0), 2),
+                    "Vc (m/min)": round((math.pi * tap_dia * tap_result['rpm']) / 1000, 1),
+                    "RPM": tap_result['rpm'],
+                    "Feed/rev (mm)": round(op.get("t_pitch", 0), 2),
+                    "Table Feed (mm/min)": tap_result['feed'],
+                    "Safety Length (mm)": round((3 * 2 * op.get("t_pitch", 0)) + 4, 1),
+                    "Cut Length (mm)": round(op.get("t_tdep", 0), 1),
+                    "Cut Time (sec)": round(tap_result['cut_time'], 2)
                 })
-              
-            
+        
 
             elif op["type"] == "Face Mill":
-
+                # Rough pass row
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
                     "Operation": "Face Mill Rough",
-                    "Tool Details": details.split("|")[0],
-                    "Parameters": details,
+                    "Tool Details": f"Ø{fm_result['tool_dia']}mm cutter",
+                    "Machining Stock": round(op.get("stock", 0) - (0.5 if fm_result["finish_passes"] > 0 else 0), 2),
+                    "Vc (m/min)": round((math.pi * fm_result['tool_dia'] * fm_result['rpm']) / 1000, 1),
+                    "RPM": fm_result['rpm'],
+                    "Feed/rev (mm)": round(fm_result['feed'] / fm_result['rpm'], 3) if fm_result['rpm'] > 0 else "-",
+                    "Table Feed (mm/min)": fm_result['feed'],
+                    "Safety Length (mm)": fm_result['tool_dia'],
+                    "Cut Length (mm)": "-",
                     "Cut Time (sec)": fm_result["time_rough_sec"]
                 })
-            
-            
+                # Finish pass row
                 if fm_result["finish_passes"] > 0:
-            
                     st.session_state.summary_data.append({
                         "Tool No": len(st.session_state.summary_data) + 1,
                         "Operation": "Face Mill Finish",
-                        "Tool Details": details.split("|")[0],
-                        "Parameters": details,
+                        "Tool Details": f"Ø{fm_result['tool_dia']}mm cutter",
+                        "Machining Stock": 0.5,
+                        "Vc (m/min)": round((math.pi * fm_result['tool_dia'] * fm_result['rpm']) / 1000, 1),
+                        "RPM": fm_result['rpm'],
+                        "Feed/rev (mm)": round(fm_result['feed'] / fm_result['rpm'], 3) if fm_result['rpm'] > 0 else "-",
+                        "Table Feed (mm/min)": fm_result['feed'],
+                        "Safety Length (mm)": fm_result['tool_dia'],
+                        "Cut Length (mm)": "-",
                         "Cut Time (sec)": fm_result["time_finish_sec"]
                     })
            
