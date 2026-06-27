@@ -1318,12 +1318,12 @@ def calculate_boring_operation(
             )
 
    
-     return {
-        "time": total_time_sec,
-        "tools": tool_count_bor,
-        "steps": step_details,
-        "tool_times": tool_times
-    } 
+         return {
+            "time": total_time_sec,
+            "tools": tool_count_bor,
+            "steps": step_details,
+            "tool_times": tool_times
+        } 
     
 # ==========================================
 # 4. OPERATION: DRILLING
