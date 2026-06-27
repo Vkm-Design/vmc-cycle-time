@@ -855,20 +855,17 @@ def calculate_hole_feature(op, material):
             0
         )
     
-    
+      
         if drilled_dia >= dia:
       
-             return {
-            "time": drill_result["time"],
-            "tools": drill_result["tools"],
-            "steps": drill_result["steps"],
-            "tool_summary": [
-                {
-                    "tool": drill_result["steps"][-1],
-                    "time": drill_result["time"]
-                }
-            ]
-        }
+            return {
+                "time": drill_result["time"],
+                "tools": drill_result["tools"],
+                "steps": drill_result["steps"],
+                "tool_times": [
+                    drill_result["time"]
+                ]
+            }
         
         
         elif drilled_dia > 0:
@@ -999,18 +996,19 @@ def calculate_drilling_feature(
             break
 
 
-
     if safe_drill_dia == 0:
 
         return {
-
+    
             "time":0,
-
+    
             "tools":0,
-
+    
             "steps":[
                 "No suitable drill found"
-            ]
+            ],
+    
+            "tool_times":[]
         }
 
 
@@ -1320,11 +1318,12 @@ def calculate_boring_operation(
             )
 
    
-    return {
+     return {
         "time": total_time_sec,
         "tools": tool_count_bor,
-        "steps": step_details
-    }
+        "steps": step_details,
+        "tool_times": tool_times
+    } 
     
 # ==========================================
 # 4. OPERATION: DRILLING
