@@ -1283,12 +1283,12 @@ def calculate_boring_operation(
         )
         current_dia = round(d2, 3)
 
+  
     # ==========================================
     # STEP 3 : FINAL BORING PASS
     # ==========================================
-    if fine_boring_required:
+    if not drill_only and fine_boring_required:
         f_tool = get_fine_boring_params(f_dia, material)
-
         if f_tool:
             tool_count_bor += 1
             finish_feed_rev = f_tool["feed_rev"]
@@ -1299,9 +1299,8 @@ def calculate_boring_operation(
             )
             finish_time = (
                 (bor_travel / finish_feed)
-                * 60 
+                * 60
             )
-
             total_time_sec += finish_time
             step_details.append(
                 f"Fine Bore Ø{current_dia} ➔ Ø{f_dia}"
@@ -1309,7 +1308,7 @@ def calculate_boring_operation(
             st.success(
                 f"Step 3: Fine Boring Ø{current_dia} ➔ Ø{f_dia} | "
                 f"RPM: {round(finish_rpm)} | "
-            f"Feed: {round(finish_feed,1)} mm/min | "
+                f"Feed: {round(finish_feed,1)} mm/min | "    # ← fixed
                 f"Time: {round(finish_time,1)}s"
             )
         else:
@@ -1317,13 +1316,12 @@ def calculate_boring_operation(
                 "Fine boring data not available for this diameter/material."
             )
 
-   
-         return {
-            "time": total_time_sec,
-            "tools": tool_count_bor,
-            "steps": step_details,
-            "tool_times": tool_times
-        } 
+    return {    # ← fixed, 4 spaces
+        "time": total_time_sec,
+        "tools": tool_count_bor,
+        "steps": step_details,
+        "tool_times": tool_times
+    }
     
 # ==========================================
 # 4. OPERATION: DRILLING
