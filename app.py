@@ -2439,25 +2439,42 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                             "Parameters": step,
                         })
             
-            
+               
             elif op["type"] == "Tap":
+
+                st.session_state.summary_data.append({
+                    "Tool No": len(st.session_state.summary_data) + 1,
+                    "Operation": "Tap Drill",
+                    "Tool Details": f"Drill Ø{tap_result['drill_dia']}mm",
+                    "Parameters": details
+                })
+            
             
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
-                    "Operation": "Tap",
-                    "Tool Details": details,
-                    "Parameters": details,
+                    "Operation": "Tapping",
+                    "Tool Details": f"Tap Ø{tap_result['tool_dia']}mm",
+                    "Parameters": details
                 })
-            
+              
             
             elif op["type"] == "Face Mill":
-            
+
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
-                    "Operation": "Face Mill",
-                    "Tool Details": details,
-                    "Parameters": details,
+                    "Operation": "Face Mill Rough",
+                    "Tool Details": details.split("|")[0],
+                    "Parameters": details
                 })
+            
+                if fm_result["finish_passes"] > 0:
+            
+                    st.session_state.summary_data.append({
+                        "Tool No": len(st.session_state.summary_data) + 1,
+                        "Operation": "Face Mill Finish",
+                        "Tool Details": details.split("|")[0],
+                        "Parameters": details
+                    })
            
             # 3. Append calculated data to your combined results list
 
