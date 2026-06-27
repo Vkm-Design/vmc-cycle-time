@@ -2439,14 +2439,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 "details": details,
                 "cycle_time": op_time
             })
-            # ==============================
-            # SUMMARY COLLECTION
-            # ==============================
-            
-            if op["type"] == "Hole":
-            
-                for step in result["steps"]:   
-
+           
             # 3. Append calculated data to your combined results list
 
             # ==============================
