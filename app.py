@@ -2436,18 +2436,19 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # SIMPLE SUMMARY COLLECTION
             # ==============================
 
-           
             if op["type"] == "Hole":
 
-                for tool in result["tool_summary"]:
+                for step in result["steps"]:
             
-                    st.session_state.summary_data.append({
-                        "Tool No": len(st.session_state.summary_data) + 1,
-                        "Operation": "Hole",
-                        "Tool Details": tool["tool"],
-                        "Parameters": tool["tool"],
-                        "Cut Time (sec)": round(tool["time"],2)
-                    })
+                    if "Drill" in step or "Bore" in step:
+            
+                        st.session_state.summary_data.append({
+                            "Tool No": len(st.session_state.summary_data) + 1,
+                            "Operation": "Hole",
+                            "Tool Details": step,
+                            "Parameters": step,
+                            "Cut Time (sec)": ""
+                        })
             
                
             elif op["type"] == "Tap":
