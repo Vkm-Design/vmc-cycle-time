@@ -2473,20 +2473,19 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             if op["type"] == "Hole":
                 for row in result["tool_rows"]:
                     st.session_state.summary_data.append({
-                        "Tool No": len(st.session_state.summary_data) + 1,
-                        "Operation": row["operation"],
-                        "Tool Details": row["tool_detail"],
-                        "Parameters": (
-                             f"Vc: {row.get('vc', '-')} m/min | "
-                             f"RPM: {row['rpm']} | "
-                             f"Feed/rev: {row.get('feed_rev', '-')} mm/rev | "
-                             f"Table Feed: {row.get('table_feed', row.get('feed', '-'))} mm/min | "
-                             f"Safety: {row.get('safety_length', '-')}mm | "
-                             f"Cut Length: {row.get('cut_length', '-')}mm | "
-                             f"Cut Time: {row['cut_time']} sec"
-                        ),                    # ← ADD comma here
-                        "Cut Time (sec)": row["cut_time"]
-                    })                        # ← ADD closing brace here
+                        st.session_state.summary_data.append({
+                            "Tool No": len(st.session_state.summary_data) + 1,
+                            "Operation": row["operation"],
+                            "Tool Details": row["tool_detail"],
+                            "Machining Stock": row.get("machining_stock", "-"),
+                            "Vc (m/min)": row.get("vc", "-"),
+                            "RPM": row["rpm"],
+                            "Feed/rev (mm)": row.get("feed_rev", "-"),
+                            "Table Feed (mm/min)": row.get("table_feed", "-"),
+                            "Safety Length (mm)": row.get("safety_length", "-"),
+                            "Cut Length (mm)": row.get("cut_length", "-"),
+                            "Cut Time (sec)": row["cut_time"]
+                        })
             
 
             elif op["type"] == "Tap":
