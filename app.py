@@ -1231,9 +1231,14 @@ def calculate_boring_operation(
             )
             tool_rows.append({                          # ← ADD FROM HERE
                 "operation": "Hole Drill",
-                "tool_detail": f"Drill Ø{safe_drill_dia}mm",
+                 "tool_detail": f"Drill Ø{safe_drill_dia}mm",
+                "machining_stock": "Solid",
+                "vc": round((math.pi * safe_drill_dia * d_rpm) / 1000, 1),
                 "rpm": round(d_rpm),
-                "feed": round(d_fmin),
+                "feed_rev": round(d_fmin / d_rpm, 3),
+                "table_feed": round(d_fmin),
+                "safety_length": 6 if bor_ht == "Through Hole" else 3,
+                "cut_length": round(d_travel, 1),
                 "cut_time": round(d_time, 2)
             })                          
             current_dia = safe_drill_dia  # 👈 Line 712: Must have exactly 12 spaces before it
