@@ -2270,6 +2270,9 @@ if st.button("🚀 Calculate Combined Cycle Time"):
     total_combined_time = 0.0
     # 1. Clear previous results to prevent stacking duplicates
     st.session_state.combined_results = []
+    st.session_state.summary_data = []
+    st.session_state.tool_master = {}
+    st.session_state.tool_counter = 1
     
     # Check if there are actually operations added
     if not st.session_state.operations:
@@ -2434,9 +2437,6 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 "Tool No": tool_no,
                 "Tool Details": tool_name,
                 "Cut Time (sec)": round(op_time,2),
-                "No of Position": 1,
-                "Position Time (sec)": 0,
-                "Tool Change (sec)": 0,
                 "Cycle Time (sec)": round(op_time,2)
             })
             
