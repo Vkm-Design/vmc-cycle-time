@@ -2467,12 +2467,14 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "Operation": row["operation"],
                         "Tool Details": row["tool_detail"],
                         "Parameters": (
-                            f"RPM: {row['rpm']} | "
-                            f"Feed: {row['feed']} mm/min | "
-                            f"Cut Time: {row['cut_time']} sec"
+                             f"Vc: {row.get('vc', '-')} m/min | "
+                             f"RPM: {row['rpm']} | "
+                             f"Feed/rev: {row.get('feed_rev', '-')} mm/rev | "
+                             f"Table Feed: {row.get('table_feed', row.get('feed', '-'))} mm/min | "
+                             f"Safety: {row.get('safety_length', '-')}mm | "
+                             f"Cut Length: {row.get('cut_length', '-')}mm | "
+                             f"Cut Time: {row['cut_time']} sec"
                         ),
-                        "Cut Time (sec)": row["cut_time"]
-                    })
             
 
             elif op["type"] == "Tap":
