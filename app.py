@@ -2451,14 +2451,19 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                             "Cut Time (sec)": round(result["time"],2)
                         })
             
-               
+
             elif op["type"] == "Tap":
 
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
                     "Operation": "Tap Drill",
                     "Tool Details": f"Drill Ø{tap_result['drill_dia']}mm",
-                    "Parameters": details
+                    "Parameters": (
+                        f"RPM: {tap_result['drill_rpm']} | "
+                        f"Feed: {tap_result['drill_feed']} mm/min | "
+                        f"Cut Time: {tap_result['drill_cut_time']} sec"
+                    ),
+                    "Cut Time (sec)": round(tap_result['drill_cut_time'],2)
                 })
             
             
@@ -2466,18 +2471,26 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "Tool No": len(st.session_state.summary_data) + 1,
                     "Operation": "Tapping",
                     "Tool Details": f"Tap Ø{tap_result['tool_dia']}mm",
-                    "Parameters": details
+                    "Parameters": (
+                        f"RPM: {tap_result['rpm']} | "
+                        f"Feed: {tap_result['feed']} mm/min | "
+                        f"Cut Time: {tap_result['cut_time']} sec"
+                    ),
+                    "Cut Time (sec)": round(tap_result['cut_time'],2)
                 })
               
             
+
             elif op["type"] == "Face Mill":
 
                 st.session_state.summary_data.append({
                     "Tool No": len(st.session_state.summary_data) + 1,
                     "Operation": "Face Mill Rough",
                     "Tool Details": details.split("|")[0],
-                    "Parameters": details
+                    "Parameters": details,
+                    "Cut Time (sec)": fm_result["time_rough_sec"]
                 })
+            
             
                 if fm_result["finish_passes"] > 0:
             
@@ -2485,7 +2498,8 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "Tool No": len(st.session_state.summary_data) + 1,
                         "Operation": "Face Mill Finish",
                         "Tool Details": details.split("|")[0],
-                        "Parameters": details
+                        "Parameters": details,
+                        "Cut Time (sec)": fm_result["time_finish_sec"]
                     })
            
             # 3. Append calculated data to your combined results list
