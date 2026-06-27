@@ -2,7 +2,7 @@ import streamlit as st
 import math
 
 # ================= MATERIAL TABLE =================
-kc_data = {
+kc_data = 
     "Aluminium": 700,
     "Steel_Hardness_upto_30_HRC": 1950,
     "Steel_Hardness_30_to_40_HRC": 2250,
