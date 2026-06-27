@@ -2273,6 +2273,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
     st.session_state.summary_data = []
     st.session_state.tool_master = {}
     st.session_state.tool_counter = 1
+    st.session_state.summary_tool_counter = 1
     
     # Check if there are actually operations added
     if not st.session_state.operations:
@@ -2468,12 +2469,14 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             
                     if "Drill" in step or "Bore" in step:
             
-                        tool_no = get_tool_no(step)
+                        
+                        tool_no = st.session_state.summary_tool_counter
+                        st.session_state.summary_tool_counter += 1
             
                         st.session_state.summary_data.append({
                             "Tool No": tool_no,
                             "Tool Details": step,
-                            "Cycle Time (sec)": ""
+                            "Cycle Time (sec)": round(result["time"],2)
                         })
 
         # ==========================================
