@@ -879,7 +879,7 @@ def calculate_hole_feature(op, material):
                 "steps": drill_result["steps"] + bore_result["steps"],
                 "tool_summary": [
                     {
-                        "tool": drill_result["steps"][0],
+                        "tool": drill_result["steps"][-1],
                         "time": drill_result["time"]
                     },
                     {
@@ -2426,21 +2426,18 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # SIMPLE SUMMARY COLLECTION
             # ==============================
 
+           
             if op["type"] == "Hole":
 
-                tool_index = 1
+                for tool in result["tool_summary"]:
             
-                for step in result["steps"]:
-            
-                    if "Drill" in step or "Bore" in step:
-            
-                        st.session_state.summary_data.append({
-                            "Tool No": len(st.session_state.summary_data) + 1,
-                            "Operation": "Hole",
-                            "Tool Details": step,
-                            "Parameters": step,
-                            "Cut Time (sec)": ""
-                        })
+                    st.session_state.summary_data.append({
+                        "Tool No": len(st.session_state.summary_data) + 1,
+                        "Operation": "Hole",
+                        "Tool Details": tool["tool"],
+                        "Parameters": tool["tool"],
+                        "Cut Time (sec)": round(tool["time"],2)
+                    })
             
                
             elif op["type"] == "Tap":
