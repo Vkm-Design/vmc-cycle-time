@@ -890,7 +890,7 @@ def calculate_hole_feature(op, material):
                 "time": drill_result["time"] + bore_result["time"],
                 "tools": drill_result["tools"] + bore_result["tools"],
                 "steps": drill_result["steps"] + bore_result["steps"],
-                    "tool_times": tool_times
+                "tool_times": tool_times
             }  
             
     
