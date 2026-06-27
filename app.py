@@ -1062,11 +1062,17 @@ def calculate_boring_operation(
         current_dia = core_dia
 
     tol_band = tol_input * 2
-
+    drill_only = (
+        tol_band >= 0.4 and
+        ra_input > 3.2
+    )
     fine_boring_required = (
         tol_band < 0.2 or
         ra_input <= 1.6
     )
+    if drill_only:
+        fine_boring_required = False
+        
     step_details.append(
         f"Fine Boring Required = {fine_boring_required}"
     )
