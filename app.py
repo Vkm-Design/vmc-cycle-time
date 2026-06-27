@@ -1056,6 +1056,7 @@ def calculate_boring_operation(
     tool_count_bor = 0
     total_time_sec = 0.0
     step_details = []
+    tool_rows = [] 
     current_dia = 0.0
 
     if e_mode == "Core Hole":
@@ -1228,6 +1229,13 @@ def calculate_boring_operation(
                 f"Power: {round(p_check,2)}kW | "
                 f"Time: {round(d_time, 2)}s"
             )
+             tool_rows.append({                          # ← ADD FROM HERE
+                "operation": "Hole Drill",
+                "tool_detail": f"Drill Ø{safe_drill_dia}mm",
+                "rpm": round(d_rpm),
+                "feed": round(d_fmin),
+                "cut_time": round(d_time, 2)
+            })                          
             current_dia = safe_drill_dia  # 👈 Line 712: Must have exactly 12 spaces before it
             
         else:
@@ -1287,6 +1295,13 @@ def calculate_boring_operation(
             f"Power: {round(p_bor, 2)}kW | "
             f"Time: {round(p_time, 1)}s"
         )
+        tool_rows.append({                          # ← ADD FROM HERE
+            "operation": f"Rough Bore Ø{current_dia}→Ø{d2}",
+            "tool_detail": f"Boring Bar Ø{d2}mm",
+            "rpm": round(tool['rpm']),
+            "feed": round(tool['feed_min']),
+            "cut_time": round(p_time, 2)
+        })             
         current_dia = round(d2, 3)
 
   
@@ -1308,6 +1323,13 @@ def calculate_boring_operation(
                 * 60
             )
             total_time_sec += finish_time
+            tool_rows.append({                          # ← ADD FROM HERE
+                "operation": f"Fine Bore Ø{current_dia}→Ø{f_dia}",
+                "tool_detail": f"Fine Boring Bar Ø{f_dia}mm",
+                "rpm": round(finish_rpm),
+                "feed": round(finish_feed, 1),
+                "cut_time": round(finish_time, 2)
+            }) 
             step_details.append(
                 f"Fine Bore Ø{current_dia} ➔ Ø{f_dia}"
             )
@@ -1326,7 +1348,7 @@ def calculate_boring_operation(
         "time": total_time_sec,
         "tools": tool_count_bor,
         "steps": step_details,
-        "tool_times": tool_times
+        "tool_rows": tool_rows 
     }
     
 # ==========================================
@@ -2434,24 +2456,18 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ==============================
 
             if op["type"] == "Hole":
-
-                time_index = 0
-            
-                for step in result["steps"]:
-            
-                    if "Drill" in step or "Bore" in step:
-            
-                        cut_time = result["tool_times"][time_index]
-            
-                        st.session_state.summary_data.append({
-                            "Tool No": len(st.session_state.summary_data) + 1,
-                            "Operation": "Hole",
-                            "Tool Details": step,
-                            "Parameters": step,
-                            "Cut Time (sec)": round(cut_time,2)
-                        })
-            
-                        time_index += 1
+                for row in result["tool_rows"]:
+                    st.session_state.summary_data.append({
+                        "Tool No": len(st.session_state.summary_data) + 1,
+                        "Operation": row["operation"],
+                        "Tool Details": row["tool_detail"],
+                        "Parameters": (
+                            f"RPM: {row['rpm']} | "
+                            f"Feed: {row['feed']} mm/min | "
+                            f"Cut Time: {row['cut_time']} sec"
+                        ),
+                        "Cut Time (sec)": row["cut_time"]
+                    })
             
 
             elif op["type"] == "Tap":
