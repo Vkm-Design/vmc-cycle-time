@@ -872,40 +872,22 @@ def calculate_hole_feature(op, material):
                 material=material,
                 core_dia=drilled_dia
             )   
-        
+          
             return {
-
-                "time":
-                    drill_result["time"]
-                    +
-                    bore_result["time"],
-            
-            
-                "tools":
-                    drill_result["tools"]
-                    +
-                    bore_result["tools"],
-            
-            
-                "steps":
-                    drill_result["steps"]
-                    +
-                    bore_result["steps"],
-            
-            
-                "tool_summary":
-                    [
-                        {
-                            "tool": drill_result["steps"][0],
-                            "time": drill_result["time"]
-                        },
-                        {
-                            "tool": bore_result["steps"][-1],
-                            "time": bore_result["time"]
-                        }
-                    ]
-            
-            }
+                "time": drill_result["time"] + bore_result["time"],
+                "tools": drill_result["tools"] + bore_result["tools"],
+                "steps": drill_result["steps"] + bore_result["steps"],
+                "tool_summary": [
+                    {
+                        "tool": drill_result["steps"][0],
+                        "time": drill_result["time"]
+                    },
+                    {
+                        "tool": bore_result["steps"][-1],
+                        "time": bore_result["time"]
+                    }
+                ]
+            }    
             
     
     # --------------------------------
@@ -2469,12 +2451,6 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             
                     tool_no = st.session_state.summary_tool_counter
                     st.session_state.summary_tool_counter += 1
-            
-                    st.session_state.summary_data.append({
-                        "Tool No": tool_no,
-                        "Tool Details": tool["tool"],
-                        "Cut Time (sec)": round(tool["time"],2)
-                    })
             
                     st.session_state.summary_data.append({
                         "Tool No": tool_no,
