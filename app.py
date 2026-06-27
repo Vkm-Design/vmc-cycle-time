@@ -1300,13 +1300,18 @@ def calculate_boring_operation(
             f"Power: {round(p_bor, 2)}kW | "
             f"Time: {round(p_time, 1)}s"
         )
-        tool_rows.append({                          # ← ADD FROM HERE
+        tool_rows.append({
             "operation": f"Rough Bore Ø{current_dia}→Ø{d2}",
             "tool_detail": f"Boring Bar Ø{d2}mm",
+            "machining_stock": round(d2 - current_dia, 3),
+            "vc": round((math.pi * d2 * tool['rpm']) / 1000, 1),
             "rpm": round(tool['rpm']),
-            "feed": round(tool['feed_min']),
+            "feed_rev": round(tool['feed_min'] / tool['rpm'], 3),
+            "table_feed": round(tool['feed_min']),
+            "safety_length": 6 if bor_ht == "Through Hole" else 3,
+            "cut_length": round(bor_travel, 1),
             "cut_time": round(p_time, 2)
-        })             
+        })
         current_dia = round(d2, 3)
 
   
