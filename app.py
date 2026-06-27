@@ -2430,12 +2430,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     f"Feed: {tap_result['feed']} mm/min | "
                     f"Cut Time: {tap_result['cut_time']}s"
                 )
-            st.session_state.combined_results.append({
-                "op_num": i + 1,
-                "type": op["type"],
-                "details": details,
-                "cycle_time": op_time
-            })
+            
 
             # 3. Append calculated data to your combined results list
 
