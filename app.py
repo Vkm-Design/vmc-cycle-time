@@ -2474,7 +2474,9 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                              f"Safety: {row.get('safety_length', '-')}mm | "
                              f"Cut Length: {row.get('cut_length', '-')}mm | "
                              f"Cut Time: {row['cut_time']} sec"
-                        })
+                        ),                    # ← ADD comma here
+                        "Cut Time (sec)": row["cut_time"]
+                    })                        # ← ADD closing brace here
             
 
             elif op["type"] == "Tap":
