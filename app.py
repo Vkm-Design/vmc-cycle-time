@@ -2435,6 +2435,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ==============================
             # SIMPLE SUMMARY COLLECTION
             # ==============================
+ 
 
             if op["type"] == "Hole":
 
@@ -2447,7 +2448,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                             "Operation": "Hole",
                             "Tool Details": step,
                             "Parameters": step,
-                            "Cut Time (sec)": ""
+                            "Cut Time (sec)": round(result["time"],2)
                         })
             
                
