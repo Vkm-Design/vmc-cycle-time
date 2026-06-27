@@ -2421,12 +2421,20 @@ if st.button("🚀 Calculate Combined Cycle Time"):
 
 
             # 3. Append calculated data to your combined results list
+
+            # ==============================
+            # SUMMARY SHEET DATA COLLECTION
+            # ==============================
+            
+            tool_name = details.split("|")[0].strip()
+            
+            tool_no = get_tool_no(tool_name)
             
             st.session_state.summary_data.append({
                 "Tool No": tool_no,
                 "Tool Details": tool_name,
                 "Cut Time (sec)": round(op_time,2),
-                "No of Position": op.get("positions",1),
+                "No of Position": 1,
                 "Position Time (sec)": 0,
                 "Tool Change (sec)": 0,
                 "Cycle Time (sec)": round(op_time,2)
