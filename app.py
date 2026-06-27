@@ -2484,7 +2484,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "Table Feed (mm/min)": row.get("table_feed", "-"),
                         "Safety Length (mm)": row.get("safety_length", "-"),
                         "Cut Length (mm)": row.get("cut_length", "-"),
-                        "Cut Time (sec)": row["cut_time"]
+                        "Cut Time (sec)": row["cut_time"],
                         "No of Positions": op.get("count", 1),
                         "Position Time (sec)": position_time,
                         "Tool Change (sec)": tool_change_time,
@@ -2506,7 +2506,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "Table Feed (mm/min)": tap_result['drill_feed'],
                     "Safety Length (mm)": 6 if op.get("t_ht") == "Through Hole" else 3,
                     "Cut Length (mm)": round(op.get("t_ddep", 0), 1),
-                    "Cut Time (sec)": round(tap_result['drill_cut_time'], 2)
+                    "Cut Time (sec)": round(tap_result['drill_cut_time'], 2),
                     "No of Positions": op.get("t_cnt", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
@@ -2525,7 +2525,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "Table Feed (mm/min)": tap_result['feed'],
                     "Safety Length (mm)": round((3 * 2 * op.get("t_pitch", 0)) + 4, 1),
                     "Cut Length (mm)": round(op.get("t_tdep", 0), 1),
-                    "Cut Time (sec)": round(tap_result['cut_time'], 2)
+                    "Cut Time (sec)": round(tap_result['cut_time'], 2),
                     "No of Positions": op.get("t_cnt", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
@@ -2546,7 +2546,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "Table Feed (mm/min)": fm_result['feed'],
                     "Safety Length (mm)": fm_result['tool_dia'],
                     "Cut Length (mm)": "-",
-                    "Cut Time (sec)": fm_result["time_rough_sec"]
+                    "Cut Time (sec)": fm_result["time_rough_sec"],
                     "No of Positions": op.get("fm_pos", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
@@ -2565,7 +2565,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "Table Feed (mm/min)": fm_result['feed'],
                         "Safety Length (mm)": fm_result['tool_dia'],
                         "Cut Length (mm)": "-",
-                        "Cut Time (sec)": fm_result["time_finish_sec"]
+                        "Cut Time (sec)": fm_result["time_finish_sec"],
                         "No of Positions": op.get("fm_pos", 1),
                         "Position Time (sec)": position_time,
                         "Tool Change (sec)": tool_change_time,
