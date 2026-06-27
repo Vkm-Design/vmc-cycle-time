@@ -2422,11 +2422,14 @@ if st.button("🚀 Calculate Combined Cycle Time"):
 
             # 3. Append calculated data to your combined results list
             
-            st.session_state.combined_results.append({
-                "op_num": i + 1,
-                "type": op["type"],
-                "details": details,
-                "cycle_time": op_time
+            st.session_state.summary_data.append({
+                "Tool No": tool_no,
+                "Tool Details": tool_name,
+                "Cut Time (sec)": round(op_time,2),
+                "No of Position": op.get("positions",1),
+                "Position Time (sec)": 0,
+                "Tool Change (sec)": 0,
+                "Cycle Time (sec)": round(op_time,2)
             })
             
             
