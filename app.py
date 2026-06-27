@@ -856,7 +856,17 @@ def calculate_hole_feature(op, material):
     
         if drilled_dia >= dia:
       
-            return drill_result
+             return {
+            "time": drill_result["time"],
+            "tools": drill_result["tools"],
+            "steps": drill_result["steps"],
+            "tool_summary": [
+                {
+                    "tool": drill_result["steps"][-1],
+                    "time": drill_result["time"]
+                }
+            ]
+        }
         
         
         elif drilled_dia > 0:
