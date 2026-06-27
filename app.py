@@ -827,7 +827,8 @@ def calculate_hole_feature(op, material):
     ra = op["ra"]
     mode = op["start_mode"]
     count = op["count"]
-
+    tool_times = []
+    
     # --------------------------------
     # CASE 1 : SOLID + LOOSE TOL + ROUGH FINISH
     # DRILL ONLY
@@ -846,6 +847,7 @@ def calculate_hole_feature(op, material):
             material,
             op["hole_type"]
         )
+        tool_times.append(drill_result["time"])
     
     
         drilled_dia = drill_result.get(
@@ -882,22 +884,14 @@ def calculate_hole_feature(op, material):
                 material=material,
                 core_dia=drilled_dia
             )   
-          
+            tool_times.append(bore_result["time"])
+            
             return {
                 "time": drill_result["time"] + bore_result["time"],
                 "tools": drill_result["tools"] + bore_result["tools"],
                 "steps": drill_result["steps"] + bore_result["steps"],
-                "tool_summary": [
-                    {
-                        "tool": drill_result["steps"][-1],
-                        "time": drill_result["time"]
-                    },
-                    {
-                        "tool": bore_result["steps"][-1],
-                        "time": bore_result["time"]
-                    }
-                ]
-            }    
+                    "tool_times": tool_times
+            }  
             
     
     # --------------------------------
