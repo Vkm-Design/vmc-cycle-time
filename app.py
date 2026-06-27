@@ -2453,16 +2453,16 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # SUMMARY SHEET DATA COLLECTION
             # ==============================
             
-            tool_name = details.split("|")[0].strip()
+            #tool_name = details.split("|")[0].strip()
             
-            tool_no = get_tool_no(tool_name)
+            #tool_no = get_tool_no(tool_name)
             
-            st.session_state.summary_data.append({
-                "Tool No": tool_no,
-                "Tool Details": tool_name,
-                "Cut Time (sec)": round(op_time,2),
-                "Cycle Time (sec)": round(op_time,2)
-            })
+            #st.session_state.summary_data.append({
+            #    "Tool No": tool_no,
+            #    "Tool Details": tool_name,
+            #    "Cut Time (sec)": round(op_time,2),
+            #    "Cycle Time (sec)": round(op_time,2)
+            #})
             
             
             # ==============================
