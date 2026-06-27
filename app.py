@@ -2513,3 +2513,20 @@ if st.button("🚀 Calculate Combined Cycle Time"):
         
         # Grand Total Message
         st.success(f"🏅 Total Combined Cycle Time = {total_cut_time:.2f} sec")
+
+        # ==============================
+        # TOOL SUMMARY REPORT
+        # ==============================
+        
+        if st.session_state.summary_data:
+        
+            st.subheader("🛠 Tool Summary")
+        
+            summary_df = pd.DataFrame(
+                st.session_state.summary_data
+            )
+        
+            st.dataframe(summary_df)
+        
+        else:
+            st.write("No tool summary data")
