@@ -2295,7 +2295,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     op,
                     material
                 )
-            
+                st.write(result)
                             
                 op_time = result["time"]
                 tool_count_bor = result["tools"]
@@ -2476,7 +2476,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         st.session_state.summary_data.append({
                             "Tool No": tool_no,
                             "Tool Details": step,
-                            "Cycle Time (sec)": round(result["time"],2)
+                            "Cycle Time (sec)": ""
                         })
 
         # ==========================================
