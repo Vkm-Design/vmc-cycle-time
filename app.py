@@ -1229,7 +1229,7 @@ def calculate_boring_operation(
                 f"Power: {round(p_check,2)}kW | "
                 f"Time: {round(d_time, 2)}s"
             )
-             tool_rows.append({                          # ← ADD FROM HERE
+            tool_rows.append({                          # ← ADD FROM HERE
                 "operation": "Hole Drill",
                 "tool_detail": f"Drill Ø{safe_drill_dia}mm",
                 "rpm": round(d_rpm),
