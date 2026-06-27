@@ -2476,11 +2476,11 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "Cut Time (sec)": round(tool["time"],2)
                     })
             
-                        st.session_state.summary_data.append({
-                            "Tool No": tool_no,
-                            "Tool Details": step,
-                            "Cut Time (sec)": round(tool["time"],2)
-                        })
+                    st.session_state.summary_data.append({
+                        "Tool No": tool_no,
+                        "Tool Details": step,
+                        "Cut Time (sec)": round(tool["time"],2)
+                    })
 
         # ==========================================
         # DISPLAY RESULTS TABLE AND TOTAL TIME
