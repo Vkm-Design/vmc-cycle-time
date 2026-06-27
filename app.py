@@ -2446,6 +2446,19 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 "details": details,
                 "cycle_time": op_time
             })
+            # ==============================
+            # SUMMARY COLLECTION
+            # ==============================
+            
+            if op["type"] == "Hole":
+            
+                for step in result["steps"]:
+                    st.session_state.summary_data.append({
+                        "Tool No": "",
+                        "Operation": "Hole",
+                        "Tool Details": step,
+                        "Cut Time (sec)": ""
+                    })
 
             # 3. Append calculated data to your combined results list
 
