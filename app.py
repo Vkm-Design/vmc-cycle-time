@@ -2289,7 +2289,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     op,
                     material
                 )
-                st.write(result)
+                
                             
                 op_time = result["time"]
                 tool_count_bor = result["tools"]
@@ -2422,6 +2422,42 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 "details": details,
                 "cycle_time": op_time
             })
+            # ==============================
+            # SIMPLE SUMMARY COLLECTION
+            # ==============================
+            
+            if op["type"] == "Hole":
+            
+                for step in result["steps"]:
+            
+                    if "Drill" in step or "Bore" in step:
+            
+                        st.session_state.summary_data.append({
+                            "Tool No": len(st.session_state.summary_data) + 1,
+                            "Operation": "Hole",
+                            "Tool Details": step,
+                            "Parameters": details,
+                        })
+            
+            
+            elif op["type"] == "Tap":
+            
+                st.session_state.summary_data.append({
+                    "Tool No": len(st.session_state.summary_data) + 1,
+                    "Operation": "Tap",
+                    "Tool Details": details,
+                    "Parameters": details,
+                })
+            
+            
+            elif op["type"] == "Face Mill":
+            
+                st.session_state.summary_data.append({
+                    "Tool No": len(st.session_state.summary_data) + 1,
+                    "Operation": "Face Mill",
+                    "Tool Details": details,
+                    "Parameters": details,
+                })
            
             # 3. Append calculated data to your combined results list
 
@@ -2441,22 +2477,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             #})
             
             
-            # ==============================
-            # SUMMARY SHEET DATA COLLECTION
-            # ==============================
             
-            if op["type"] == "Hole":
-
-                for tool in result["tool_summary"]:
-            
-                    tool_no = st.session_state.summary_tool_counter
-                    st.session_state.summary_tool_counter += 1
-            
-                    st.session_state.summary_data.append({
-                        "Tool No": tool_no,
-                        "Tool Details": step,
-                        "Cut Time (sec)": round(tool["time"],2)
-                    })
 
         # ==========================================
         # DISPLAY RESULTS TABLE AND TOTAL TIME
