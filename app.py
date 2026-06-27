@@ -2488,7 +2488,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "No of Positions": op.get("count", 1),
                         "Position Time (sec)": position_time,
                         "Tool Change (sec)": tool_change_time,
-                        "Total Time (sec)": round(row["cut_time"] + tool_change_time + (op.get("count", 1) - 1) * position_time, 2)
+                        "Total Time (sec)": round((row["cut_time"] * op.get("count", 1)) + tool_change_time + (op.get("count", 1) - 1) * position_time, 2)
                     })
             
 
@@ -2510,7 +2510,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "No of Positions": op.get("t_cnt", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
-                    "Total Time (sec)": round(tap_result['drill_cut_time'] + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
+                    "Total Time (sec)": round((tap_result['drill_cut_time'] * op.get("t_cnt", 1)) + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
                 })
                 # Tap/Threadmill row
                 tap_dia = tap_result['tool_dia']
@@ -2529,7 +2529,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "No of Positions": op.get("t_cnt", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
-                    "Total Time (sec)": round(tap_result['cut_time'] + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
+                    "Total Time (sec)": round((tap_result['cut_time'] * op.get("t_cnt", 1)) + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
                 })
         
 
@@ -2550,7 +2550,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "No of Positions": op.get("fm_pos", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
-                    "Total Time (sec)": round(fm_result["time_rough_sec"] + tool_change_time + (op.get("fm_pos", 1) - 1) * position_time, 2)
+                    "Total Time (sec)": round((fm_result["time_rough_sec"] * op.get("fm_pos", 1)) + tool_change_time + (op.get("fm_pos", 1) - 1) * position_time, 2)
                 })
                 # Finish pass row
                 if fm_result["finish_passes"] > 0:
@@ -2569,7 +2569,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "No of Positions": op.get("fm_pos", 1),
                         "Position Time (sec)": position_time,
                         "Tool Change (sec)": tool_change_time,
-                        "Total Time (sec)": round(fm_result["time_finish_sec"] + tool_change_time + (op.get("fm_pos", 1) - 1) * position_time, 2)
+                        "Total Time (sec)": round((fm_result["time_finish_sec"] * op.get("fm_pos", 1)) + tool_change_time + (op.get("fm_pos", 1) - 1) * position_time, 2)
                     })
            
             # 3. Append calculated data to your combined results list
