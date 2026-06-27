@@ -2102,6 +2102,22 @@ if "operations" not in st.session_state:
 
 if "combined_results" not in st.session_state:
     st.session_state.combined_results = []
+
+if "summary_data" not in st.session_state:
+    st.session_state.summary_data = []
+
+if "tool_master" not in st.session_state:
+    st.session_state.tool_master = {}
+
+if "tool_counter" not in st.session_state:
+    st.session_state.tool_counter = 1
+
+def get_tool_no(tool_name):
+    if tool_name not in st.session_state.tool_master:
+        st.session_state.tool_master[tool_name] = st.session_state.tool_counter
+        st.session_state.tool_counter += 1
+
+    return st.session_state.tool_master[tool_name]
     
 # ==========================================
 # ADD / CLEAR OPERATIONS BUTTONS
@@ -2411,6 +2427,21 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                 "type": op["type"],
                 "details": details,
                 "cycle_time": op_time
+            })
+            
+            
+            # ==============================
+            # SUMMARY SHEET DATA COLLECTION
+            # ==============================
+            
+            tool_name = details.split("|")[0].strip()
+            
+            tool_no = get_tool_no(tool_name)
+            
+            st.session_state.summary_data.append({
+                "Tool No": tool_no,
+                "Tool Details": tool_name,
+                "Cycle Time (sec)": round(op_time,2)
             })
 
         # ==========================================
