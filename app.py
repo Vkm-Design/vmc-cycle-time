@@ -880,8 +880,10 @@ def calculate_hole_feature(op, material):
        
     if (
         mode == "Solid"
-        and tol >= 0.2
-        and ra >= 3.2
+        and (
+            (dia <= 15 and tol >= 0.1 and ra >= 2.4) or
+            (dia > 15 and tol >= 0.2 and ra > 3.2)
+        )
     ):
     
         drill_result = calculate_drilling_feature(
@@ -1162,32 +1164,37 @@ def calculate_boring_operation(
     # ==========================================
     # DEPTH VALIDATION
     # ==========================================
-    if b_dep > 150:
+    if b_dep > 80 and not drill_only:
         st.error(
-            f"Depth {b_dep}mm exceeds validated boring limit of 150mm."
+            f"Depth {b_dep}mm exceeds validated boring limit of 80mm."
         )
         st.warning(
             "Check tool weight, machine spindle capability, "
             "fixture rigidity and process feasibility manually."
         )
-        st.stop()
+        return {
+            "time": 0.0,
+            "tools": 0,
+            "steps": [f"Depth {b_dep}mm exceeds 80mm boring limit"],
+            "tool_rows": []
+        }
     
     # ==========================================
     # L/D VALIDATION
     # ==========================================
     ld_ratio = b_dep / f_dia
-    if ld_ratio > 3:
+    if ld_ratio > 5 and not drill_only:
         st.error(
-            f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 3."
+            f"L/D Ratio = {round(ld_ratio,1)} exceeds recommended limit of 5."
         )
         st.warning(
             "Check boring bar rigidity, machine capability "
-             "and fixture stability."
-         )
+            "and fixture stability."
+        )
         return {
             "time": 0.0,
             "tools": 0,
-            "steps": [f"L/D ratio {round(ld_ratio,1)} exceeds limit"],
+            "steps": [f"L/D ratio {round(ld_ratio,1)} exceeds limit of 5"],
             "tool_rows": []
         }
 
