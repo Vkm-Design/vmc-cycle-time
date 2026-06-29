@@ -375,8 +375,8 @@ drill_data_aluminium = [
             {"min_d": 3, "max_d": 5, "vc": 50, "feed_min": 450, "max_depth": 20},
             {"min_d": 5, "max_d": 8, "vc": 80, "feed_min": 550, "max_depth": 30},
             {"min_d": 8, "max_d": 10, "vc": 100, "feed_min": 480, "max_depth": 40},
-            {"min_d": 10, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 50},
-
+            {"min_d": 10, "max_d": 12, "vc": 120, "feed_min": 550, "max_depth": 60},
+            {"min_d": 12, "max_d": 15, "vc": 120, "feed_min": 550, "max_depth": 75},
             {"min_d": 15, "max_d": 16, "rpm": 2464, "feed_min": 444, "max_depth": 80},
             {"min_d": 16, "max_d": 17, "rpm": 2508, "feed_min": 451, "max_depth": 85},
             {"min_d": 17, "max_d": 18, "rpm": 2364, "feed_min": 426, "max_depth": 90},
