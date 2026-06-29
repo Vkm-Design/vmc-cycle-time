@@ -205,6 +205,25 @@ def calculate_tapping_time(op):
     # DRILL TIME CALCULATION
     drill_dia = diameter - pitch  # tap dia minus pitch = drill dia
     d_rpm, d_fmin, d_max_depth = get_parameters(drill_dia, op_material)
+    # Check drill depth against table
+    if d_max_depth and op["t_ddep"] > d_max_depth:
+        st.warning(
+            f"⚠️ Drill depth {op['t_ddep']}mm exceeds table recommendation "
+            f"of {d_max_depth}mm for Ø{round(drill_dia,2)}mm drill. "
+            f"Use extended drill or check feasibility."
+        )
+        return {
+            "time": 0.0,
+            "process": "Error — Drill Depth Exceeded",
+            "tool_dia": 0,
+            "rpm": 0,
+            "feed": 0,
+            "cut_time": 0,
+            "drill_dia": 0,
+            "drill_rpm": 0,
+            "drill_feed": 0,
+            "drill_cut_time": 0
+        }
     
     if d_rpm and d_fmin:
         drill_travel = op["t_ddep"] + 3 + ((0.18 * drill_dia) if drill_dia <= 20 else 0)
