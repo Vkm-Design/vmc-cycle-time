@@ -2580,7 +2580,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "No of Positions": op.get("t_cnt", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
-                    "Total Time (sec)": 0 if row["cut_time"] == 0 else round((tap_result['drill_cut_time'] * op.get("t_cnt", 1)) + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
+                    "Total Time (sec)": 0 if tap_result['drill_cut_time'] == 0 else round((tap_result['drill_cut_time'] * op.get("t_cnt", 1)) + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
                 })
                 # Tap/Threadmill row
                 tap_dia = tap_result['tool_dia']
@@ -2599,7 +2599,7 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "No of Positions": op.get("t_cnt", 1),
                     "Position Time (sec)": position_time,
                     "Tool Change (sec)": tool_change_time,
-                    "Total Time (sec)": 0 if row["cut_time"] == 0 else round((tap_result['cut_time'] * op.get("t_cnt", 1)) + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
+                    "Total Time (sec)": 0 if tap_result['cut_time'] == 0 else round((tap_result['cut_time'] * op.get("t_cnt", 1)) + tool_change_time + (op.get("t_cnt", 1) - 1) * position_time, 2)
                 })
         
 
