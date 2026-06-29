@@ -329,6 +329,27 @@ def calculate_tapping_time(op):
     rpm = (1000 * vc) / (math.pi * diameter)
     feed_min = pitch * rpm
     cut_length = (op["t_tdep"] + (pitch * 3)) * 2 + 4
+    # Check tap depth against table
+    if op["t_tdep"] > selected_row.get("max_depth", 999):
+        st.warning(
+            f"⚠️ Tap depth {op['t_tdep']}mm exceeds table recommendation "
+            f"of {selected_row.get('max_depth')}mm for {op['t_size']}. "
+            f"Use extended tap or check feasibility."
+        )
+        return {
+            "time": 0.0,
+            "process": "Error — Tap Depth Exceeded",
+            "tool_dia": diameter,
+            "rpm": 0,
+            "feed": 0,
+            "cut_time": 0,
+            "drill_dia": round(drill_dia, 2),
+            "drill_rpm": round(d_rpm) if d_rpm else 0,
+            "drill_feed": round(d_fmin) if d_fmin else 0,
+            "drill_cut_time": round(drill_cut_time, 2)
+        }
+    Three locations — do them one by one and test!
+
     cut_time = (cut_length / feed_min) * 60  # per position only
     total_time = cut_time * op["t_cnt"]
     return {
