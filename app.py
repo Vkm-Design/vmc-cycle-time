@@ -348,7 +348,6 @@ def calculate_tapping_time(op):
             "drill_feed": round(d_fmin) if d_fmin else 0,
             "drill_cut_time": round(drill_cut_time, 2)
         }
-    Three locations — do them one by one and test!
 
     cut_time = (cut_length / feed_min) * 60  # per position only
     total_time = cut_time * op["t_cnt"]
