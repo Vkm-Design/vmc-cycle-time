@@ -2484,28 +2484,25 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ==============================
 
             if op["type"] == "Hole":
-                if "tool_rows" not in result:
-                    st.warning("No tool rows returned for this hole operation.")
-                else:
-                    for row in result["tool_rows"]:
+                for row in result["tool_rows"]:
                    
-                        st.session_state.summary_data.append({
-                            "Tool No": len(st.session_state.summary_data) + 1,
-                            "Operation": row["operation"],
-                            "Tool Details": row["tool_detail"],
-                            "Machining Stock": row.get("machining_stock", "-"),
-                            "Vc (m/min)": row.get("vc", "-"),
-                            "RPM": row["rpm"],
-                            "Feed/rev (mm)": row.get("feed_rev", "-"),
-                            "Table Feed (mm/min)": row.get("table_feed", "-"),
-                            "Safety Length (mm)": row.get("safety_length", "-"),
-                            "Cut Length (mm)": row.get("cut_length", "-"),
-                            "Cut Time (sec)": row["cut_time"],
-                            "No of Positions": op.get("count", 1),
-                            "Position Time (sec)": position_time,
-                            "Tool Change (sec)": tool_change_time,
-                            "Total Time (sec)": round((row["cut_time"] * op.get("count", 1)) + tool_change_time + (op.get("count", 1) - 1) * position_time, 2)
-                        })
+                    st.session_state.summary_data.append({
+                        "Tool No": len(st.session_state.summary_data) + 1,
+                        "Operation": row["operation"],
+                        "Tool Details": row["tool_detail"],
+                        "Machining Stock": row.get("machining_stock", "-"),
+                        "Vc (m/min)": row.get("vc", "-"),
+                        "RPM": row["rpm"],
+                        "Feed/rev (mm)": row.get("feed_rev", "-"),
+                        "Table Feed (mm/min)": row.get("table_feed", "-"),
+                        "Safety Length (mm)": row.get("safety_length", "-"),
+                        "Cut Length (mm)": row.get("cut_length", "-"),
+                        "Cut Time (sec)": row["cut_time"],
+                        "No of Positions": op.get("count", 1),
+                        "Position Time (sec)": position_time,
+                        "Tool Change (sec)": tool_change_time,
+                        "Total Time (sec)": round((row["cut_time"] * op.get("count", 1)) + tool_change_time + (op.get("count", 1) - 1) * position_time, 2)
+                    })
                 
 
             elif op["type"] == "Tap":
