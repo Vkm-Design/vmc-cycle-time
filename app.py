@@ -981,8 +981,9 @@ st.sidebar.info(f"Using: {m_power:.1f}kW | {m_torque:.1f}Nm | {m_taper}")
 st.sidebar.markdown("---")
 
 st.sidebar.header("Cycle Time Settings")
-tool_change_time = st.sidebar.number_input("Tool Change Time (sec)", min_value=0.0, value=8.0, step=0.5, key="tool_change_time")
-position_time = st.sidebar.number_input("Position / Index Time (sec)", min_value=0.0, value=3.0, step=0.5, key="position_time")
+tool_change_time = machine_data[machine]["tool_change_time"]
+
+position_time = machine_data[machine]["position_time"]
 
 usable_power = m_power * 0.85
 usable_torque = m_torque * 0.85
