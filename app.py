@@ -963,7 +963,10 @@ def calculate_drilling_feature(
 
         rpm = d_params[0]
         f_min = d_params[1]
-
+        max_depth = d_params[2]  # ← get max_depth from table
+        # Check depth against table max_depth
+        if max_depth and depth > max_depth:
+            continue  # skip this drill, depth exceeds table recommendation
 
         # power calculation
         p_req = (
