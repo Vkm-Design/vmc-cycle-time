@@ -11,20 +11,160 @@ kc_data = {
 
 # ================= MACHINE TABLE (WITH TAPER TAGS) =================
 machine_data = {
-    "Ace BT40": {"power": 5.5, "torque": 35, "taper": "BT40"},
-    "Ace HSK63": {"power": 5.5, "torque": 35, "taper": "HSK A63"},
 
-    "Brother Std BT30": {"power": 7, "torque": 26.8, "taper": "BT30"},
-    "Brother High Torque BT30": {"power": 9.2, "torque": 61.1, "taper": "BT30"},
+    "Ace MCV 400/450 HSK A63": {
+        "make": "Ace MCV",
+        "model": "400/450",
+        "power": 5.5,
+        "peak_power": 7.5,
+        "torque": 26,
+        "peak_torque": 35,
+        "taper": "HSK A63",
+        "rpm": 10000,
+        "tool_change_time": 5,
+        "position_time": 2,
+        "max_tool_diameter": 75,
+        "max_tool_weight": 8,
+        "no_of_tools": 24
+    },
 
-    "Fanuc Std BT30": {"power": 3.7, "torque": 11.8, "taper": "BT30"},
-    "Fanuc High Torque BT30": {"power": 3.7, "torque": 27.6, "taper": "BT30"},
 
-    "Makino Slim HSK50": {"power": 11, "torque": 33, "taper": "HSK A50"},
-    "Makino PS65 BT40": {"power": 18.5, "torque": 95, "taper": "BT40"},
-    "Makino PS65 HSK63": {"power": 18.5, "torque": 95, "taper": "HSK A63"}
+    "Ace MCV High Torque 400/450 HSK A63": {
+        "make": "Ace MCV High Torque",
+        "model": "400/450",
+        "power": 7.5,
+        "peak_power": 9,
+        "torque": 35,
+        "peak_torque": 43,
+        "taper": "HSK A63",
+        "rpm": 10000,
+        "tool_change_time": 5,
+        "position_time": 2,
+        "max_tool_diameter": 75,
+        "max_tool_weight": 8,
+        "no_of_tools": 24
+    },
+
+
+    "Brother Std S500/700 BT30": {
+        "make": "Brother Std",
+        "model": "S500/700",
+        "power": 7,
+        "peak_power": 10.1,
+        "torque": 26.8,
+        "peak_torque": 40,
+        "taper": "BT30",
+        "rpm": 10000,
+        "tool_change_time": 1.8,
+        "position_time": 1,
+        "max_tool_diameter": 100,
+        "max_tool_weight": 3,
+        "no_of_tools": 21
+    },
+
+
+    "Brother High Torque S500/700 BT30": {
+        "make": "Brother High Torque",
+        "model": "S500/700",
+        "power": 9.2,
+        "peak_power": 12.8,
+        "torque": 61.1,
+        "peak_torque": 92,
+        "taper": "BT30",
+        "rpm": 10000,
+        "tool_change_time": 1.8,
+        "position_time": 1,
+        "max_tool_diameter": 100,
+        "max_tool_weight": 3,
+        "no_of_tools": 21
+    },
+
+
+    "Fanuc Std DiB5 BT30": {
+        "make": "Fanuc Std",
+        "model": "DiB5 S/M/L",
+        "power": 3.7,
+        "peak_power": 11,
+        "torque": 11.8,
+        "peak_torque": 35,
+        "taper": "BT30",
+        "rpm": 10000,
+        "tool_change_time": 1.8,
+        "position_time": 1,
+        "max_tool_diameter": 80,
+        "max_tool_weight": 3,
+        "no_of_tools": 21
+    },
+
+
+    "Fanuc High Torque DiB5 BT30": {
+        "make": "Fanuc High Torque",
+        "model": "DiB5 S/M/L",
+        "power": 3.7,
+        "peak_power": 11,
+        "torque": 27.6,
+        "peak_torque": 80,
+        "taper": "BT30",
+        "rpm": 10000,
+        "tool_change_time": 1.8,
+        "position_time": 1,
+        "max_tool_diameter": 80,
+        "max_tool_weight": 3,
+        "no_of_tools": 21
+    },
+
+
+    "Makino Slim 3n/5n HSK A50": {
+        "make": "Makino Slim",
+        "model": "3n/5n",
+        "power": 11,
+        "peak_power": 18,
+        "torque": 33,
+        "peak_torque": 80,
+        "taper": "HSK A50",
+        "rpm": 10000,
+        "tool_change_time": 3.3,
+        "position_time": 1.2,
+        "max_tool_diameter": 80,
+        "max_tool_weight": 2.4,
+        "no_of_tools": 26
+    },
+
+
+    "Makino PS65/105 HSK A63": {
+        "make": "Makino PS",
+        "model": "PS65/105",
+        "power": 18.5,
+        "peak_power": 30,
+        "torque": 95,
+        "peak_torque": 175,
+        "taper": "HSK A63",
+        "rpm": 10000,
+        "tool_change_time": 3.6,
+        "position_time": 1.2,
+        "max_tool_diameter": 75,
+        "max_tool_weight": 8,
+        "no_of_tools": 30
+    },
+
+
+    "BFW Dhruva 4070 HSK A63": {
+        "make": "BFW Dhruva",
+        "model": "4070",
+        "power": 7.5,
+        "peak_power": 9,
+        "torque": 47.5,
+        "peak_torque": 95,
+        "taper": "HSK A63",
+        "rpm": 10000,
+        "tool_change_time": 5,
+        "position_time": 2,
+        "max_tool_diameter": 90,
+        "max_tool_weight": 4,
+        "no_of_tools": 14
+    }
+
 }
-
 def calculate_facemill_time(op):
     # Retrieve global parameters
     global tool_change_time, position_time, m_taper, m_power, kc, material
