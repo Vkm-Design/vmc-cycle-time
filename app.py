@@ -289,6 +289,10 @@ def calculate_tapping_time(op):
                 "rpm": 0,
                 "feed": 0,
                 "cut_time": 0
+                "drill_dia": round(drill_dia, 2),      # ← ADD
+                "drill_rpm": round(d_rpm) if d_rpm else 0,   # ← ADD
+                "drill_feed": round(d_fmin) if d_fmin else 0,  # ← ADD
+                "drill_cut_time": round(drill_cut_time, 2)    # ← ADD
             }
             
         if tm_row:
@@ -1180,7 +1184,12 @@ def calculate_boring_operation(
             "Check boring bar rigidity, machine capability "
              "and fixture stability."
          )
-        st.stop()
+        return {
+            "time": 0.0,
+            "tools": 0,
+            "steps": [f"L/D ratio {round(ld_ratio,1)} exceeds limit"],
+            "tool_rows": []
+        }
 
     # ==========================================
     # SPECIAL PROCESS VALIDATION
