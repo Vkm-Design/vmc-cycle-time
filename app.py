@@ -1008,7 +1008,7 @@ def calculate_drilling_feature(
                 "No suitable drill found"
             ],
     
-            "tool_times":[]
+            "tool_rows": []
         }
 
 
@@ -1037,7 +1037,19 @@ def calculate_drilling_feature(
             f"Drill Ø{safe_drill_dia} | "
             f"Power {round(p_req,2)}kW | "
             f"Torque {round(torque_req,1)}Nm"
-        ]
+        ],
+        "tool_rows": [{
+            "operation": "Hole Drill",
+            "tool_detail": f"Drill Ø{safe_drill_dia}mm",
+            "machining_stock": "Solid",
+            "vc": round((math.pi * safe_drill_dia * rpm) / 1000, 1),
+            "rpm": round(rpm),
+            "feed_rev": round(f_min / rpm, 3),
+            "table_feed": round(f_min),
+            "safety_length": 6 if hole_type == "Through Hole" else 3,
+            "cut_length": round(depth, 1),
+            "cut_time": round(cut_time, 2)
+        }]
 
     }
 
