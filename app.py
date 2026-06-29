@@ -1254,7 +1254,7 @@ def calculate_boring_operation(
         st.info(f"Step 2: Boring Sequence to Ø{rough_target_dia}")
         bor_travel = b_dep + (3 if bor_ht == "Blind Hole" else 6)
     
-        while current_dia < rough_target_dia:
+    while current_dia < rough_target_dia:
         tool = get_boring_params(current_dia, material)
         if not tool:
             st.warning(f"No boring data found for Ø{current_dia}.")
