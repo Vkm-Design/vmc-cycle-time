@@ -2472,7 +2472,10 @@ if st.button("🚀 Calculate Combined Cycle Time"):
             # ==============================
 
             if op["type"] == "Hole":
-                for row in result["tool_rows"]:
+                if "tool_rows" not in result:
+                    st.warning("No tool rows returned for this hole operation.")
+                else:
+                    for row in result["tool_rows"]:
                    
                     st.session_state.summary_data.append({
                         "Tool No": len(st.session_state.summary_data) + 1,
