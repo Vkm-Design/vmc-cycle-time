@@ -329,6 +329,7 @@ def calculate_facemill_time(op):
         "time_rough_sec": round(time_rough * 60, 1),
         "time_finish_sec": round(time_finish * 60, 1),
         "finish_type": finish_type
+        "cut_length": round(cut_length, 1)
     }
 
 def calculate_tapping_time(op):
