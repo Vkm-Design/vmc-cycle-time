@@ -328,7 +328,7 @@ def calculate_facemill_time(op):
         "finish_passes": finish_passes,
         "time_rough_sec": round(time_rough * 60, 1),
         "time_finish_sec": round(time_finish * 60, 1),
-        "finish_type": finish_type
+        "finish_type": finish_type,
         "cut_length": round(cut_length, 1)
     }
 
