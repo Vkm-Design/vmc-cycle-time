@@ -2757,7 +2757,10 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                     "Feed/rev (mm)": round(fm_result['feed'] / fm_result['rpm'], 3) if fm_result['rpm'] > 0 else "-",
                     "Table Feed (mm/min)": fm_result['feed'],
                     "Safety Length (mm)": fm_result['tool_dia'],
-                    "Cut Length (mm)": fm_result["cut_length"],
+                    "Cut Length (mm)": round(
+                        fm_result["cut_length"] - fm_result["tool_dia"],
+                        1
+                    ),
                     "Cut Time (sec)": fm_result["time_rough_sec"],
                     "No of Positions": op.get("fm_pos", 1),
                     "Position Time (sec)": position_time,
@@ -2776,7 +2779,10 @@ if st.button("🚀 Calculate Combined Cycle Time"):
                         "Feed/rev (mm)": round(fm_result['feed'] / fm_result['rpm'], 3) if fm_result['rpm'] > 0 else "-",
                         "Table Feed (mm/min)": fm_result['feed'],
                         "Safety Length (mm)": fm_result['tool_dia'],
-                        "Cut Length (mm)": fm_result["cut_length"],
+                        "Cut Length (mm)": round(
+                            fm_result["cut_length"] - fm_result["tool_dia"],
+                            1
+                        ),
                         "Cut Time (sec)": fm_result["time_finish_sec"],
                         "No of Positions": op.get("fm_pos", 1),
                         "Position Time (sec)": position_time,
